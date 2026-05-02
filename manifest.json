@@ -1,6 +1,6 @@
 {
-  "name": "nono's world",
-  "short_name": "nono's world",
+  "name": "Système N",
+  "short_name": "Système N",
   "description": "Galerie PFP + boîte à outils, 100% locale et hors-ligne",
   "start_url": "./index.html",
   "scope": "./",
