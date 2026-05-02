@@ -2250,26 +2250,12 @@ body.has-miniplayer .fab {
     <div class="title">📚 Toutes les fonctionnalités</div>
     <button class="icon-btn" onclick="goTo('settings')">⚙</button>
   </div>
-  <div class="home-search-wrap">
-    <div class="home-search-rel">
-      <span class="home-search-icon">🔍</span>
-      <input type="text" class="home-search" id="home-search" placeholder="Chercher une fonctionnalité ou tes données..." oninput="onHomeSearch(this.value)" autocomplete="off">
+  <div style="padding: 4px 16px 8px;">
+    <div style="position:relative;">
+      <input type="text" class="home-search" id="home-search" placeholder="Tapez pour rechercher..." oninput="onHomeSearch(this.value)" autocomplete="off" style="background:transparent; border:1px solid rgba(255,255,255,0.15); border-radius:14px; padding:11px 14px;">
     </div>
   </div>
   <div class="home-search-results" id="home-search-results"></div>
-
-  <div class="home-tabs" id="home-tabs">
-    <div class="home-tab active" data-tab="all" onclick="filterHomeTab('all')">✨ Tout</div>
-    <div class="home-tab" data-tab="fav" onclick="filterHomeTab('fav')">⭐ Favoris</div>
-    <div class="home-tab" data-tab="Scolaire" onclick="filterHomeTab('Scolaire')">📚 Scolaire</div>
-    <div class="home-tab" data-tab="Mini-jeux" onclick="filterHomeTab('Mini-jeux')">🎮 Jeux</div>
-    <div class="home-tab" data-tab="Couleurs & créa" onclick="filterHomeTab('Couleurs & créa')">🎨 Créa</div>
-    <div class="home-tab" data-tab="Documents / PDF" onclick="filterHomeTab('Documents / PDF')">📄 Docs</div>
-    <div class="home-tab" data-tab="Productivité" onclick="filterHomeTab('Productivité')">✅ Pro</div>
-    <div class="home-tab" data-tab="Aléatoire & fun" onclick="filterHomeTab('Aléatoire & fun')">🎲 Fun</div>
-    <div class="home-tab" data-tab="Vie quotidienne" onclick="filterHomeTab('Vie quotidienne')">🏡 Vie</div>
-    <div class="home-tab" data-tab="Outils" onclick="filterHomeTab('Outils')">🛠 Outils</div>
-  </div>
 
   <div class="home-section" id="fav-section" style="display:none;">
     <div class="home-section-header" onclick="toggleSec(this)">
@@ -9422,6 +9408,9 @@ function goTo(page) {
   targetEl.classList.add('active');
   state.page = page;
   window.scrollTo(0, 0);
+  // Cache le FAB sur le dashboard d'accueil (actions rapides déjà dedans)
+  const fab = document.getElementById('fab-quick');
+  if (fab) fab.style.display = (page === 'home') ? 'none' : '';
   // Hook nav
   if (typeof pushRecent === 'function') pushRecent(page);
   if (typeof updateBottomNav === 'function') updateBottomNav(page);
