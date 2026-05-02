@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFF0F5" id="theme-meta">
+<title>love2nono</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<style>
+:root {
+  --bg: #FFF0F5;
+  --surface: #FFE4EC;
+  --surfaceAlt: #FFD6E5;
+  --primary: #FF6FA3;
+  --primaryDark: #E14D87;
+  --accent: #FFB6D9;
+  --text: #3D2230;
+  --textSec: #8B5A6B;
+  --border: #FFC1D9;
+  --shadow: rgba(255,111,163,0.25);
+  --danger: #E14D6B;
+  --radius: 20px;
+  --radiusBtn: 16px;
+  --radiusChip: 999px;
+}
+[data-theme="dark"] {
+  --bg: #0F0F14;
+  --surface: #1C1C24;
+  --surfaceAlt: #262630;
+  --primary: #7B61FF;
+  --primaryDark: #5E45D9;
+  --accent: #A78BFA;
+  --text: #F5F5F7;
+  --textSec: #9CA3AF;
+  --border: #2A2A35;
+  --shadow: rgba(0,0,0,0.5);
+  --danger: #FF6B7A;
+  --radius: 12px;
+  --radiusBtn: 10px;
+  --radiusChip: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  height: 100%;
+  overscroll-behavior-y: none;
+}
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input { font-family: inherit; }
+img { display: block; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+
+/* Header */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+}
+.title { font-size: 26px; font-weight: 800; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 20px;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-left: 8px;
+  transition: transform 0.1s;
+}
+.icon-btn:active { transform: scale(0.92); }
+
+/* Search */
+.search {
+  display: flex; align-items: center;
+  margin: 0 16px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.search input {
+  flex: 1; border: none; background: none; outline: none;
+  color: var(--text); font-size: 15px; padding: 0 8px;
+}
+.search input::placeholder { color: var(--textSec); }
+.search-clear { color: var(--textSec); font-size: 18px; padding: 4px 8px; }
+
+/* Chips */
+.chips {
+  display: flex; gap: 8px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  padding: 0 16px 14px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  display: inline-flex; align-items: center;
+  white-space: nowrap;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radiusChip);
+  font-size: 14px; font-weight: 600;
+  flex-shrink: 0;
+  gap: 6px;
+}
+.chip.active { background: var(--chip-bg, var(--primary)); color: white; border-color: var(--chip-bg, var(--primary)); }
+.chip .dot { width: 8px; height: 8px; border-radius: 4px; background: var(--chip-color); }
+.chip .count {
+  background: var(--surfaceAlt);
+  padding: 2px 6px; border-radius: 10px;
+  font-size: 11px; font-weight: 700;
+  min-width: 20px; text-align: center;
+}
+.chip.active .count { background: rgba(255,255,255,0.25); }
+
+/* Grid */
+.grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; padding: 0 8px;
+}
+.pfp-card {
+  position: relative;
+  aspect-ratio: 1/1;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 6px var(--shadow);
+  transition: transform 0.1s;
+}
+.pfp-card:active { transform: scale(0.96); }
+.pfp-card img { width: 100%; height: 100%; object-fit: cover; }
+.fav-badge {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; border-radius: 13px;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+/* FAB */
+.fab {
+  position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px;
+  width: 60px; height: 60px; border-radius: 30px;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; color: white; font-weight: 300;
+  box-shadow: 0 4px 12px var(--shadow);
+  z-index: 50;
+  transition: transform 0.1s;
+}
+.fab:active { transform: scale(0.92); }
+
+/* Empty */
+.empty {
+  text-align: center; padding: 60px 32px;
+  color: var(--textSec);
+}
+.empty .icon { font-size: 48px; margin-bottom: 16px; }
+.empty h3 { color: var(--text); font-size: 18px; margin-bottom: 8px; }
+.empty p { font-size: 14px; line-height: 1.5; }
+
+/* Pages */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+/* Detail */
+.detail-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px;
+}
+.back-btn {
+  width: 40px; height: 40px; border-radius: 20px;
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+}
+.detail-title { font-size: 18px; font-weight: 700; flex: 1; text-align: center; padding: 0 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.detail-img-wrap {
+  margin: 0 16px;
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 4px 12px var(--shadow);
+  aspect-ratio: 1/1;
+}
+.detail-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.detail-cats { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 16px 0; }
+.cat-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px; border-radius: var(--radiusChip);
+  color: white; font-size: 13px; font-weight: 600;
+}
+.section {
+  margin: 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.section h3 { font-size: 16px; margin-bottom: 4px; }
+.section p { font-size: 13px; color: var(--textSec); margin-bottom: 14px; line-height: 1.4; }
+.big-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px;
+  background: var(--primary);
+  border-radius: var(--radiusBtn);
+  width: 100%;
+  text-align: left;
+}
+.big-btn.alt { background: var(--surfaceAlt); margin-top: 10px; }
+.big-btn .ico { font-size: 24px; }
+.big-btn-content { flex: 1; }
+.big-btn-title { color: white; font-size: 15px; font-weight: 700; }
+.big-btn-sub { color: rgba(255,255,255,0.85); font-size: 12px; margin-top: 2px; }
+.big-btn.alt .big-btn-title { color: var(--text); }
+.big-btn.alt .big-btn-sub { color: var(--textSec); }
+.action-row {
+  display: flex; align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  width: 100%; text-align: left;
+}
+.action-row:last-child { border-bottom: none; }
+.action-row .ico { width: 30px; font-size: 20px; }
+.action-row .lbl { flex: 1; font-size: 15px; font-weight: 500; }
+.action-row .chev { color: var(--textSec); font-size: 22px; }
+.action-row.danger .lbl { color: var(--danger); }
+
+/* Modal */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px; z-index: 100;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 100%; max-width: 500px;
+  max-height: 85vh; overflow-y: auto;
+}
+.modal h2 { font-size: 18px; margin-bottom: 16px; }
+.modal label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--textSec); margin: 14px 0 8px;
+}
+.modal input[type="text"] {
+  width: 100%; padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text); font-size: 15px; outline: none;
+}
+.modal-actions {
+  display: flex; justify-content: flex-end;
+  gap: 10px; margin-top: 24px;
+}
+.modal-actions.with-delete { justify-content: space-between; }
+.btn {
+  padding: 11px 18px; border-radius: 12px;
+  font-size: 14px; font-weight: 600;
+}
+.btn.primary { background: var(--primary); color: white; }
+.btn.alt { background: var(--surfaceAlt); color: var(--text); }
+.btn.danger { background: var(--danger); color: white; }
+
+/* Color swatches */
+.color-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch {
+  width: 40px; height: 40px; border-radius: 20px;
+  border: 3px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 900;
+}
+.swatch.selected { border-color: var(--text); }
+.icon-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.icon-cell {
+  width: 44px; height: 44px; border-radius: 10px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.icon-cell.selected { border-color: var(--primary); }
+.icon-cell.none { color: var(--textSec); font-weight: 600; }
+
+/* Cat list (modal) */
+.cat-pick {
+  display: flex; align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  width: 100%; text-align: left;
+}
+.cat-pick .color-dot {
+  width: 14px; height: 14px; border-radius: 7px; margin-right: 12px;
+}
+.cat-pick .name { flex: 1; font-size: 15px; }
+.checkbox {
+  width: 24px; height: 24px; border-radius: 6px;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 900;
+}
+.checkbox.checked { background: var(--primary); border-color: var(--primary); }
+
+/* Categories page list */
+.cat-row {
+  display: flex; align-items: center;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  width: 100%; text-align: left;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+.cat-row .color-dot {
+  width: 16px; height: 16px; border-radius: 8px; margin-right: 14px;
+}
+.cat-row-info { flex: 1; }
+.cat-row-name { font-size: 16px; font-weight: 600; }
+.cat-row-count { font-size: 13px; color: var(--textSec); margin-top: 2px; }
+
+/* Settings */
+.settings-section { margin: 20px 16px; }
+.section-label {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--textSec);
+  margin-bottom: 8px; padding-left: 4px;
+}
+.theme-row {
+  display: flex; align-items: center; padding: 16px;
+  width: 100%; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.theme-row:last-child { border-bottom: none; }
+.theme-preview { display: flex; margin-right: 14px; }
+.preview-dot {
+  width: 24px; height: 24px; border-radius: 12px;
+  border: 2px solid var(--bg);
+  margin-left: -8px;
+}
+.preview-dot:first-child { margin-left: 0; }
+.theme-info { flex: 1; }
+.theme-info .name { font-size: 16px; font-weight: 700; }
+.theme-info .desc { font-size: 13px; color: var(--textSec); margin-top: 2px; }
+.radio {
+  width: 24px; height: 24px; border-radius: 12px;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.radio.selected { background: var(--primary); border-color: var(--primary); }
+.radio.selected::after {
+  content: ''; width: 10px; height: 10px; border-radius: 5px; background: white;
+}
+.stats-row { display: flex; gap: 10px; }
+.stat-card {
+  flex: 1; padding: 16px; text-align: center;
+  background: var(--surface); border-radius: var(--radius);
+}
+.stat-value { font-size: 28px; font-weight: 800; color: var(--primary); }
+.stat-label { font-size: 12px; color: var(--textSec); margin-top: 4px; }
+.about {
+  background: var(--surface); border-radius: var(--radius); padding: 16px;
+}
+.about h4 { font-size: 17px; margin-bottom: 6px; }
+.about p { font-size: 13px; color: var(--textSec); line-height: 1.5; }
+.about p + p { margin-top: 10px; }
+.about strong { color: var(--text); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: calc(100px + env(safe-area-inset-bottom));
+  left: 50%; transform: translateX(-50%);
+  background: var(--text); color: var(--bg);
+  padding: 12px 20px; border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  z-index: 200; opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  max-width: 90%; text-align: center;
+}
+.toast.show { opacity: 1; }
+
+/* Hidden input */
+.hidden-file { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ======= GALLERY PAGE ======= -->
+<div class="page active" id="page-gallery">
+  <div class="topbar">
+    <div class="title" id="gallery-title">✨ Mes PFP</div>
+    <div style="display:flex;">
+      <button class="icon-btn" onclick="goTo('categories')">🏷️</button>
+      <button class="icon-btn" onclick="goTo('settings')">⚙</button>
+    </div>
+  </div>
+  <div class="search">
+    <span style="color:var(--textSec);">🔍</span>
+    <input type="text" id="search-input" placeholder="Rechercher...">
+    <button class="search-clear" id="search-clear" style="display:none;">✕</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div id="grid-container">
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty-gallery" style="display:none;">
+      <div class="icon" id="empty-icon">🌸</div>
+      <h3>Aucune PFP pour l'instant</h3>
+      <p>Appuie sur le bouton + pour importer tes premières photos de profil.</p>
+    </div>
+  </div>
+  <button class="fab" onclick="document.getElementById('file-input').click()">+</button>
+  <input type="file" id="file-input" class="hidden-file" accept="image/*" multiple>
+</div>
+
+<!-- ======= DETAIL PAGE ======= -->
+<div class="page" id="page-detail">
+  <div class="detail-header">
+    <button class="back-btn" onclick="goTo('gallery')">‹</button>
+    <div class="detail-title" id="detail-title">PFP</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="detail-img-wrap"><img id="detail-img" alt=""></div>
+  <div class="detail-cats" id="detail-cats"></div>
+  <div class="section">
+    <h3>Utiliser sur Discord</h3>
+    <p>Discord ne permet pas de changer ta PFP automatiquement. Choisis une méthode :</p>
+    <button class="big-btn" id="btn-save-photo">
+      <span class="ico">💾</span>
+      <span class="big-btn-content">
+        <span class="big-btn-title">Enregistrer dans Photos</span>
+        <span class="big-btn-sub">Maintiens l'image puis "Ajouter aux Photos"</span>
+      </span>
+    </button>
+    <button class="big-btn alt" id="btn-share">
+      <span class="ico">📤</span>
+      <span class="big-btn-content">
+        <span class="big-btn-title">Partager</span>
+        <span class="big-btn-sub">Vers Discord ou autre app</span>
+      </span>
+    </button>
+  </div>
+  <div class="section" style="padding:0 16px;">
+    <button class="action-row" id="btn-fav">
+      <span class="ico" id="fav-icon">♡</span>
+      <span class="lbl" id="fav-label">Ajouter aux favoris</span>
+      <span class="chev">›</span>
+    </button>
+    <button class="action-row" id="btn-edit-cats">
+      <span class="ico">🏷️</span>
+      <span class="lbl" id="cats-label">Catégories (0)</span>
+      <span class="chev">›</span>
+    </button>
+    <button class="action-row" id="btn-rename">
+      <span class="ico">✏️</span>
+      <span class="lbl">Renommer</span>
+      <span class="chev">›</span>
+    </button>
+    <button class="action-row danger" id="btn-delete">
+      <span class="ico">🗑️</span>
+      <span class="lbl">Supprimer</span>
+      <span class="chev">›</span>
+    </button>
+  </div>
+</div>
+
+<!-- ======= CATEGORIES PAGE ======= -->
+<div class="page" id="page-categories">
+  <div class="detail-header">
+    <button class="back-btn" onclick="goTo('gallery')">‹</button>
+    <div class="detail-title">Catégories</div>
+    <button class="icon-btn" style="background:var(--primary);color:white;" onclick="openCategoryModal(null)">+</button>
+  </div>
+  <div style="padding: 16px;">
+    <div id="categories-list"></div>
+    <div class="empty" id="empty-cats" style="display:none;">
+      <div class="icon">🏷️</div>
+      <h3>Aucune catégorie</h3>
+      <p>Crée des catégories pour organiser tes PFP par thème, vibe, ou ce que tu veux !</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======= SETTINGS PAGE ======= -->
+<div class="page" id="page-settings">
+  <div class="detail-header">
+    <button class="back-btn" onclick="goTo('gallery')">‹</button>
+    <div class="detail-title">Paramètres</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="settings-section">
+    <div class="section-label">Apparence</div>
+    <div style="background:var(--surface);border-radius:var(--radius);overflow:hidden;">
+      <button class="theme-row" onclick="setTheme('girly')">
+        <div class="theme-preview">
+          <div class="preview-dot" style="background:#FFF0F5;"></div>
+          <div class="preview-dot" style="background:#FF6FA3;"></div>
+          <div class="preview-dot" style="background:#FFB6D9;"></div>
+        </div>
+        <div class="theme-info">
+          <div class="name">Girly</div>
+          <div class="desc">Doux, rose, arrondi</div>
+        </div>
+        <div class="radio" id="radio-girly"></div>
+      </button>
+      <button class="theme-row" onclick="setTheme('dark')">
+        <div class="theme-preview">
+          <div class="preview-dot" style="background:#0F0F14;"></div>
+          <div class="preview-dot" style="background:#7B61FF;"></div>
+          <div class="preview-dot" style="background:#A78BFA;"></div>
+        </div>
+        <div class="theme-info">
+          <div class="name">Sombre</div>
+          <div class="desc">Minimaliste, violet, épuré</div>
+        </div>
+        <div class="radio" id="radio-dark"></div>
+      </button>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="section-label">Statistiques</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-value" id="stat-pfps">0</div><div class="stat-label">PFP</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-favs">0</div><div class="stat-label">Favoris</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-cats">0</div><div class="stat-label">Catégories</div></div>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="section-label">Astuce</div>
+    <div class="about">
+      <h4>Comment changer ta PFP Discord</h4>
+      <p>1. Ouvre une PFP dans l'app<br>
+        2. Maintiens l'image et tape "Ajouter aux Photos"<br>
+        3. Va dans Discord → Profil → Modifier l'avatar → Photos<br>
+        4. Sélectionne ton image ✨</p>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="section-label">Données</div>
+    <div class="about">
+      <h4>Sauvegarde</h4>
+      <p>Toutes tes PFP sont stockées localement dans Safari. Si tu vides les données du site, elles seront perdues.</p>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn primary" onclick="exportData()">📥 Exporter</button>
+        <button class="btn alt" onclick="document.getElementById('import-input').click()">📤 Importer</button>
+        <input type="file" id="import-input" class="hidden-file" accept="application/json">
+      </div>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="section-label">À propos</div>
+    <div class="about">
+      <h4>love2nono</h4>
+      <p>Galerie locale pour organiser tes PFP Discord. Tout reste sur ton téléphone, zéro internet.</p>
+      <p>Version 1.0.0 — Made with 💖 pour Nono</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======= MODALS ======= -->
+<div class="modal-bg" id="modal-rename">
+  <div class="modal">
+    <h2>Renommer la PFP</h2>
+    <input type="text" id="rename-input" placeholder="Ex: Anime mignon">
+    <div class="modal-actions">
+      <button class="btn alt" onclick="closeModal('modal-rename')">Annuler</button>
+      <button class="btn primary" onclick="saveRename()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-cats-pick">
+  <div class="modal">
+    <h2>Catégories</h2>
+    <div id="cats-pick-list"></div>
+    <div class="modal-actions">
+      <button class="btn alt" onclick="closeModal('modal-cats-pick')">Annuler</button>
+      <button class="btn primary" onclick="saveCatsPick()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-cat-edit">
+  <div class="modal">
+    <h2 id="cat-modal-title">Nouvelle catégorie</h2>
+    <label>Nom</label>
+    <input type="text" id="cat-name" placeholder="Ex: Anime, Mignon, Aesthetic...">
+    <label>Couleur</label>
+    <div class="color-row" id="color-row"></div>
+    <label>Icône (optionnel)</label>
+    <div class="icon-row" id="icon-row"></div>
+    <div class="modal-actions with-delete">
+      <button class="btn danger" id="cat-delete-btn" onclick="deleteCategoryConfirm()" style="display:none;">Supprimer</button>
+      <div style="display:flex;gap:10px;">
+        <button class="btn alt" onclick="closeModal('modal-cat-edit')">Annuler</button>
+        <button class="btn primary" onclick="saveCategory()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const PALETTES = {
+  girly: ['#FF6FA3','#FFB6D9','#C77DFF','#9D4EDD','#FF85A1','#FFADD6','#F8AFA6','#F4978E','#FFD166','#FFE066'],
+  dark: ['#7B61FF','#A78BFA','#5DD6E5','#3DD2D6','#FF6B7A','#FF8C42','#FFD166','#5DD68F','#C77DFF','#06FFA5']
+};
+const ICONS = ['✨','🌸','💖','🌙','⭐','🔥','⚡','💀','🎀','🍓','🌺','🦋','🐰','🐱','🎮','🎨','🌊','☁️','🍑','🌷','👑','💎','🖤','🤍'];
+
+// ============================================================
+// INDEXEDDB
+// ============================================================
+let db;
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('pfp_gallery', 1);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('pfps')) {
+        const s = d.createObjectStore('pfps', { keyPath: 'id', autoIncrement: true });
+        s.createIndex('added_at', 'added_at');
+      }
+      if (!d.objectStoreNames.contains('categories')) {
+        const s = d.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
+        s.createIndex('name', 'name', { unique: true });
+      }
+      if (!d.objectStoreNames.contains('pfp_cats')) {
+        const s = d.createObjectStore('pfp_cats', { keyPath: 'key' });
+        s.createIndex('pfp_id', 'pfp_id');
+        s.createIndex('cat_id', 'cat_id');
+      }
+    };
+    req.onsuccess = () => { db = req.result; res(db); };
+    req.onerror = () => rej(req.error);
+  });
+}
+function tx(stores, mode = 'readonly') { return db.transaction(stores, mode); }
+function p(req) { return new Promise((res, rej) => { req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error); }); }
+
+async function getAllPfps() {
+  return await p(tx(['pfps']).objectStore('pfps').getAll());
+}
+async function getPfp(id) { return await p(tx(['pfps']).objectStore('pfps').get(id)); }
+async function addPfp(pfp) {
+  return await p(tx(['pfps'], 'readwrite').objectStore('pfps').add(pfp));
+}
+async function updatePfp(pfp) {
+  return await p(tx(['pfps'], 'readwrite').objectStore('pfps').put(pfp));
+}
+async function deletePfpDb(id) {
+  const t = tx(['pfps','pfp_cats'], 'readwrite');
+  await p(t.objectStore('pfps').delete(id));
+  const allLinks = await p(t.objectStore('pfp_cats').index('pfp_id').getAll(id));
+  for (const l of allLinks) await p(t.objectStore('pfp_cats').delete(l.key));
+}
+
+async function getAllCategories() {
+  const cats = await p(tx(['categories']).objectStore('categories').getAll());
+  const links = await p(tx(['pfp_cats']).objectStore('pfp_cats').getAll());
+  return cats.map(c => ({ ...c, count: links.filter(l => l.cat_id === c.id).length }))
+             .sort((a,b) => a.name.localeCompare(b.name));
+}
+async function addCategory(cat) {
+  return await p(tx(['categories'], 'readwrite').objectStore('categories').add(cat));
+}
+async function updateCategory(cat) {
+  return await p(tx(['categories'], 'readwrite').objectStore('categories').put(cat));
+}
+async function deleteCategoryDb(id) {
+  const t = tx(['categories','pfp_cats'], 'readwrite');
+  await p(t.objectStore('categories').delete(id));
+  const links = await p(t.objectStore('pfp_cats').index('cat_id').getAll(id));
+  for (const l of links) await p(t.objectStore('pfp_cats').delete(l.key));
+}
+
+async function getCategoriesForPfp(pfpId) {
+  const links = await p(tx(['pfp_cats']).objectStore('pfp_cats').index('pfp_id').getAll(pfpId));
+  const cats = [];
+  for (const l of links) {
+    const c = await p(tx(['categories']).objectStore('categories').get(l.cat_id));
+    if (c) cats.push(c);
+  }
+  return cats.sort((a,b) => a.name.localeCompare(b.name));
+}
+async function setCategoriesForPfp(pfpId, catIds) {
+  const t = tx(['pfp_cats'], 'readwrite');
+  const store = t.objectStore('pfp_cats');
+  const existing = await p(store.index('pfp_id').getAll(pfpId));
+  for (const e of existing) await p(store.delete(e.key));
+  for (const cid of catIds) await p(store.add({ key: `${pfpId}_${cid}`, pfp_id: pfpId, cat_id: cid }));
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  currentPage: 'gallery',
+  currentTheme: localStorage.getItem('theme') || 'girly',
+  pfps: [],
+  categories: [],
+  filter: 'all', // 'all' | 'fav' | category id
+  search: '',
+  detailId: null,
+  editingCat: null,
+  selectedColor: PALETTES.girly[0],
+  selectedIcon: '',
+  pickedCats: new Set(),
+};
+
+// ============================================================
+// THEME
+// ============================================================
+function setTheme(name) {
+  state.currentTheme = name;
+  document.documentElement.setAttribute('data-theme', name === 'dark' ? 'dark' : '');
+  localStorage.setItem('theme', name);
+  document.getElementById('theme-meta').setAttribute('content', name === 'dark' ? '#0F0F14' : '#FFF0F5');
+  document.getElementById('gallery-title').textContent = name === 'girly' ? '✨ Mes PFP' : '◆ Galerie';
+  document.getElementById('empty-icon').textContent = name === 'girly' ? '🌸' : '📷';
+  document.getElementById('radio-girly').classList.toggle('selected', name === 'girly');
+  document.getElementById('radio-dark').classList.toggle('selected', name === 'dark');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  state.currentPage = page;
+  window.scrollTo(0, 0);
+  if (page === 'gallery') renderGallery();
+  if (page === 'categories') renderCategoriesList();
+  if (page === 'settings') renderStats();
+}
+
+function showToast(msg, dur = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ============================================================
+// GALLERY
+// ============================================================
+async function refreshData() {
+  state.pfps = await getAllPfps();
+  state.categories = await getAllCategories();
+}
+
+async function renderGallery() {
+  await refreshData();
+  // Chips
+  const chipsEl = document.getElementById('chips');
+  chipsEl.innerHTML = '';
+  const allChip = makeChip({
+    label: 'Toutes', icon: state.currentTheme === 'girly' ? '✨' : '◆',
+    active: state.filter === 'all', onClick: () => { state.filter = 'all'; renderGallery(); }
+  });
+  chipsEl.appendChild(allChip);
+  const favChip = makeChip({
+    label: 'Favoris', icon: '♥', color: 'var(--danger)',
+    active: state.filter === 'fav', onClick: () => { state.filter = 'fav'; renderGallery(); }
+  });
+  chipsEl.appendChild(favChip);
+  for (const c of state.categories) {
+    const chip = makeChip({
+      label: c.name, color: c.color, icon: c.icon, count: c.count,
+      active: state.filter === c.id, onClick: () => { state.filter = c.id; renderGallery(); }
+    });
+    chipsEl.appendChild(chip);
+  }
+
+  // Grid
+  let pfps = state.pfps.slice();
+  if (state.filter === 'fav') pfps = pfps.filter(p => p.is_favorite);
+  else if (typeof state.filter === 'number') {
+    const links = await p(tx(['pfp_cats']).objectStore('pfp_cats').index('cat_id').getAll(state.filter));
+    const ids = new Set(links.map(l => l.pfp_id));
+    pfps = pfps.filter(p => ids.has(p.id));
+  }
+  if (state.search.trim()) {
+    const s = state.search.toLowerCase();
+    pfps = pfps.filter(p => (p.title || '').toLowerCase().includes(s));
+  }
+  pfps.sort((a,b) => (b.added_at || '').localeCompare(a.added_at || ''));
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  document.getElementById('empty-gallery').style.display = pfps.length === 0 ? 'block' : 'none';
+  for (const item of pfps) {
+    const card = document.createElement('button');
+    card.className = 'pfp-card';
+    card.onclick = () => openDetail(item.id);
+    const img = document.createElement('img');
+    img.src = item.uri;
+    img.loading = 'lazy';
+    card.appendChild(img);
+    if (item.is_favorite) {
+      const b = document.createElement('div');
+      b.className = 'fav-badge';
+      b.innerHTML = '<span style="color:#FF6FA3;font-weight:700;">♥</span>';
+      card.appendChild(b);
+    }
+    grid.appendChild(card);
+  }
+}
+
+function makeChip({ label, icon, color, count, active, onClick }) {
+  const b = document.createElement('button');
+  b.className = 'chip' + (active ? ' active' : '');
+  if (active && color) b.style.setProperty('--chip-bg', color);
+  if (color && !active) {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.setProperty('--chip-color', color);
+    b.appendChild(dot);
+  }
+  if (icon) {
+    const ic = document.createElement('span');
+    ic.textContent = icon;
+    b.appendChild(ic);
+  }
+  const lbl = document.createElement('span');
+  lbl.textContent = label;
+  b.appendChild(lbl);
+  if (typeof count === 'number') {
+    const c = document.createElement('span');
+    c.className = 'count';
+    c.textContent = count;
+    b.appendChild(c);
+  }
+  b.onclick = onClick;
+  return b;
+}
+
+// ============================================================
+// IMPORT
+// ============================================================
+function fileToDataURL(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(file);
+  });
+}
+
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (files.length === 0) return;
+  let count = 0;
+  for (const f of files) {
+    try {
+      const dataUrl = await fileToDataURL(f);
+      await addPfp({
+        uri: dataUrl,
+        filename: f.name,
+        title: null,
+        is_favorite: 0,
+        added_at: new Date().toISOString(),
+      });
+      count++;
+    } catch (err) { console.warn(err); }
+  }
+  e.target.value = '';
+  if (count > 0) {
+    showToast(`${count} PFP ajoutée${count > 1 ? 's' : ''} ✨`);
+    renderGallery();
+  }
+});
+
+// ============================================================
+// DETAIL
+// ============================================================
+async function openDetail(id) {
+  state.detailId = id;
+  const pfp = await getPfp(id);
+  if (!pfp) return;
+  document.getElementById('detail-img').src = pfp.uri;
+  document.getElementById('detail-title').textContent = pfp.title || 'PFP';
+  document.getElementById('fav-icon').textContent = pfp.is_favorite ? '♥' : '♡';
+  document.getElementById('fav-label').textContent = pfp.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris';
+  const cats = await getCategoriesForPfp(id);
+  document.getElementById('cats-label').textContent = `Catégories (${cats.length})`;
+  const catsEl = document.getElementById('detail-cats');
+  catsEl.innerHTML = '';
+  for (const c of cats) {
+    const b = document.createElement('span');
+    b.className = 'cat-badge';
+    b.style.background = c.color;
+    b.textContent = (c.icon ? c.icon + ' ' : '') + c.name;
+    catsEl.appendChild(b);
+  }
+  goTo('detail');
+}
+
+document.getElementById('btn-fav').onclick = async () => {
+  const pfp = await getPfp(state.detailId);
+  pfp.is_favorite = pfp.is_favorite ? 0 : 1;
+  await updatePfp(pfp);
+  openDetail(state.detailId);
+};
+
+document.getElementById('btn-rename').onclick = async () => {
+  const pfp = await getPfp(state.detailId);
+  document.getElementById('rename-input').value = pfp.title || '';
+  openModal('modal-rename');
+};
+async function saveRename() {
+  const pfp = await getPfp(state.detailId);
+  pfp.title = document.getElementById('rename-input').value.trim() || null;
+  await updatePfp(pfp);
+  closeModal('modal-rename');
+  openDetail(state.detailId);
+}
+
+document.getElementById('btn-delete').onclick = async () => {
+  if (!confirm('Supprimer cette PFP ? Cette action est définitive.')) return;
+  await deletePfpDb(state.detailId);
+  goTo('gallery');
+  showToast('PFP supprimée');
+};
+
+document.getElementById('btn-edit-cats').onclick = async () => {
+  const pfpCats = await getCategoriesForPfp(state.detailId);
+  state.pickedCats = new Set(pfpCats.map(c => c.id));
+  await refreshData();
+  const list = document.getElementById('cats-pick-list');
+  list.innerHTML = '';
+  if (state.categories.length === 0) {
+    list.innerHTML = '<p style="color:var(--textSec);text-align:center;padding:20px;">Aucune catégorie. Crée-en depuis l\'écran Catégories.</p>';
+  } else {
+    for (const c of state.categories) {
+      const r = document.createElement('button');
+      r.className = 'cat-pick';
+      r.innerHTML = `
+        <span class="color-dot" style="background:${c.color};"></span>
+        <span class="name">${c.icon ? c.icon + ' ' : ''}${escapeHtml(c.name)}</span>
+        <span class="checkbox ${state.pickedCats.has(c.id) ? 'checked' : ''}">${state.pickedCats.has(c.id) ? '✓' : ''}</span>
+      `;
+      r.onclick = () => {
+        if (state.pickedCats.has(c.id)) state.pickedCats.delete(c.id);
+        else state.pickedCats.add(c.id);
+        const cb = r.querySelector('.checkbox');
+        const on = state.pickedCats.has(c.id);
+        cb.classList.toggle('checked', on);
+        cb.textContent = on ? '✓' : '';
+      };
+      list.appendChild(r);
+    }
+  }
+  openModal('modal-cats-pick');
+};
+
+async function saveCatsPick() {
+  await setCategoriesForPfp(state.detailId, Array.from(state.pickedCats));
+  closeModal('modal-cats-pick');
+  openDetail(state.detailId);
+}
+
+// ============================================================
+// SHARE / SAVE
+// ============================================================
+function dataURLtoBlob(dataUrl) {
+  const arr = dataUrl.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8 = new Uint8Array(n);
+  while (n--) u8[n] = bstr.charCodeAt(n);
+  return new Blob([u8], { type: mime });
+}
+
+document.getElementById('btn-share').onclick = async () => {
+  const pfp = await getPfp(state.detailId);
+  const blob = dataURLtoBlob(pfp.uri);
+  const ext = (blob.type.split('/')[1] || 'jpg').split('+')[0];
+  const file = new File([blob], `pfp.${ext}`, { type: blob.type });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'PFP' });
+    } catch (e) { /* user cancelled */ }
+  } else {
+    // fallback : ouvrir dans un nouvel onglet
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    showToast('Maintiens l\'image puis "Ajouter aux Photos"');
+  }
+};
+
+document.getElementById('btn-save-photo').onclick = async () => {
+  const pfp = await getPfp(state.detailId);
+  // Sur iOS : ouvre l'image en grand, l'utilisateur fait "Ajouter aux Photos" en maintenant
+  // Sur Android : déclenche un téléchargement
+  const blob = dataURLtoBlob(pfp.uri);
+  const url = URL.createObjectURL(blob);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    // ouvre l'image dans un nouvel onglet pour que l'utilisateur la maintienne
+    window.open(url, '_blank');
+    showToast('Maintiens l\'image puis "Ajouter aux Photos"', 4000);
+  } else {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pfp_${Date.now()}.${(blob.type.split('/')[1] || 'jpg').split('+')[0]}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    showToast('Téléchargé dans la galerie');
+  }
+};
+
+// ============================================================
+// CATEGORIES PAGE
+// ============================================================
+async function renderCategoriesList() {
+  await refreshData();
+  const list = document.getElementById('categories-list');
+  list.innerHTML = '';
+  document.getElementById('empty-cats').style.display = state.categories.length === 0 ? 'block' : 'none';
+  for (const c of state.categories) {
+    const b = document.createElement('button');
+    b.className = 'cat-row';
+    b.innerHTML = `
+      <span class="color-dot" style="background:${c.color};"></span>
+      <span class="cat-row-info">
+        <div class="cat-row-name">${c.icon ? c.icon + ' ' : ''}${escapeHtml(c.name)}</div>
+        <div class="cat-row-count">${c.count} PFP${c.count > 1 ? 's' : ''}</div>
+      </span>
+      <span style="color:var(--textSec);font-size:22px;">›</span>
+    `;
+    b.onclick = () => openCategoryModal(c);
+    list.appendChild(b);
+  }
+}
+
+function openCategoryModal(cat) {
+  state.editingCat = cat;
+  document.getElementById('cat-modal-title').textContent = cat ? 'Modifier' : 'Nouvelle catégorie';
+  document.getElementById('cat-name').value = cat ? cat.name : '';
+  state.selectedColor = cat ? cat.color : PALETTES[state.currentTheme][0];
+  state.selectedIcon = cat ? (cat.icon || '') : '';
+  document.getElementById('cat-delete-btn').style.display = cat ? 'block' : 'none';
+
+  // colors
+  const cr = document.getElementById('color-row');
+  cr.innerHTML = '';
+  for (const col of PALETTES[state.currentTheme]) {
+    const s = document.createElement('button');
+    s.className = 'swatch' + (col === state.selectedColor ? ' selected' : '');
+    s.style.background = col;
+    s.textContent = col === state.selectedColor ? '✓' : '';
+    s.onclick = () => {
+      state.selectedColor = col;
+      cr.querySelectorAll('.swatch').forEach(x => { x.classList.remove('selected'); x.textContent = ''; });
+      s.classList.add('selected');
+      s.textContent = '✓';
+    };
+    cr.appendChild(s);
+  }
+  // icons
+  const ir = document.getElementById('icon-row');
+  ir.innerHTML = '';
+  const noneBtn = document.createElement('button');
+  noneBtn.className = 'icon-cell none' + (state.selectedIcon === '' ? ' selected' : '');
+  noneBtn.textContent = '—';
+  noneBtn.onclick = () => {
+    state.selectedIcon = '';
+    ir.querySelectorAll('.icon-cell').forEach(x => x.classList.remove('selected'));
+    noneBtn.classList.add('selected');
+  };
+  ir.appendChild(noneBtn);
+  for (const ic of ICONS) {
+    const c = document.createElement('button');
+    c.className = 'icon-cell' + (ic === state.selectedIcon ? ' selected' : '');
+    c.textContent = ic;
+    c.onclick = () => {
+      state.selectedIcon = ic;
+      ir.querySelectorAll('.icon-cell').forEach(x => x.classList.remove('selected'));
+      c.classList.add('selected');
+    };
+    ir.appendChild(c);
+  }
+
+  openModal('modal-cat-edit');
+}
+
+async function saveCategory() {
+  const name = document.getElementById('cat-name').value.trim();
+  if (!name) { alert('Donne un nom à ta catégorie.'); return; }
+  try {
+    if (state.editingCat) {
+      await updateCategory({ ...state.editingCat, name, color: state.selectedColor, icon: state.selectedIcon || null });
+    } else {
+      await addCategory({ name, color: state.selectedColor, icon: state.selectedIcon || null, created_at: new Date().toISOString() });
+    }
+    closeModal('modal-cat-edit');
+    renderCategoriesList();
+  } catch (e) {
+    if (String(e).includes('uniqueness')) alert('Une catégorie avec ce nom existe déjà.');
+    else alert('Erreur : ' + e);
+  }
+}
+
+async function deleteCategoryConfirm() {
+  if (!state.editingCat) return;
+  if (!confirm(`Supprimer "${state.editingCat.name}" ? Les PFP ne seront pas supprimées.`)) return;
+  await deleteCategoryDb(state.editingCat.id);
+  closeModal('modal-cat-edit');
+  renderCategoriesList();
+}
+
+// ============================================================
+// SETTINGS / STATS
+// ============================================================
+async function renderStats() {
+  await refreshData();
+  document.getElementById('stat-pfps').textContent = state.pfps.length;
+  document.getElementById('stat-favs').textContent = state.pfps.filter(p => p.is_favorite).length;
+  document.getElementById('stat-cats').textContent = state.categories.length;
+}
+
+async function exportData() {
+  const pfps = await getAllPfps();
+  const cats = await p(tx(['categories']).objectStore('categories').getAll());
+  const links = await p(tx(['pfp_cats']).objectStore('pfp_cats').getAll());
+  const data = { version: 1, pfps, categories: cats, links };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pfp_gallery_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showToast('Sauvegarde téléchargée');
+}
+
+document.getElementById('import-input').addEventListener('change', async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  if (!confirm('Importer cette sauvegarde ? Tes données actuelles seront écrasées.')) return;
+  try {
+    const text = await f.text();
+    const data = JSON.parse(text);
+    // Clear stores
+    const t = tx(['pfps','categories','pfp_cats'], 'readwrite');
+    await p(t.objectStore('pfps').clear());
+    await p(t.objectStore('categories').clear());
+    await p(t.objectStore('pfp_cats').clear());
+    // Import
+    for (const pfp of data.pfps || []) await p(t.objectStore('pfps').put(pfp));
+    for (const c of data.categories || []) await p(t.objectStore('categories').put(c));
+    for (const l of data.links || []) await p(t.objectStore('pfp_cats').put(l));
+    showToast('Importé ✨');
+    renderStats();
+  } catch (err) {
+    alert('Erreur d\'import : ' + err.message);
+  }
+  e.target.value = '';
+});
+
+// ============================================================
+// SEARCH
+// ============================================================
+const searchInput = document.getElementById('search-input');
+const searchClear = document.getElementById('search-clear');
+searchInput.addEventListener('input', () => {
+  state.search = searchInput.value;
+  searchClear.style.display = state.search ? 'block' : 'none';
+  if (state.currentPage === 'gallery') renderGallery();
+});
+searchClear.onclick = () => {
+  searchInput.value = ''; state.search = '';
+  searchClear.style.display = 'none';
+  renderGallery();
+};
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(m => {
+  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
+});
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ============================================================
+// INIT
+// ============================================================
+(async () => {
+  await openDB();
+  setTheme(state.currentTheme);
+  await renderGallery();
+})();
+
+// ============================================================
+// SERVICE WORKER (offline)
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW failed', e));
+  });
+}
+</script>
+</body>
+</html>
