@@ -1,4 +1,4 @@
-const CACHE = 'systeme-n-v15';
+const CACHE = 'systeme-n-v17-kitty';
 const ASSETS = [
   './',
   './index.html',

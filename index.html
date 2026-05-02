@@ -847,6 +847,197 @@ body.design-pokemon .bottom-nav-btn.active { color: #FFCC00 !important; }
 
 
 
+
+/* ============================================================
+   FIXES UNIVERSELS DESIGNS - COHÉRENCE & RESPONSIVE
+   ============================================================ */
+
+/* Force que les body backgrounds des designs prennent le pas sur tout thème */
+body[class*="design-"] { background-color: var(--bg) !important; color: var(--text) !important; }
+
+/* Search bar : force le padding-left correct et visibilité de la loupe partout */
+.home-search { padding-left: 44px !important; }
+.home-search-icon { left: 16px !important; font-size: 18px !important; opacity: 1 !important; }
+
+/* Force les emojis des tuiles à rester visibles dans TOUS les designs */
+body[class*="design-"] .home-tile .ico {
+  font-size: 26px !important;
+  display: block !important;
+  filter: none !important;
+  opacity: 1 !important;
+  margin-bottom: 4px;
+}
+/* Sauf Vogue où on veut le côté minimal en niveaux de gris */
+body.design-vogue .home-tile .ico {
+  filter: grayscale(100%) contrast(1.2) !important;
+  opacity: 0.85 !important;
+}
+/* Et Terminal/Cyberpunk avec teinte */
+body.design-terminal .home-tile .ico { filter: hue-rotate(85deg) saturate(1.5) brightness(1.1) !important; }
+body.design-gameboy .home-tile .ico { filter: sepia(1) saturate(2) hue-rotate(40deg) brightness(0.8) !important; }
+
+/* Force que les .home-tile soient assez grandes pour le contenu (responsive iPhone) */
+.home-tile {
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 4px;
+}
+.home-tile .lbl {
+  font-size: 11px;
+  line-height: 1.2;
+  word-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Section header : empêche le débordement du nom de section */
+.home-section-header .title-txt {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tuiles dans Vogue : couleur de label adaptative */
+body.design-vogue .home-tile { 
+  background: var(--surface, #FFF) !important; 
+  color: var(--text, #1A1A1A) !important;
+}
+body.design-vogue .home-tile .lbl { 
+  color: var(--text, #1A1A1A) !important;
+}
+
+/* Pour TOUS les designs : si le user a un theme dark de fond, qu'on garde de la lisibilité */
+body.design-vogue, body.design-paper, body.design-brutalist, body.design-manga, body.design-pokemon {
+  /* Designs "clairs" -> force fond clair */
+  --bg-override: var(--bg) !important;
+}
+
+/* Fix tabs scrollables sur petit écran */
+.home-tabs {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+.home-tabs::-webkit-scrollbar { display: none; }
+.home-tab { flex-shrink: 0; }
+
+/* Top bar : empêche débordement du titre */
+.topbar .title { 
+  flex: 1; 
+  min-width: 0; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap;
+}
+
+/* Page header : pareil */
+.page-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Responsive très petit écran (< 360px iPhone SE) */
+@media (max-width: 360px) {
+  .home-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .home-tile { min-height: 64px; padding: 8px 2px; }
+  .home-tile .lbl { font-size: 10px !important; }
+  .home-tile .ico { font-size: 22px !important; }
+  body.preset-compact .home-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* Vogue spécifique : force fond clair quoi qu'il arrive */
+body.design-vogue { background: #FAFAFA !important; color: #1A1A1A !important; }
+body.design-vogue .home-search-icon { color: #C9A96E !important; }
+body.design-vogue .home-search { background: #FFF !important; color: #1A1A1A !important; border-color: #1A1A1A22 !important; }
+body.design-vogue .home-tab { background: #FFF !important; color: #1A1A1A !important; border-color: #1A1A1A22 !important; }
+body.design-vogue .home-tab.active { background: #1A1A1A !important; color: #FAFAFA !important; }
+body.design-vogue .topbar { background: #FFF !important; }
+body.design-vogue .topbar .title, body.design-vogue .topbar { color: #1A1A1A !important; }
+body.design-vogue .bottom-nav { background: #FFF !important; border-color: #1A1A1A33 !important; }
+body.design-vogue .bottom-nav-btn { color: #666 !important; }
+body.design-vogue .bottom-nav-btn.active { color: #1A1A1A !important; }
+
+/* Pareil Brutalist (jaune fluo doit rester) */
+body.design-brutalist { background: #FFFF00 !important; color: #000 !important; }
+body.design-brutalist .home-search { background: #FFF !important; color: #000 !important; border: 3px solid #000 !important; }
+body.design-brutalist .home-search-icon { color: #000 !important; }
+body.design-brutalist .home-tab { background: #FFF !important; color: #000 !important; border: 2px solid #000 !important; border-radius: 0 !important; }
+body.design-brutalist .home-tab.active { background: #000 !important; color: #FFFF00 !important; }
+body.design-brutalist .topbar { background: #FFFF00 !important; }
+body.design-brutalist .topbar .title { color: #000 !important; }
+
+/* Papier vintage : fond clair même si theme dark */
+body.design-paper { background: #F4ECD8 !important; color: #3E2A1F !important; }
+body.design-paper .home-search { background: #FAF3DD !important; color: #3E2A1F !important; }
+body.design-paper .home-search-icon { color: #8B4513 !important; }
+body.design-paper .home-tab { background: #FAF3DD !important; color: #3E2A1F !important; }
+body.design-paper .home-tab.active { background: #8B4513 !important; color: #FAF3DD !important; }
+
+/* Manga shōnen */
+body.design-manga { background-color: #FFF !important; color: #000 !important; }
+body.design-manga .home-search { background: #FFF !important; color: #000 !important; border: 3px solid #000 !important; }
+body.design-manga .home-tab { background: #FFF !important; color: #000 !important; border: 2px solid #000 !important; }
+body.design-manga .home-tab.active { background: #000 !important; color: #FFF !important; }
+
+/* Pokémon fond clair */
+body.design-pokemon { color: #2A2A2A !important; }
+body.design-pokemon .home-search { background: #FFF !important; color: #2A2A2A !important; }
+body.design-pokemon .home-tab { background: #FFF !important; color: #2A2A2A !important; border: 2px solid #2A2A2A !important; }
+body.design-pokemon .home-tab.active { background: #DC0A2D !important; color: #FFF !important; }
+
+/* Y2K, Glass, Cyberpunk, GameBoy, Terminal, Neon : ce sont des designs sombres -> garder fond sombre */
+body.design-y2k { color: #2A1A4A !important; }
+body.design-y2k .home-search { background: rgba(255,255,255,0.7) !important; color: #2A1A4A !important; backdrop-filter: blur(10px); }
+body.design-y2k .home-search-icon { color: #FF1493 !important; }
+body.design-y2k .home-tab { background: rgba(255,255,255,0.5) !important; color: #2A1A4A !important; backdrop-filter: blur(10px); border-color: rgba(255,255,255,0.7) !important; }
+body.design-y2k .home-tab.active { background: linear-gradient(135deg, #FF1493, #00CED1) !important; color: #FFF !important; }
+body.design-y2k .topbar { background: rgba(255,255,255,0.5) !important; backdrop-filter: blur(20px); }
+
+body.design-terminal { background: #000 !important; color: #00FF41 !important; }
+body.design-terminal .home-search { background: #000 !important; color: #00FF41 !important; border: 1px solid #00FF4166 !important; border-radius: 0 !important; }
+body.design-terminal .home-search-icon { color: #00FF41 !important; }
+body.design-terminal .home-tab { background: transparent !important; color: #00FF41 !important; border: 1px solid #00FF41 !important; border-radius: 0 !important; }
+body.design-terminal .home-tab.active { background: #00FF41 !important; color: #000 !important; }
+body.design-terminal .topbar { background: #000 !important; }
+body.design-terminal .topbar .title { color: #00FF41 !important; }
+
+body.design-cyberpunk { background: linear-gradient(180deg, #0A001A 0%, #1A0033 100%) !important; background-attachment: fixed !important; color: #FF00E5 !important; }
+body.design-cyberpunk .home-search { background: rgba(20,0,42,0.8) !important; color: #00E5FF !important; border-color: #FF00E555 !important; }
+body.design-cyberpunk .home-search-icon { color: #FFFF00 !important; text-shadow: 0 0 6px #FFFF00; }
+body.design-cyberpunk .home-tab { background: rgba(20,0,42,0.5) !important; color: #00E5FF !important; border: 1px solid #FF00E555 !important; }
+body.design-cyberpunk .home-tab.active { background: #FF00E5 !important; color: #000 !important; }
+
+body.design-gameboy { background: #9BBC0F !important; color: #0F380F !important; }
+body.design-gameboy .home-search { background: #9BBC0F !important; color: #0F380F !important; border: 2px solid #0F380F !important; border-radius: 0 !important; }
+body.design-gameboy .home-search-icon { color: #0F380F !important; }
+body.design-gameboy .home-tab { background: #9BBC0F !important; color: #0F380F !important; border: 2px solid #0F380F !important; border-radius: 0 !important; }
+body.design-gameboy .home-tab.active { background: #0F380F !important; color: #9BBC0F !important; }
+body.design-gameboy .topbar { background: #306230 !important; }
+body.design-gameboy .topbar .title { color: #9BBC0F !important; }
+
+body.design-glass { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%) !important; background-attachment: fixed !important; color: #FFF !important; }
+body.design-glass .home-search { background: rgba(255,255,255,0.15) !important; backdrop-filter: blur(10px); color: #FFF !important; border: 1px solid rgba(255,255,255,0.3) !important; }
+body.design-glass .home-search::placeholder { color: rgba(255,255,255,0.6); }
+body.design-glass .home-search-icon { color: rgba(255,255,255,0.8) !important; }
+body.design-glass .home-tab { background: rgba(255,255,255,0.12) !important; color: #FFF !important; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2) !important; }
+body.design-glass .home-tab.active { background: rgba(255,255,255,0.95) !important; color: #1e3c72 !important; }
+
+
 /* === BOTTOM NAV BAR === */
 .bottom-nav {
   position: fixed;
@@ -27630,7 +27821,7 @@ function penGuess(L) {
 
 // Définitions des icônes : {id, name, desc, type:'svg'|'image'|'custom', data}
 const APP_ICONS = [
-  { id:'default', name:'Original', desc:'L\'icône native Système N', type:'image', data:'icon-180.png', emoji:'✦' },
+  { id:'default', name:'Original', desc:'Hello Kitty feutrine 🩶🤍', type:'image', data:'icon-180.png', emoji:'🐱' },
   { id:'manga', name:'Manga b&w', desc:'Style shōnen monochrome', type:'image', data:'icons-pack/icon-manga-180.png', emoji:'⚡' },
   { id:'kawaii', name:'Kawaii pastel', desc:'Hello Kitty rose', type:'image', data:'icons-pack/icon-kawaii-180.png', emoji:'🌸' },
   { id:'aesthetic', name:'Aesthetic', desc:'Anime moody noir', type:'image', data:'icons-pack/icon-aesthetic-180.png', emoji:'🌙' },
