@@ -1,6 +1,6 @@
 {
-  "name": "Système N",
-  "short_name": "Système N",
+  "name": "Love2nono",
+  "short_name": "Love2nono",
   "description": "Galerie PFP + boîte à outils, 100% locale et hors-ligne",
   "start_url": "./index.html",
   "scope": "./",

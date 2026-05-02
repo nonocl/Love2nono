@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#FFF0F5" id="theme-meta">
-<title>Système N</title>
+<title>Love2nono</title>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -176,10 +176,17 @@ img { display: block; -webkit-user-select: none; user-select: none; -webkit-user
   border-radius: 14px;
   color: var(--text);
   font-size: 14px;
-  outline: none;
-  transition: border 0.2s;
+  outline: none !important;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
 }
-.home-search:focus { border-color: var(--primary); }
+.home-search:focus, .home-search:focus-visible, .home-search:active { 
+  outline: none !important;
+  border-color: var(--primary);
+  box-shadow: none !important;
+}
 .home-search-icon {
   position: absolute;
   left: 30px;
@@ -1293,13 +1300,22 @@ body.has-nav .mini-player { bottom: 70px; }
   padding: 16px;
 }
 .label { display: block; font-size: 13px; font-weight: 600; color: var(--textSec); margin: 12px 0 6px; }
-.input, textarea.input {
+.input, textarea.input, input[type="text"], input[type="search"], input[type="email"], input[type="number"], input[type="date"], input[type="password"] {
   width: 100%; padding: 12px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 12px;
-  color: var(--text); font-size: 15px; outline: none;
+  color: var(--text); font-size: 15px; 
+  outline: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
   font-family: inherit;
+  box-sizing: border-box;
+}
+.input:focus, textarea.input:focus, input:focus, select:focus { 
+  outline: none !important; 
+  box-shadow: none !important; 
 }
 textarea.input { resize: vertical; min-height: 60px; }
 .btn {
@@ -2183,12 +2199,61 @@ body.has-miniplayer .fab {
 <body>
 
 <!-- ======= HOME ======= -->
+<!-- ====== DASHBOARD ACCUEIL SOBRE ====== -->
 <div class="page active" id="page-home">
   <div class="topbar">
-    <div class="title" id="home-title">✦ Système N</div>
+    <div class="title" id="home-title">💖 Love2nono</div>
     <button class="icon-btn" onclick="goTo('settings')">⚙</button>
   </div>
-  <div id="home-widget" style="display:none; padding:8px 12px;"></div>
+  
+  <div style="padding:16px;">
+    <!-- Salutation perso -->
+    <div id="dash-greeting" style="margin-bottom:14px;"></div>
+    
+    <!-- Widget bandeau -->
+    <div id="home-widget" style="display:none; margin-bottom:14px;"></div>
+    
+    <!-- Mes shortcuts perso -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <h3 style="font-size:13px; font-weight:700; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px; margin:0;">Mes raccourcis</h3>
+      <button onclick="dashEditMode()" id="dash-edit-btn" style="background:none; border:none; color:var(--primary); font-size:12px; font-weight:700; cursor:pointer;">✎ Modifier</button>
+    </div>
+    <div id="dash-shortcuts" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px;"></div>
+    
+    <!-- Big buttons -->
+    <button onclick="goTo('all')" style="width:100%; background:linear-gradient(135deg, var(--primary), var(--accent)); color:white; border:none; border-radius:18px; padding:18px; font-size:15px; font-weight:700; display:flex; align-items:center; gap:14px; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,0.15);">
+      <div style="font-size:32px;">📚</div>
+      <div style="flex:1; text-align:left;">
+        <div style="font-size:16px; font-weight:800;">Toutes les fonctionnalités</div>
+        <div style="font-size:11px; opacity:0.85; font-weight:400; margin-top:2px;">Accède à tout · 200+ outils</div>
+      </div>
+      <div style="font-size:24px; opacity:0.7;">→</div>
+    </button>
+    
+    <!-- Quick stats du jour -->
+    <h3 style="font-size:13px; font-weight:700; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px; margin:18px 0 8px;">Aperçu du jour</h3>
+    <div id="dash-quick" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+    
+    <!-- Citation/inspiration du jour -->
+    <div id="dash-inspire" style="margin-top:16px;"></div>
+    
+    <!-- Boutons quick actions -->
+    <h3 style="font-size:13px; font-weight:700; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px; margin:18px 0 8px;">Actions rapides</h3>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
+      <button onclick="goTo('today')" class="btn alt" style="font-size:11px; padding:10px 4px; flex-direction:column; line-height:1.3;"><span style="font-size:18px; margin-bottom:2px;">☀️</span>Aujourd'hui</button>
+      <button onclick="goTo('inbox')" class="btn alt" style="font-size:11px; padding:10px 4px; flex-direction:column; line-height:1.3;"><span style="font-size:18px; margin-bottom:2px;">📥</span>Inbox</button>
+      <button onclick="goTo('cmdk')" class="btn alt" style="font-size:11px; padding:10px 4px; flex-direction:column; line-height:1.3;"><span style="font-size:18px; margin-bottom:2px;">⌨</span>Recherche</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="page" id="page-all">
+  <div class="topbar">
+    <button class="icon-btn" onclick="goTo('home')">‹</button>
+    <div class="title">📚 Toutes les fonctionnalités</div>
+    <button class="icon-btn" onclick="goTo('settings')">⚙</button>
+  </div>
   <div class="home-search-wrap">
     <div class="home-search-rel">
       <span class="home-search-icon">🔍</span>
@@ -2384,7 +2449,7 @@ body.has-miniplayer .fab {
     <div class="home-section-header" onclick="toggleSec(this)">
       <div class="icon-bg">✅</div>
       <div class="title-txt">Productivité</div>
-      <div class="count-badge">14</div>
+      <div class="count-badge">16</div>
       <div class="chev">▼</div>
     </div>
     <div class="home-grid">
@@ -2401,7 +2466,9 @@ body.has-miniplayer .fab {
     <button class="home-tile" onclick="goTo('today')"><span class="ico">☀️</span><span class="lbl">Aujourd'hui</span></button>
     <button class="home-tile" onclick="goTo('inbox')"><span class="ico">📥</span><span class="lbl">Inbox</span></button>
     <button class="home-tile" onclick="goTo('gratitude')"><span class="ico">🙏</span><span class="lbl">Gratitude</span></button>
-    <button class="home-tile" onclick="goTo('capsule')"><span class="ico">⏳</span><span class="lbl">Capsule temporelle</span></button></div>
+    <button class="home-tile" onclick="goTo('capsule')"><span class="ico">⏳</span><span class="lbl">Capsule temporelle</span></button>
+    <button class="home-tile" onclick="goTo('focus')"><span class="ico">🎯</span><span class="lbl">Mode Focus</span></button>
+    <button class="home-tile" onclick="goTo('projects')"><span class="ico">🚀</span><span class="lbl">Side projects</span></button></div>
   </div>
 
   <div class="home-section">
@@ -2423,7 +2490,7 @@ body.has-miniplayer .fab {
     <div class="home-section-header" onclick="toggleSec(this)">
       <div class="icon-bg">🏡</div>
       <div class="title-txt">Vie quotidienne</div>
-      <div class="count-badge">17</div>
+      <div class="count-badge">13</div>
       <div class="chev">▼</div>
     </div>
     <div class="home-grid">
@@ -2431,12 +2498,8 @@ body.has-miniplayer .fab {
     <button class="home-tile" onclick="goTo('vault')"><span class="ico">🔐</span><span class="lbl">Comptes</span></button>
     <button class="home-tile" onclick="goTo('sobriety')"><span class="ico">🌿</span><span class="lbl">Sobriété</span></button>
     <button class="home-tile" onclick="goTo('sleep')"><span class="ico">😴</span><span class="lbl">Sommeil</span></button>
-    <button class="home-tile" onclick="goTo('water')"><span class="ico">💧</span><span class="lbl">Eau</span></button>
     <button class="home-tile" onclick="goTo('weight')"><span class="ico">⚖️</span><span class="lbl">Poids</span></button>
-    <button class="home-tile" onclick="goTo('wallet')"><span class="ico">💵</span><span class="lbl">Solde</span></button>
-    <button class="home-tile" onclick="goTo('expenses')"><span class="ico">💰</span><span class="lbl">Dépenses</span></button>
     <button class="home-tile" onclick="goTo('stats')"><span class="ico">📈</span><span class="lbl">Stats</span></button>
-    <button class="home-tile" onclick="goTo('sport-track')"><span class="ico">💪</span><span class="lbl">Sport</span></button>
     <button class="home-tile" onclick="goTo('meds')"><span class="ico">💊</span><span class="lbl">Médicaments</span></button>
     <button class="home-tile" onclick="goTo('recipes')"><span class="ico">🍝</span><span class="lbl">Recettes</span></button>
     <button class="home-tile" onclick="goTo('split-bill')"><span class="ico">💸</span><span class="lbl">Split bill</span></button>
@@ -2465,14 +2528,54 @@ body.has-miniplayer .fab {
     <div class="home-section-header" onclick="toggleSec(this)">
       <div class="icon-bg">🧘</div>
       <div class="title-txt">Bien-être</div>
+      <div class="count-badge">12</div>
+      <div class="chev">▼</div>
+    </div>
+    <div class="home-grid">
+    <button class="home-tile" onclick="goTo('mood')"><span class="ico">😊</span><span class="lbl">Mood quick</span></button>
+    <button class="home-tile" onclick="goTo('emotion')"><span class="ico">🌈</span><span class="lbl">Mood tracker</span></button>
+    <button class="home-tile" onclick="goTo('cycle')"><span class="ico">🌸</span><span class="lbl">Cycle</span></button>
+    <button class="home-tile" onclick="goTo('skincare')"><span class="ico">✨</span><span class="lbl">Skincare</span></button>
+    <button class="home-tile" onclick="goTo('selfcare')"><span class="ico">💗</span><span class="lbl">Self-care</span></button>
+    <button class="home-tile" onclick="goTo('manifest')"><span class="ico">✨</span><span class="lbl">Manifestation</span></button>
+    <button class="home-tile" onclick="goTo('compliment')"><span class="ico">💕</span><span class="lbl">Compliment</span></button>
+    <button class="home-tile" onclick="goTo('quotes')"><span class="ico">💬</span><span class="lbl">Citations</span></button>
+    <button class="home-tile" onclick="goTo('breathing')"><span class="ico">🌬️</span><span class="lbl">Respiration</span></button>
+    <button class="home-tile" onclick="goTo('meditation')"><span class="ico">🧘</span><span class="lbl">Méditation</span></button>
+    <button class="home-tile" onclick="goTo('astro')"><span class="ico">🌙</span><span class="lbl">Astro</span></button>
+    <button class="home-tile" onclick="goTo('mentor')"><span class="ico">🎯</span><span class="lbl">Mentor</span></button></div>
+  </div>
+
+  <div class="home-section">
+    <div class="home-section-header" onclick="toggleSec(this)">
+      <div class="icon-bg">👗</div>
+      <div class="title-txt">Lifestyle</div>
+      <div class="count-badge">8</div>
+      <div class="chev">▼</div>
+    </div>
+    <div class="home-grid">
+    <button class="home-tile" onclick="goTo('wardrobe')"><span class="ico">👗</span><span class="lbl">Garde-robe</span></button>
+    <button class="home-tile" onclick="goTo('outfit')"><span class="ico">🪞</span><span class="lbl">Tenue du jour</span></button>
+    <button class="home-tile" onclick="goTo('beauty')"><span class="ico">💄</span><span class="lbl">Beauty box</span></button>
+    <button class="home-tile" onclick="goTo('makeup')"><span class="ico">💋</span><span class="lbl">Tutos make-up</span></button>
+    <button class="home-tile" onclick="goTo('soiree')"><span class="ico">🎉</span><span class="lbl">Planning soirée</span></button>
+    <button class="home-tile" onclick="goTo('grooming')"><span class="ico">💈</span><span class="lbl">Grooming</span></button>
+    <button class="home-tile" onclick="goTo('wallet2')"><span class="ico">💰</span><span class="lbl">Finances</span></button>
+    <button class="home-tile" onclick="goTo('gaming')"><span class="ico">🎮</span><span class="lbl">Gaming hub</span></button></div>
+  </div>
+
+  <div class="home-section">
+    <div class="home-section-header" onclick="toggleSec(this)">
+      <div class="icon-bg">💪</div>
+      <div class="title-txt">Sport</div>
       <div class="count-badge">4</div>
       <div class="chev">▼</div>
     </div>
     <div class="home-grid">
-    <button class="home-tile" onclick="goTo('mood')"><span class="ico">😊</span><span class="lbl">Mood tracker</span></button>
-    <button class="home-tile" onclick="goTo('quotes')"><span class="ico">💬</span><span class="lbl">Citations</span></button>
-    <button class="home-tile" onclick="goTo('breathing')"><span class="ico">🌬️</span><span class="lbl">Respiration</span></button>
-    <button class="home-tile" onclick="goTo('meditation')"><span class="ico">🧘</span><span class="lbl">Méditation</span></button></div>
+    <button class="home-tile" onclick="goTo('muscu')"><span class="ico">💪</span><span class="lbl">Muscu</span></button>
+    <button class="home-tile" onclick="goTo('pr')"><span class="ico">🏆</span><span class="lbl">Mes PR</span></button>
+    <button class="home-tile" onclick="goTo('fit')"><span class="ico">⚡</span><span class="lbl">Fitness daily</span></button>
+    <button class="home-tile" onclick="goTo('diet')"><span class="ico">🥗</span><span class="lbl">Macros diet</span></button></div>
   </div>
 
   <div class="home-section">
@@ -2517,7 +2620,7 @@ body.has-miniplayer .fab {
     <div class="home-section-header" onclick="toggleSec(this)">
       <div class="icon-bg">🛠️</div>
       <div class="title-txt">Outils</div>
-      <div class="count-badge">23</div>
+      <div class="count-badge">24</div>
       <div class="chev">▼</div>
     </div>
     <div class="home-grid">
@@ -2543,7 +2646,8 @@ body.has-miniplayer .fab {
     <button class="home-tile" onclick="goTo('exif')"><span class="ico">🔒</span><span class="lbl">Nettoyeur EXIF</span></button>
     <button class="home-tile" onclick="goTo('cheatdev')"><span class="ico">📋</span><span class="lbl">Cheat sheets dev</span></button>
     <button class="home-tile" onclick="goTo('icon')"><span class="ico">🎨</span><span class="lbl">Icône d'app</span></button>
-    <button class="home-tile" onclick="goTo('widgets')"><span class="ico">📱</span><span class="lbl">Widgets déco</span></button></div>
+    <button class="home-tile" onclick="goTo('widgets')"><span class="ico">📱</span><span class="lbl">Widgets déco</span></button>
+    <button class="home-tile" onclick="goTo('pseudos')"><span class="ico">🎭</span><span class="lbl">Mes pseudos</span></button></div>
   </div>
 </div>
 
@@ -5193,13 +5297,15 @@ body.has-miniplayer .fab {
     <button class="btn alt full" onclick="document.getElementById('import-input').click()">📤 Importer une sauvegarde</button>
     <input type="file" id="import-input" class="hidden-file" accept="application/json">
     <div style="height:8px;"></div>
+    <button class="btn alt full" onclick="resetAppCache()" style="margin-bottom:8px;">🧹 Réparer l'app (vider cache)</button>
+    <p style="font-size:11px; color:var(--textSec); margin-top:-4px; margin-bottom:8px;">Si l'app affiche un bug d'affichage ou ne se charge pas correctement.</p>
     <button class="btn ghost full" onclick="resetAll()" style="color:var(--danger); border-color:var(--danger);">⚠️ Tout réinitialiser</button>
   </div>
 
   <div class="section">
     <h3 style="font-size:15px; font-weight:700; margin-bottom:12px;">À propos</h3>
     <p style="font-size:13px; color:var(--textSec); line-height:1.5;">
-      <strong style="color:var(--text);">Système N</strong><br>
+      <strong style="color:var(--text);">Love2nono</strong><br>
       Galerie PFP + boîte à outils, 100% locale et hors-ligne.<br><br>
       Version 1.0.0<br>
       Made with 💖 pour Nono
@@ -8004,7 +8110,7 @@ body.has-miniplayer .fab {
       <p style="font-size:12px; line-height:1.5; margin-top:8px;">⚠️ <strong>Limite iOS :</strong> l'icône <strong>déjà installée</strong> sur ton écran d'accueil ne change pas automatiquement (Apple la verrouille). Pour la mettre à jour : maintiens l'icône → Supprimer du Springboard → rouvre l'app dans Safari → Partager → Sur l'écran d'accueil.</p>
     </div>
 
-    <p style="font-size:12px; color:var(--textSec);">Choisis l'icône que tu veux pour Système N. Tu peux prendre une icône préfaite, importer une photo, ou utiliser un PFP de ta galerie.</p>
+    <p style="font-size:12px; color:var(--textSec);">Choisis l'icône que tu veux pour Love2nono. Tu peux prendre une icône préfaite, importer une photo, ou utiliser un PFP de ta galerie.</p>
 
     <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:14px;">Icônes intégrées</h3>
     <div id="icon-list" style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:8px;"></div>
@@ -8165,6 +8271,532 @@ body.has-miniplayer .fab {
 </div>
 
 
+
+<!-- ====== PACK GIRLY v20 ====== -->
+
+<!-- ====== CYCLE MENSTRUEL ====== -->
+<div class="page" id="page-cycle">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🌸 Mon cycle</div>
+    <button class="icon-btn" onclick="goTo('cycle-log')" title="Logger">+</button>
+  </div>
+  <div class="section" id="cycle-content"></div>
+</div>
+
+<div class="page" id="page-cycle-log">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('cycle')">‹</button>
+    <div class="page-title">📝 Logger</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <span class="label">Date</span>
+    <input type="date" class="input" id="cyc-date">
+    <span class="label">Flux</span>
+    <select class="input" id="cyc-flow">
+      <option value="">— Pas de règles —</option>
+      <option value="spotting">💧 Spotting (très léger)</option>
+      <option value="light">💧💧 Léger</option>
+      <option value="medium">💧💧💧 Normal</option>
+      <option value="heavy">💧💧💧💧 Abondant</option>
+    </select>
+    <span class="label">Symptômes (multiples)</span>
+    <div id="cyc-symptoms" style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-top:6px;"></div>
+    <span class="label">Humeur</span>
+    <div id="cyc-mood" style="display:flex; gap:4px; flex-wrap:wrap;"></div>
+    <span class="label">Notes (optionnel)</span>
+    <textarea class="input" id="cyc-notes" rows="3" placeholder="Comment tu te sens..."></textarea>
+    <button class="btn primary full" onclick="cycSave()" style="margin-top:14px;">💾 Enregistrer</button>
+  </div>
+</div>
+
+<!-- ====== SKINCARE ====== -->
+<div class="page" id="page-skincare">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">✨ Skincare routine</div>
+    <button class="icon-btn" onclick="skinEdit()" title="Modifier">✎</button>
+  </div>
+  <div class="section" id="skin-content"></div>
+</div>
+
+<div class="page" id="page-skincare-edit">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('skincare')">‹</button>
+    <div class="page-title">✎ Routine</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <h3 style="font-size:14px; font-weight:700; color:var(--primary);">🌅 Routine matin</h3>
+    <div id="skin-am" style="margin-top:8px;"></div>
+    <button class="btn alt full" onclick="skinAdd('am')" style="margin-top:6px;">+ Ajouter étape matin</button>
+    
+    <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:20px;">🌙 Routine soir</h3>
+    <div id="skin-pm" style="margin-top:8px;"></div>
+    <button class="btn alt full" onclick="skinAdd('pm')" style="margin-top:6px;">+ Ajouter étape soir</button>
+    
+    <button class="btn primary full" onclick="goTo('skincare')" style="margin-top:18px;">✓ Terminé</button>
+  </div>
+</div>
+
+<!-- ====== GARDE-ROBE ====== -->
+<div class="page" id="page-wardrobe">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">👗 Garde-robe</div>
+    <button class="icon-btn" onclick="wardAddNew()">+</button>
+  </div>
+  <div class="section">
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:6px;" id="ward-cats"></div>
+    <div id="ward-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px;"></div>
+  </div>
+</div>
+
+<div class="page" id="page-wardrobe-add">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('wardrobe')">‹</button>
+    <div class="page-title">+ Vêtement</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <input type="file" id="ward-photo" accept="image/*" style="display:none;" onchange="wardLoadPhoto(this)">
+    <div id="ward-preview" onclick="document.getElementById('ward-photo').click()" style="background:var(--surface); border:2px dashed var(--border); border-radius:14px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; color:var(--textSec); cursor:pointer; margin-bottom:14px;">📷 Tap pour photo</div>
+    <span class="label">Catégorie</span>
+    <select class="input" id="ward-cat">
+      <option value="haut">👕 Hauts</option>
+      <option value="bas">👖 Bas</option>
+      <option value="robe">👗 Robes</option>
+      <option value="manteau">🧥 Manteaux</option>
+      <option value="chaussure">👟 Chaussures</option>
+      <option value="acc">👜 Accessoires</option>
+      <option value="bijou">💍 Bijoux</option>
+      <option value="lingerie">🩱 Lingerie</option>
+    </select>
+    <span class="label">Nom</span>
+    <input type="text" class="input" id="ward-name" placeholder="Ex: pull rose Zara">
+    <span class="label">Couleur(s)</span>
+    <input type="text" class="input" id="ward-color" placeholder="Ex: rose, blanc">
+    <span class="label">Saison</span>
+    <select class="input" id="ward-season">
+      <option value="all">Toute l'année</option>
+      <option value="winter">❄️ Hiver</option>
+      <option value="spring">🌸 Printemps</option>
+      <option value="summer">☀️ Été</option>
+      <option value="autumn">🍂 Automne</option>
+    </select>
+    <span class="label">Notes (style, marque...)</span>
+    <textarea class="input" id="ward-notes" rows="2"></textarea>
+    <button class="btn primary full" onclick="wardSave()" style="margin-top:14px;">💾 Enregistrer</button>
+  </div>
+</div>
+
+<!-- ====== OUTFIT BUILDER ====== -->
+<div class="page" id="page-outfit">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🪞 Tenue du jour</div>
+    <button class="icon-btn" onclick="outfitSave()" title="Sauvegarder">💾</button>
+  </div>
+  <div class="section">
+    <p style="font-size:11px; color:var(--textSec);">Pioche dans ta garde-robe pour composer une tenue.</p>
+    <div id="outfit-builder" style="margin-top:10px;"></div>
+    <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📚 Mes tenues sauvegardées</h3>
+    <div id="outfit-history" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- ====== BEAUTY BOX ====== -->
+<div class="page" id="page-beauty">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💄 Beauty box</div>
+    <button class="icon-btn" onclick="beautyAdd()">+</button>
+  </div>
+  <div class="section">
+    <p style="font-size:12px; color:var(--textSec);">Tes produits beauté avec dates d'expiration. L'app t'alerte avant la péremption.</p>
+    <div id="beauty-list" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<div class="page" id="page-beauty-add">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('beauty')">‹</button>
+    <div class="page-title">+ Produit</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <span class="label">Type</span>
+    <select class="input" id="bty-type">
+      <option value="skincare">✨ Soin visage</option>
+      <option value="makeup">💄 Maquillage</option>
+      <option value="parfum">🌸 Parfum</option>
+      <option value="cheveux">💇 Cheveux</option>
+      <option value="ongles">💅 Ongles</option>
+      <option value="corps">🧴 Corps</option>
+    </select>
+    <span class="label">Nom du produit</span>
+    <input type="text" class="input" id="bty-name" placeholder="Ex: rouge à lèvres Charlotte Tilbury">
+    <span class="label">Marque</span>
+    <input type="text" class="input" id="bty-brand">
+    <span class="label">Date d'ouverture</span>
+    <input type="date" class="input" id="bty-opened">
+    <span class="label">Durée après ouverture (PAO en mois)</span>
+    <select class="input" id="bty-pao">
+      <option value="3">3 mois</option>
+      <option value="6">6 mois (mascara, eyeliner)</option>
+      <option value="12" selected>12 mois (rouge à lèvres, fond de teint)</option>
+      <option value="18">18 mois</option>
+      <option value="24">24 mois</option>
+      <option value="36">36 mois (parfum)</option>
+    </select>
+    <span class="label">Note (1-5)</span>
+    <select class="input" id="bty-rating">
+      <option value="0">Pas noté</option>
+      <option value="5">⭐⭐⭐⭐⭐ Coup de cœur</option>
+      <option value="4">⭐⭐⭐⭐ Très bien</option>
+      <option value="3">⭐⭐⭐ Correct</option>
+      <option value="2">⭐⭐ Bof</option>
+      <option value="1">⭐ Pas aimé</option>
+    </select>
+    <button class="btn primary full" onclick="beautySave()" style="margin-top:14px;">💾 Enregistrer</button>
+  </div>
+</div>
+
+<!-- ====== SELF CARE ====== -->
+<div class="page" id="page-selfcare">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💗 Self-care</div>
+    <button class="icon-btn" onclick="renderSelfcare()" title="Refresh">↻</button>
+  </div>
+  <div class="section" id="selfcare-content"></div>
+</div>
+
+<!-- ====== MANIFESTATION ====== -->
+<div class="page" id="page-manifest">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">✨ Manifestation</div>
+    <button class="icon-btn" onclick="manifAdd()">+</button>
+  </div>
+  <div class="section">
+    <div style="background:linear-gradient(135deg, #FFD166, #FF6FA3); color:white; padding:14px; border-radius:14px;">
+      <div style="font-size:16px; font-weight:800;">✨ Tes intentions</div>
+      <p style="font-size:11px; opacity:0.9; margin-top:4px;">Écris ce que tu veux attirer dans ta vie. Relire chaque jour aide à les concrétiser.</p>
+    </div>
+    <div id="manif-list" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- ====== HOROSCOPE ====== -->
+<div class="page" id="page-astro">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🌙 Astro du jour</div>
+    <button class="icon-btn" onclick="astroSettings()" title="Settings">⚙</button>
+  </div>
+  <div class="section" id="astro-content"></div>
+</div>
+
+<!-- ====== COMPLIMENTS ====== -->
+<div class="page" id="page-compliment">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💕 Compliment du jour</div>
+    <button class="icon-btn" onclick="compNew()" title="Nouveau">↻</button>
+  </div>
+  <div class="section" id="comp-content"></div>
+</div>
+
+<!-- ====== MAQUILLAGE TUTOS ====== -->
+<div class="page" id="page-makeup">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💄 Tutos maquillage</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <div id="mk-list" style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;"></div>
+    <div id="mk-detail" style="display:none; margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- ====== SOIRÉE PLANNER ====== -->
+<div class="page" id="page-soiree">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🎉 Planning soirée</div>
+    <button class="icon-btn" onclick="soireeNew()" title="Nouvelle">+</button>
+  </div>
+  <div class="section">
+    <p style="font-size:12px; color:var(--textSec);">Organise tes soirées : invités, tenue, budget, playlist, checklist.</p>
+    <div id="soiree-list" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<div class="page" id="page-soiree-edit">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('soiree')">‹</button>
+    <div class="page-title">🎉 Soirée</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section" id="soiree-edit-content"></div>
+</div>
+
+<!-- ====== JOURNAL ÉMOTIONS ====== -->
+<div class="page" id="page-emotion">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🌈 Mood tracker</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section" id="emotion-content"></div>
+</div>
+
+
+
+<!-- ====== PACK BOYS v21 ====== -->
+
+<!-- ====== TRACKER MUSCU ====== -->
+<div class="page" id="page-muscu">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💪 Muscu</div>
+    <button class="icon-btn" onclick="muscuNewSession()" title="Nouvelle séance">+</button>
+  </div>
+  <div class="section" id="muscu-content"></div>
+</div>
+
+<div class="page" id="page-muscu-session">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('muscu')">‹</button>
+    <div class="page-title">🔥 Séance</div>
+    <button class="icon-btn" onclick="muscuFinishSession()" title="Terminer">✓</button>
+  </div>
+  <div class="section" id="muscu-session-content"></div>
+</div>
+
+<!-- ====== PR PERSONNELS ====== -->
+<div class="page" id="page-pr">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🏆 Mes PR</div>
+    <button class="icon-btn" onclick="prAdd()">+</button>
+  </div>
+  <div class="section" id="pr-content"></div>
+</div>
+
+<!-- ====== STATS FITNESS QUICK ====== -->
+<div class="page" id="page-fit">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">⚡ Fitness daily</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section" id="fit-content"></div>
+</div>
+
+<!-- ====== WALLET FINANCES ====== -->
+<div class="page" id="page-wallet2">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💰 Finances</div>
+    <button class="icon-btn" onclick="walletAdd()">+</button>
+  </div>
+  <div class="section" id="wallet2-content"></div>
+</div>
+
+<div class="page" id="page-wallet2-add">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('wallet2')">‹</button>
+    <div class="page-title">+ Transaction</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <span class="label">Type</span>
+    <div style="display:flex; gap:6px;">
+      <button class="btn alt full" id="wt-in-btn" onclick="walletSetType('in')">📥 Revenu</button>
+      <button class="btn alt full" id="wt-out-btn" onclick="walletSetType('out')">📤 Dépense</button>
+    </div>
+    <span class="label">Montant (€)</span>
+    <input type="number" class="input" id="wt-amount" step="0.01" placeholder="0.00">
+    <span class="label">Catégorie</span>
+    <select class="input" id="wt-cat">
+      <option value="argent_poche">💸 Argent de poche</option>
+      <option value="cadeau">🎁 Cadeau</option>
+      <option value="job">💼 Petit job</option>
+      <option value="autre_in">➕ Autre revenu</option>
+      <option value="bouffe" data-type="out">🍔 Bouffe</option>
+      <option value="sortie" data-type="out">🎉 Sortie</option>
+      <option value="vetement" data-type="out">👕 Vêtements</option>
+      <option value="tech" data-type="out">📱 Tech</option>
+      <option value="jeux" data-type="out">🎮 Jeux</option>
+      <option value="transport" data-type="out">🚌 Transport</option>
+      <option value="autre_out" data-type="out">🛒 Autre dépense</option>
+    </select>
+    <span class="label">Description</span>
+    <input type="text" class="input" id="wt-desc" placeholder="Ex: McDo avec les potes">
+    <span class="label">Date</span>
+    <input type="date" class="input" id="wt-date">
+    <button class="btn primary full" onclick="walletSave()" style="margin-top:14px;">💾 Enregistrer</button>
+  </div>
+</div>
+
+<div class="page" id="page-wallet2-goals">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('wallet2')">‹</button>
+    <div class="page-title">🎯 Objectifs épargne</div>
+    <button class="icon-btn" onclick="goalAdd()">+</button>
+  </div>
+  <div class="section" id="wallet2-goals-content"></div>
+</div>
+
+<!-- ====== GAMING HUB ====== -->
+<div class="page" id="page-gaming">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🎮 Gaming hub</div>
+    <button class="icon-btn" onclick="gameAdd()">+</button>
+  </div>
+  <div class="section">
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:6px;">
+      <button class="btn primary" onclick="gamingTab('playing')" id="gt-playing" style="font-size:11px; padding:6px 10px; flex-shrink:0;">🎮 En cours</button>
+      <button class="btn alt" onclick="gamingTab('done')" id="gt-done" style="font-size:11px; padding:6px 10px; flex-shrink:0;">✅ Finis</button>
+      <button class="btn alt" onclick="gamingTab('wishlist')" id="gt-wishlist" style="font-size:11px; padding:6px 10px; flex-shrink:0;">⭐ Wishlist</button>
+      <button class="btn alt" onclick="gamingTab('drop')" id="gt-drop" style="font-size:11px; padding:6px 10px; flex-shrink:0;">⏸ Drop</button>
+    </div>
+    <div id="gaming-list" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<div class="page" id="page-gaming-add">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('gaming')">‹</button>
+    <div class="page-title">+ Jeu</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <span class="label">Nom du jeu</span>
+    <input type="text" class="input" id="gm-name" placeholder="Ex: Elden Ring">
+    <span class="label">Plateforme</span>
+    <select class="input" id="gm-plat">
+      <option value="ps5">🎮 PS5</option>
+      <option value="ps4">🎮 PS4</option>
+      <option value="xbox">🎮 Xbox</option>
+      <option value="switch">🎮 Switch</option>
+      <option value="pc">💻 PC</option>
+      <option value="mobile">📱 Mobile</option>
+    </select>
+    <span class="label">Statut</span>
+    <select class="input" id="gm-status">
+      <option value="playing">🎮 En cours</option>
+      <option value="done">✅ Fini</option>
+      <option value="wishlist">⭐ Wishlist</option>
+      <option value="drop">⏸ Drop</option>
+    </select>
+    <span class="label">Genre</span>
+    <input type="text" class="input" id="gm-genre" placeholder="Ex: RPG, FPS, MOBA">
+    <span class="label">Heures jouées (estimé)</span>
+    <input type="number" class="input" id="gm-hours" placeholder="0" step="0.5">
+    <span class="label">Note (0-10)</span>
+    <input type="number" class="input" id="gm-rating" placeholder="0-10" min="0" max="10">
+    <span class="label">Notes / progression</span>
+    <textarea class="input" id="gm-notes" rows="3" placeholder="Niveau, succès, avis..."></textarea>
+    <button class="btn primary full" onclick="gameSave()" style="margin-top:14px;">💾 Enregistrer</button>
+  </div>
+</div>
+
+<!-- ====== MODE FOCUS ====== -->
+<div class="page" id="page-focus">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🎯 Focus</div>
+    <button class="icon-btn" onclick="focusStats()" title="Stats">📊</button>
+  </div>
+  <div class="section" id="focus-content"></div>
+</div>
+
+<!-- ====== GROOMING ====== -->
+<div class="page" id="page-grooming">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">💈 Grooming</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section" id="grooming-content"></div>
+</div>
+
+<!-- ====== DIET MACROS ====== -->
+<div class="page" id="page-diet">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🥗 Macros</div>
+    <button class="icon-btn" onclick="dietSettings()" title="Settings">⚙</button>
+  </div>
+  <div class="section" id="diet-content"></div>
+</div>
+
+<div class="page" id="page-diet-add">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('diet')">‹</button>
+    <div class="page-title">+ Repas</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="section">
+    <span class="label">Nom</span>
+    <input type="text" class="input" id="dt-name" placeholder="Ex: poulet riz">
+    <span class="label">Calories (kcal)</span>
+    <input type="number" class="input" id="dt-kcal" placeholder="0">
+    <span class="label">Protéines (g)</span>
+    <input type="number" class="input" id="dt-prot" placeholder="0">
+    <span class="label">Glucides (g)</span>
+    <input type="number" class="input" id="dt-carb" placeholder="0">
+    <span class="label">Lipides (g)</span>
+    <input type="number" class="input" id="dt-fat" placeholder="0">
+    <button class="btn primary full" onclick="dietSave()" style="margin-top:14px;">💾 Ajouter</button>
+    <h3 style="font-size:13px; font-weight:700; color:var(--primary); margin-top:18px;">⚡ Préréglages rapides</h3>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-top:8px;" id="dt-presets"></div>
+  </div>
+</div>
+
+<!-- ====== MENTOR DU JOUR ====== -->
+<div class="page" id="page-mentor">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🎯 Mentor</div>
+    <button class="icon-btn" onclick="mentorNew()" title="Nouvelle">↻</button>
+  </div>
+  <div class="section" id="mentor-content"></div>
+</div>
+
+<!-- ====== SIDE PROJECTS ====== -->
+<div class="page" id="page-projects">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🚀 Projets</div>
+    <button class="icon-btn" onclick="projAdd()">+</button>
+  </div>
+  <div class="section">
+    <p style="font-size:11px; color:var(--textSec);">Tes idées de business, side projects, créa. Suis leur avancement.</p>
+    <div id="proj-list" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- ====== DISCORD/IRL pseudos ====== -->
+<div class="page" id="page-pseudos">
+  <div class="page-header">
+    <button class="back-btn" onclick="goTo('home')">‹</button>
+    <div class="page-title">🎭 Mes pseudos</div>
+    <button class="icon-btn" onclick="psAdd()">+</button>
+  </div>
+  <div class="section">
+    <p style="font-size:11px; color:var(--textSec);">Tous tes pseudos sur les différentes plateformes au même endroit.</p>
+    <div id="ps-list" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+
 <!-- Bouton flottant sélecteur de thèmes -->
 <button class="theme-fab" id="theme-fab" onclick="toggleThemeFab()" title="Thèmes">🎨</button>
 <div class="theme-fab-panel" id="theme-fab-panel">
@@ -8203,11 +8835,11 @@ body.has-miniplayer .fab {
   <button class="bottom-nav-btn active" data-nav="home" onclick="navTo('home')">
     <span class="nav-ico">🏠</span><span>Accueil</span>
   </button>
+  <button class="bottom-nav-btn" data-nav="all" onclick="goTo('all')">
+    <span class="nav-ico">📚</span><span>Tout</span>
+  </button>
   <button class="bottom-nav-btn" data-nav="search" onclick="navSearch()">
     <span class="nav-ico">🔍</span><span>Cherch.</span>
-  </button>
-  <button class="bottom-nav-btn" data-nav="favs" onclick="navFavs()">
-    <span class="nav-ico">⭐</span><span>Favoris</span>
   </button>
   <button class="bottom-nav-btn" data-nav="recent" onclick="navTo('recent')">
     <span class="nav-ico">🕒</span><span>Récents</span>
@@ -8232,7 +8864,7 @@ body.has-miniplayer .fab {
 <div class="burger-overlay" id="burger-overlay" onclick="closeBurger()"></div>
 <aside class="burger-menu" id="burger-menu">
   <div class="burger-header">
-    <h2>✦ Système N</h2>
+    <h2>💖 Love2nono</h2>
     <p>Toutes tes fonctionnalités</p>
   </div>
   <div id="burger-content" style="flex:1; overflow-y:auto;"></div>
@@ -8746,12 +9378,14 @@ function removeWallpaper() {
 let db;
 function openDB() {
   return new Promise((res, rej) => {
-    const req = indexedDB.open('nonosworld', 12);
+    const req = indexedDB.open('nonosworld', 13);
     req.onupgradeneeded = (e) => {
       const d = e.target.result;
       const stores = ['pfps','categories','albums','pfp_cats','pfp_albums','counters','countdowns','bdays','habits','habit_logs','wishes','quotes','moods','notes','palettes','tracks','playlists','playlist_tracks','watchlist','music_cats','track_cats','grades','homework','classes','decks','cards','friends','expenses','vault','videos','wallet_tx','events','game_scores','sobriety','sleep_log','weight_log','wheels','wallet_tx','kv',
         // === NOUVEAUX STORES v12 ===
-        'files','file_folders','note_cats','drawings'];
+        'files','file_folders','note_cats','drawings',
+        // === NOUVEAU STORE v13 (Pack Girly) ===
+        'wardrobe'];
       for (const name of stores) {
         if (!d.objectStoreNames.contains(name)) {
           if (name === 'kv') d.createObjectStore(name, { keyPath: 'key' });
@@ -9000,10 +9634,46 @@ function goTo(page) {
   if (page === 'game-sokoban') sokInit(0);
   if (page === 'game-pendu') penNew();
   if (page === 'icon') renderIconChooser();
-  if (page === 'home') renderHomeWidget();
+  if (page === 'home') renderDash();
+  if (page === 'all') renderHomeWidget();
   if (page === 'widgets') {}
   if (page === 'widget-packs') renderWidgetGrid();
   if (page === 'widget-custom') wgUpdate();
+  // === PACK GIRLY v20 ===
+  if (page === 'cycle') renderCycle();
+  if (page === 'cycle-log') {}
+  if (page === 'skincare') renderSkincare();
+  if (page === 'skincare-edit') renderSkinEdit();
+  if (page === 'wardrobe') renderWardrobe();
+  if (page === 'wardrobe-add') {}
+  if (page === 'outfit') renderOutfit();
+  if (page === 'beauty') renderBeauty();
+  if (page === 'beauty-add') {}
+  if (page === 'selfcare') renderSelfcare();
+  if (page === 'manifest') renderManif();
+  if (page === 'astro') renderAstro();
+  if (page === 'compliment') compNew();
+  if (page === 'makeup') renderMakeup();
+  if (page === 'soiree') renderSoirees();
+  if (page === 'soiree-edit') renderSoireeEdit();
+  if (page === 'emotion') renderEmotion();
+  // === PACK BOYS v21 ===
+  if (page === 'muscu') renderMuscu();
+  if (page === 'muscu-session') renderMuscuSession();
+  if (page === 'pr') renderPR();
+  if (page === 'fit') renderFit();
+  if (page === 'wallet2') renderWallet2();
+  if (page === 'wallet2-add') {}
+  if (page === 'wallet2-goals') renderGoals();
+  if (page === 'gaming') { gamingTab(_gamingTab || 'playing'); }
+  if (page === 'gaming-add') {}
+  if (page === 'focus') renderFocus();
+  if (page === 'grooming') renderGrooming();
+  if (page === 'diet') renderDiet();
+  if (page === 'diet-add') renderDietPresets();
+  if (page === 'mentor') mentorNew();
+  if (page === 'projects') renderProjects();
+  if (page === 'pseudos') renderPseudos();
 }
 
 function toast(msg, dur=2200) {
@@ -11922,7 +12592,7 @@ function updateMediaSession() {
   const meta = {
     title: t.title,
     artist: t.artist || 'Inconnu',
-    album: t.album || "Système N",
+    album: t.album || "Love2nono",
   };
   if (t.cover) {
     meta.artwork = [
@@ -12301,13 +12971,9 @@ const PAGE_INDEX = [
   { page:'friends', name:'Amis', cat:'Vie quot', ico:'👥', kw:'ami contact pote' },
   { page:'vault', name:'Comptes', cat:'Vie quot', ico:'🔐', kw:'compte mot de passe vault' },
   { page:'sleep', name:'Sommeil', cat:'Vie quot', ico:'😴', kw:'sommeil sleep dormir' },
-  { page:'water', name:'Eau', cat:'Vie quot', ico:'💧', kw:'eau hydratation' },
-  { page:'wallet', name:'Solde', cat:'Vie quot', ico:'💵', kw:'argent solde portefeuille' },
-  { page:'expenses', name:'Dépenses', cat:'Vie quot', ico:'💰', kw:'dépense budget' },
-  { page:'sport-track', name:'Sport', cat:'Vie quot', ico:'💪', kw:'sport workout muscu reps' },
   { page:'recipes', name:'Recettes', cat:'Vie quot', ico:'🍝', kw:'recette cuisine' },
   // Bien-être
-  { page:'mood', name:'Mood tracker', cat:'Bien-être', ico:'😊', kw:'humeur mood émotion' },
+  { page:'mood', name:'Mood quick', cat:'Bien-être', ico:'😊', kw:'humeur mood emotion rapide quick' },
   { page:'quotes', name:'Citations', cat:'Bien-être', ico:'💬', kw:'citation quote' },
   { page:'breathing', name:'Respiration', cat:'Bien-être', ico:'🌬️', kw:'respiration breathing box' },
   { page:'meditation', name:'Méditation', cat:'Bien-être', ico:'🧘', kw:'méditation calme' },
@@ -12384,6 +13050,31 @@ const PAGE_INDEX = [
   { page:'game-c4', name:'Connect 4', cat:'Jeux', ico:'🔴', kw:'puissance 4 connect four jaune rouge' },
   { page:'icon', name:'Icône d\'app', cat:'Outils', ico:'🎨', kw:'icone icon app branding logo personnaliser apple touch favicon' },
   { page:'widgets', name:'Widgets déco', cat:'Outils', ico:'📱', kw:'widget deco springboard ecran accueil image custom' },
+  // === PACK GIRLY v20 ===
+  { page:'cycle', name:'Cycle menstruel', cat:'Bien-être', ico:'🌸', kw:'cycle regle menstruel period flow ovulation' },
+  { page:'skincare', name:'Skincare routine', cat:'Bien-être', ico:'✨', kw:'skincare peau soin visage routine matin soir' },
+  { page:'wardrobe', name:'Garde-robe', cat:'Lifestyle', ico:'👗', kw:'garde robe vetements fringues style mode dressing' },
+  { page:'outfit', name:'Tenue du jour', cat:'Lifestyle', ico:'🪞', kw:'tenue outfit du jour style ootd' },
+  { page:'beauty', name:'Beauty box', cat:'Lifestyle', ico:'💄', kw:'beauty box maquillage produits expiration peremption pao' },
+  { page:'selfcare', name:'Self-care', cat:'Bien-être', ico:'💗', kw:'self care prendre soin chouchouter relax' },
+  { page:'manifest', name:'Manifestation', cat:'Bien-être', ico:'✨', kw:'manifestation intention loi attraction reve' },
+  { page:'astro', name:'Astro', cat:'Lifestyle', ico:'🌙', kw:'astro horoscope signe zodiaque' },
+  { page:'compliment', name:'Compliment du jour', cat:'Bien-être', ico:'💕', kw:'compliment confiance affirmation positif' },
+  { page:'makeup', name:'Tutos maquillage', cat:'Lifestyle', ico:'💄', kw:'maquillage tuto guide eyeliner smokey' },
+  { page:'soiree', name:'Planning soirée', cat:'Lifestyle', ico:'🎉', kw:'soiree planning fete invites checklist' },
+  { page:'emotion', name:'Mood tracker', cat:'Bien-être', ico:'🌈', kw:'mood emotions humeur tracker' },
+  // === PACK BOYS v21 ===
+  { page:'muscu', name:'Muscu', cat:'Sport', ico:'💪', kw:'muscu musculation gym programme ppl push pull legs' },
+  { page:'pr', name:'Mes PR', cat:'Sport', ico:'🏆', kw:'pr personal record squat bench sdt' },
+  { page:'fit', name:'Fitness daily', cat:'Sport', ico:'⚡', kw:'fitness daily pompes abdos tractions squats' },
+  { page:'wallet2', name:'Finances', cat:'Lifestyle', ico:'💰', kw:'argent finances wallet revenus depenses' },
+  { page:'gaming', name:'Gaming hub', cat:'Lifestyle', ico:'🎮', kw:'gaming jeux video tracker steam ps5 xbox' },
+  { page:'focus', name:'Mode Focus', cat:'Productivité', ico:'🎯', kw:'focus concentration pose telephone dopamine detox' },
+  { page:'grooming', name:'Grooming', cat:'Lifestyle', ico:'💈', kw:'grooming homme barbe rasage cheveux soin' },
+  { page:'diet', name:'Macros', cat:'Sport', ico:'🥗', kw:'diet macros calories proteines glucides lipides' },
+  { page:'mentor', name:'Mentor du jour', cat:'Bien-être', ico:'🎯', kw:'mentor citation motivation goggins arnold tyson' },
+  { page:'projects', name:'Side projects', cat:'Productivité', ico:'🚀', kw:'projet side project business idee' },
+  { page:'pseudos', name:'Pseudos', cat:'Outils', ico:'🎭', kw:'pseudos discord insta steam riot username' },
 ];
 
 let _hsTimer = null;
@@ -12468,10 +13159,10 @@ function navFavs() {
 }
 function updateBottomNav(page) {
   document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
-  let active = 'home';
+  let active = '';
   if (page === 'recent') active = 'recent';
   else if (page === 'home') active = 'home';
-  else active = ''; // No active when on a regular page
+  else if (page === 'all') active = 'all';
   if (active) {
     const btn = document.querySelector(`.bottom-nav-btn[data-nav="${active}"]`);
     if (btn) btn.classList.add('active');
@@ -28391,7 +29082,7 @@ const WIDGET_PACKS = {
         ctx.fillStyle = '#3B5BA5'; ctx.fillRect(80, 60, 352, 392);
         ctx.fillStyle = '#FFF'; ctx.fillRect(120, 90, 272, 90);
         ctx.fillStyle = '#1a1a1a'; ctx.font = '700 14px monospace';
-        ctx.fillText('Système N', 135, 115);
+        ctx.fillText('Love2nono', 135, 115);
         ctx.fillText('________________', 135, 135);
         ctx.fillText('memories.txt', 135, 160);
         ctx.fillStyle = '#888'; ctx.fillRect(180, 200, 152, 60);
@@ -28960,13 +29651,2641 @@ function wgRandomize() {
 }
 
 
+
+// ============================================================
+// PACK GIRLY v20
+// ============================================================
+
+// === CYCLE MENSTRUEL ===
+const CYC_SYMPTOMS = [
+  {id:'cramps', name:'Crampes', emoji:'😖'},
+  {id:'headache', name:'Mal de tête', emoji:'🤕'},
+  {id:'tired', name:'Fatigue', emoji:'😴'},
+  {id:'bloating', name:'Ballonnement', emoji:'🤰'},
+  {id:'tender', name:'Seins sensibles', emoji:'💗'},
+  {id:'acne', name:'Acné', emoji:'😣'},
+  {id:'craving', name:'Envies sucré', emoji:'🍫'},
+  {id:'back', name:'Mal de dos', emoji:'😩'},
+  {id:'nausea', name:'Nausée', emoji:'🤢'},
+  {id:'libido', name:'Libido +', emoji:'🔥'},
+  {id:'discharge', name:'Pertes', emoji:'💧'},
+  {id:'sleep', name:'Insomnie', emoji:'🌙'}
+];
+const CYC_MOODS = [
+  {id:'happy', emoji:'😊', name:'Bien'},
+  {id:'sad', emoji:'😢', name:'Triste'},
+  {id:'angry', emoji:'😡', name:'Énervée'},
+  {id:'anx', emoji:'😰', name:'Anxieuse'},
+  {id:'meh', emoji:'😐', name:'Neutre'},
+  {id:'love', emoji:'🥰', name:'Amoureuse'},
+  {id:'cry', emoji:'😭', name:'À pleurer'},
+  {id:'energy', emoji:'⚡', name:'Énergique'}
+];
+function getCycLogs() { try { return JSON.parse(localStorage.getItem('nw_cycle_logs') || '[]'); } catch { return []; } }
+function saveCycLogs(d) { localStorage.setItem('nw_cycle_logs', JSON.stringify(d)); }
+
+function renderCycle() {
+  const logs = getCycLogs().sort((a,b) => b.date.localeCompare(a.date));
+  const periodDays = logs.filter(l => l.flow && l.flow !== '');
+  
+  // Calcul prédiction
+  let cycleLength = 28, periodLength = 5, lastPeriod = null, nextPeriod = null, dayInCycle = null, phase = '';
+  
+  // Trouve les débuts de règles (jours avec flow et le précédent jour soit pas de flow soit absent)
+  const periodStarts = [];
+  const sortedLogs = [...logs].sort((a,b) => a.date.localeCompare(b.date));
+  for (let i = 0; i < sortedLogs.length; i++) {
+    if (sortedLogs[i].flow) {
+      const prev = i > 0 ? sortedLogs[i-1] : null;
+      const dayBefore = new Date(sortedLogs[i].date); dayBefore.setDate(dayBefore.getDate()-1);
+      const prevHadFlow = prev && prev.date === dayBefore.toISOString().slice(0,10) && prev.flow;
+      if (!prevHadFlow) periodStarts.push(sortedLogs[i].date);
+    }
+  }
+  
+  if (periodStarts.length >= 2) {
+    // Calcule moyenne cycle
+    let sum = 0, n = 0;
+    for (let i = 1; i < periodStarts.length; i++) {
+      const days = Math.round((new Date(periodStarts[i]) - new Date(periodStarts[i-1])) / 86400000);
+      if (days > 15 && days < 50) { sum += days; n++; }
+    }
+    if (n > 0) cycleLength = Math.round(sum / n);
+  }
+  
+  if (periodStarts.length) {
+    lastPeriod = new Date(periodStarts[periodStarts.length - 1]);
+    const today = new Date(); today.setHours(0,0,0,0); lastPeriod.setHours(0,0,0,0);
+    dayInCycle = Math.floor((today - lastPeriod) / 86400000) + 1;
+    nextPeriod = new Date(lastPeriod.getTime() + cycleLength * 86400000);
+    
+    if (dayInCycle <= 5) phase = 'menstruelle';
+    else if (dayInCycle <= 13) phase = 'folliculaire';
+    else if (dayInCycle <= 16) phase = 'ovulation';
+    else phase = 'lutéale';
+  }
+  
+  const phaseInfo = {
+    'menstruelle': { color:'#E74C3C', emoji:'🌹', desc:'Repos, hydratation, douceur. Évite les efforts intenses.' },
+    'folliculaire': { color:'#F39C12', emoji:'🌷', desc:'Énergie qui remonte. Bon moment pour entreprendre.' },
+    'ovulation': { color:'#E67E22', emoji:'🌟', desc:'Pic d\'énergie et confiance. Moment social, séduction.' },
+    'lutéale': { color:'#9B59B6', emoji:'🌙', desc:'Introspection. Auto-soin, créativité, repos progressif.' }
+  };
+  
+  const today = new Date().toISOString().slice(0,10);
+  const todayLog = logs.find(l => l.date === today);
+  
+  let html = '';
+  
+  if (lastPeriod) {
+    const daysToNext = Math.ceil((nextPeriod - new Date()) / 86400000);
+    const pi = phaseInfo[phase] || {};
+    html += `<div style="background:linear-gradient(135deg, ${pi.color || '#FF6FA3'}, ${pi.color || '#FF6FA3'}AA); color:white; padding:18px; border-radius:18px; text-align:center;">
+      <div style="font-size:11px; opacity:0.85;">Phase ${phase}</div>
+      <div style="font-size:42px; font-weight:900; line-height:1;">${pi.emoji || '🌸'} J${dayInCycle}</div>
+      <div style="font-size:13px; margin-top:8px; line-height:1.5;">${pi.desc || ''}</div>
+    </div>`;
+    
+    if (daysToNext > 0) {
+      html += `<div style="background:var(--surface); padding:12px 14px; border-radius:14px; margin-top:10px; text-align:center;">
+        <div style="font-size:11px; color:var(--textSec);">⏳ Prochaines règles dans</div>
+        <div style="font-size:24px; font-weight:800; color:var(--primary);">${daysToNext} jour${daysToNext > 1 ? 's' : ''}</div>
+        <div style="font-size:11px; color:var(--textSec); margin-top:2px;">≈ ${nextPeriod.toLocaleDateString('fr-FR', {day:'numeric', month:'long'})}</div>
+      </div>`;
+    } else if (daysToNext >= -5) {
+      html += `<div style="background:#E74C3C; color:white; padding:12px 14px; border-radius:14px; margin-top:10px; text-align:center;">
+        <div style="font-size:14px; font-weight:700;">🌹 Tes règles devraient être là</div>
+      </div>`;
+    }
+    
+    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+      <div style="background:var(--surface); padding:10px; border-radius:10px; text-align:center;">
+        <div style="font-size:10px; color:var(--textSec);">Cycle moyen</div>
+        <div style="font-size:18px; font-weight:800;">${cycleLength}j</div>
+      </div>
+      <div style="background:var(--surface); padding:10px; border-radius:10px; text-align:center;">
+        <div style="font-size:10px; color:var(--textSec);">Périodes loggées</div>
+        <div style="font-size:18px; font-weight:800;">${periodStarts.length}</div>
+      </div>
+    </div>`;
+  } else {
+    html += `<div style="background:linear-gradient(135deg, #FF6FA3, #FFD166); color:white; padding:18px; border-radius:18px; text-align:center;">
+      <div style="font-size:48px;">🌸</div>
+      <div style="font-size:16px; font-weight:800; margin-top:8px;">Bienvenue</div>
+      <p style="font-size:12px; line-height:1.5; margin-top:8px; opacity:0.95;">Logge ton premier jour de règles pour activer les prédictions.</p>
+    </div>`;
+  }
+  
+  // Calendar mini
+  html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📅 Ce mois</h3>`;
+  html += renderCycCalendar(logs);
+  
+  // Today
+  html += `<button class="btn primary full" onclick="cycLogToday()" style="margin-top:14px;">${todayLog ? '✎ Modifier aujourd\'hui' : '+ Logger aujourd\'hui'}</button>`;
+  
+  document.getElementById('cycle-content').innerHTML = html;
+}
+
+function renderCycCalendar(logs) {
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDay = (firstDay.getDay() + 6) % 7; // Lundi = 0
+  
+  let html = `<div style="background:var(--surface); padding:12px; border-radius:14px; margin-top:8px;">
+    <div style="text-align:center; font-weight:700; margin-bottom:8px;">${firstDay.toLocaleDateString('fr-FR', {month:'long', year:'numeric'})}</div>
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; font-size:9px; text-align:center; color:var(--textSec);">
+      <div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-top:4px;">`;
+  
+  for (let i = 0; i < startDay; i++) html += '<div></div>';
+  
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const log = logs.find(l => l.date === dateStr);
+    let bg = 'transparent', col = 'var(--text)';
+    if (log && log.flow) {
+      bg = log.flow === 'spotting' ? '#FFB3BA' : log.flow === 'light' ? '#FF6B9D' : log.flow === 'medium' ? '#E74C3C' : '#8B0000';
+      col = '#FFF';
+    }
+    const isToday = dateStr === new Date().toISOString().slice(0,10);
+    html += `<div onclick="cycEditDate('${dateStr}')" style="aspect-ratio:1; background:${bg}; color:${col}; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; ${isToday ? 'border:2px solid var(--primary);' : ''} cursor:pointer;">${d}</div>`;
+  }
+  html += `</div>`;
+  html += `<div style="display:flex; gap:10px; justify-content:center; margin-top:10px; font-size:10px; flex-wrap:wrap;">
+    <span><span style="display:inline-block; width:10px; height:10px; background:#FFB3BA; border-radius:50%;"></span> Spotting</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:#FF6B9D; border-radius:50%;"></span> Léger</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:#E74C3C; border-radius:50%;"></span> Normal</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:#8B0000; border-radius:50%;"></span> Abondant</span>
+  </div></div>`;
+  return html;
+}
+
+function cycLogToday() { cycEditDate(new Date().toISOString().slice(0,10)); }
+function cycEditDate(dateStr) {
+  document.getElementById('cyc-date').value = dateStr;
+  const log = getCycLogs().find(l => l.date === dateStr) || {};
+  document.getElementById('cyc-flow').value = log.flow || '';
+  document.getElementById('cyc-notes').value = log.notes || '';
+  // Symptômes
+  const sympWrap = document.getElementById('cyc-symptoms');
+  sympWrap.innerHTML = CYC_SYMPTOMS.map(s => 
+    `<button onclick="this.classList.toggle('cs-on')" data-sid="${s.id}" class="${(log.symptoms || []).includes(s.id) ? 'cs-on' : ''}" style="background:var(--surface); border:1px solid var(--border); padding:8px 6px; border-radius:10px; cursor:pointer; font-size:11px; text-align:center;">
+      <div style="font-size:18px;">${s.emoji}</div><div>${s.name}</div></button>`
+  ).join('');
+  // Style toggle
+  if (!document.getElementById('cs-style-tag')) {
+    const st = document.createElement('style'); st.id = 'cs-style-tag';
+    st.textContent = '.cs-on { background: var(--primary) !important; color:white !important; border-color:var(--primary) !important; }';
+    document.head.appendChild(st);
+  }
+  // Mood
+  const moodWrap = document.getElementById('cyc-mood');
+  moodWrap.innerHTML = CYC_MOODS.map(m =>
+    `<button onclick="this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('cs-on')); this.classList.add('cs-on');" data-mid="${m.id}" class="${log.mood === m.id ? 'cs-on' : ''}" style="background:var(--surface); border:1px solid var(--border); padding:8px 10px; border-radius:10px; cursor:pointer; font-size:11px; text-align:center; flex:1; min-width:70px;">
+      <div style="font-size:18px;">${m.emoji}</div><div>${m.name}</div></button>`
+  ).join('');
+  goTo('cycle-log');
+}
+function cycSave() {
+  const date = document.getElementById('cyc-date').value;
+  if (!date) return toast('Date requise');
+  const flow = document.getElementById('cyc-flow').value;
+  const notes = document.getElementById('cyc-notes').value.trim();
+  const symptoms = Array.from(document.querySelectorAll('#cyc-symptoms .cs-on')).map(b => b.dataset.sid);
+  const mood = document.querySelector('#cyc-mood .cs-on')?.dataset.mid || '';
+  let logs = getCycLogs().filter(l => l.date !== date);
+  if (flow || notes || symptoms.length || mood) {
+    logs.push({ date, flow, notes, symptoms, mood });
+  }
+  saveCycLogs(logs);
+  toast('🌸 Sauvegardé');
+  goTo('cycle');
+}
+
+// === SKINCARE ===
+const SKIN_DEFAULT_AM = [
+  {ico:'💦', name:'Nettoyant doux', desc:'À l\'eau tiède'},
+  {ico:'🌿', name:'Tonique', desc:'Sur coton ou tapotements'},
+  {ico:'💧', name:'Sérum hydratant', desc:'Acide hyaluronique idéal'},
+  {ico:'🧴', name:'Crème hydratante', desc:''},
+  {ico:'☀️', name:'Crème solaire SPF50', desc:'Étape la plus importante !'}
+];
+const SKIN_DEFAULT_PM = [
+  {ico:'💄', name:'Démaquillant huile', desc:'Si maquillage'},
+  {ico:'💦', name:'Nettoyant', desc:'Double cleansing'},
+  {ico:'🍃', name:'Exfoliant', desc:'2-3× par semaine seulement'},
+  {ico:'🧪', name:'Sérum traitant', desc:'Rétinol, vitamine C, niacinamide'},
+  {ico:'👁', name:'Contour des yeux', desc:''},
+  {ico:'🌙', name:'Crème de nuit riche', desc:''}
+];
+function getSkin() { 
+  let s; try { s = JSON.parse(localStorage.getItem('nw_skin') || 'null'); } catch { s = null; }
+  if (!s) s = { am: SKIN_DEFAULT_AM, pm: SKIN_DEFAULT_PM, log: {} };
+  return s;
+}
+function saveSkin(s) { localStorage.setItem('nw_skin', JSON.stringify(s)); }
+function renderSkincare() {
+  const s = getSkin();
+  const today = todayKey();
+  const log = s.log[today] || { am: [], pm: [] };
+  
+  let html = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    <div style="background:linear-gradient(135deg, #FFD166, #FF8C42); color:white; padding:14px; border-radius:14px; text-align:center;">
+      <div style="font-size:24px;">🌅</div>
+      <div style="font-size:13px; font-weight:700; margin-top:4px;">Matin</div>
+      <div style="font-size:18px; font-weight:900;">${log.am.length}/${s.am.length}</div>
+    </div>
+    <div style="background:linear-gradient(135deg, #5DADE2, #A78BFA); color:white; padding:14px; border-radius:14px; text-align:center;">
+      <div style="font-size:24px;">🌙</div>
+      <div style="font-size:13px; font-weight:700; margin-top:4px;">Soir</div>
+      <div style="font-size:18px; font-weight:900;">${log.pm.length}/${s.pm.length}</div>
+    </div>
+  </div>`;
+  
+  ['am', 'pm'].forEach(period => {
+    const items = s[period];
+    const done = log[period];
+    html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">${period === 'am' ? '🌅 Routine matin' : '🌙 Routine soir'}</h3>`;
+    items.forEach((it, idx) => {
+      const checked = done.includes(idx);
+      html += `<div onclick="skinToggle('${period}', ${idx})" style="background:var(--surface); padding:12px 14px; border-radius:12px; margin-bottom:6px; display:flex; gap:10px; align-items:center; cursor:pointer; ${checked ? 'opacity:0.6;' : ''}">
+        <div style="font-size:24px;">${it.ico || '✨'}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px; font-weight:700; ${checked ? 'text-decoration:line-through;' : ''}">${escapeHtml(it.name)}</div>
+          ${it.desc ? `<div style="font-size:11px; color:var(--textSec);">${escapeHtml(it.desc)}</div>` : ''}
+        </div>
+        <div style="width:24px; height:24px; border-radius:50%; background:${checked ? 'var(--success)' : 'transparent'}; border:2px solid ${checked ? 'var(--success)' : 'var(--border)'}; display:flex; align-items:center; justify-content:center; color:white; font-size:14px;">${checked ? '✓' : ''}</div>
+      </div>`;
+    });
+  });
+  
+  document.getElementById('skin-content').innerHTML = html;
+}
+function skinToggle(period, idx) {
+  const s = getSkin();
+  const today = todayKey();
+  if (!s.log[today]) s.log[today] = { am:[], pm:[] };
+  const arr = s.log[today][period];
+  if (arr.includes(idx)) s.log[today][period] = arr.filter(x => x !== idx);
+  else arr.push(idx);
+  saveSkin(s);
+  renderSkincare();
+}
+function skinEdit() { goTo('skincare-edit'); }
+function renderSkinEdit() {
+  const s = getSkin();
+  ['am', 'pm'].forEach(period => {
+    const wrap = document.getElementById('skin-' + period);
+    wrap.innerHTML = s[period].map((it, i) => `<div style="background:var(--surface); padding:10px; border-radius:10px; margin-bottom:6px; display:flex; gap:8px; align-items:center;">
+      <div style="font-size:20px;">${it.ico || '✨'}</div>
+      <div style="flex:1;">
+        <input type="text" value="${escapeHtml(it.name)}" onchange="skinEditField('${period}', ${i}, 'name', this.value)" style="background:transparent; border:none; color:var(--text); font-weight:700; font-size:13px; width:100%; outline:none;">
+        <input type="text" value="${escapeHtml(it.desc || '')}" onchange="skinEditField('${period}', ${i}, 'desc', this.value)" placeholder="Note (optionnel)" style="background:transparent; border:none; color:var(--textSec); font-size:11px; width:100%; outline:none; margin-top:2px;">
+      </div>
+      <button onclick="skinDel('${period}', ${i})" style="background:none; border:none; color:var(--danger); font-size:18px; cursor:pointer;">🗑</button>
+    </div>`).join('');
+  });
+}
+function skinEditField(period, i, field, val) {
+  const s = getSkin(); s[period][i][field] = val; saveSkin(s);
+}
+function skinDel(period, i) {
+  if (!confirm('Supprimer cette étape ?')) return;
+  const s = getSkin(); s[period].splice(i, 1); saveSkin(s); renderSkinEdit();
+}
+function skinAdd(period) {
+  const name = prompt('Nom de l\'étape ?');
+  if (!name) return;
+  const s = getSkin();
+  s[period].push({ ico:'✨', name, desc:'' });
+  saveSkin(s); renderSkinEdit();
+}
+
+// === GARDE-ROBE ===
+const WARD_CATS = [
+  {id:'all', name:'Tout', emoji:'👗'},
+  {id:'haut', name:'Hauts', emoji:'👕'},
+  {id:'bas', name:'Bas', emoji:'👖'},
+  {id:'robe', name:'Robes', emoji:'👗'},
+  {id:'manteau', name:'Manteaux', emoji:'🧥'},
+  {id:'chaussure', name:'Chaussures', emoji:'👟'},
+  {id:'acc', name:'Accessoires', emoji:'👜'},
+  {id:'bijou', name:'Bijoux', emoji:'💍'},
+  {id:'lingerie', name:'Lingerie', emoji:'🩱'}
+];
+let _wardFilter = 'all';
+let _wardPhotoData = null;
+
+async function renderWardrobe() {
+  // Tabs
+  const tabs = document.getElementById('ward-cats');
+  tabs.innerHTML = WARD_CATS.map(c =>
+    `<button onclick="_wardFilter='${c.id}'; renderWardrobe();" class="btn ${_wardFilter === c.id ? 'primary' : 'alt'}" style="font-size:11px; padding:6px 10px; flex-shrink:0;">${c.emoji} ${c.name}</button>`
+  ).join('');
+  
+  let items = await dbAll('wardrobe');
+  if (!items) items = [];
+  if (_wardFilter !== 'all') items = items.filter(i => i.cat === _wardFilter);
+  
+  const grid = document.getElementById('ward-grid');
+  if (!items.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--textSec);">Aucun vêtement. Tap + pour en ajouter.</div>';
+    return;
+  }
+  grid.innerHTML = items.map(it => `<div onclick="wardOpen(${it.id})" style="background:var(--surface); border-radius:14px; overflow:hidden; cursor:pointer;">
+    ${it.photo ? `<img src="${it.photo}" style="width:100%; aspect-ratio:1; object-fit:cover;">` : `<div style="aspect-ratio:1; background:var(--surfaceAlt); display:flex; align-items:center; justify-content:center; font-size:40px;">${WARD_CATS.find(c=>c.id===it.cat)?.emoji || '👕'}</div>`}
+    <div style="padding:8px;">
+      <div style="font-size:12px; font-weight:700; line-height:1.2;">${escapeHtml(it.name || 'Sans nom')}</div>
+      ${it.color ? `<div style="font-size:10px; color:var(--textSec); margin-top:2px;">${escapeHtml(it.color)}</div>` : ''}
+    </div>
+  </div>`).join('');
+}
+function wardAddNew() {
+  _wardPhotoData = null;
+  document.getElementById('ward-preview').innerHTML = '📷 Tap pour photo';
+  document.getElementById('ward-name').value = '';
+  document.getElementById('ward-color').value = '';
+  document.getElementById('ward-notes').value = '';
+  goTo('wardrobe-add');
+}
+function wardLoadPhoto(input) {
+  const f = (input.files || [])[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      // Resize 600px max
+      const c = document.createElement('canvas');
+      const max = 600;
+      const ratio = Math.min(max / img.width, max / img.height, 1);
+      c.width = img.width * ratio; c.height = img.height * ratio;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      _wardPhotoData = c.toDataURL('image/jpeg', 0.85);
+      document.getElementById('ward-preview').innerHTML = `<img src="${_wardPhotoData}" style="width:100%; height:100%; object-fit:cover; border-radius:14px;">`;
+    };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(f);
+}
+async function wardSave() {
+  const item = {
+    cat: document.getElementById('ward-cat').value,
+    name: document.getElementById('ward-name').value.trim() || 'Sans nom',
+    color: document.getElementById('ward-color').value.trim(),
+    season: document.getElementById('ward-season').value,
+    notes: document.getElementById('ward-notes').value.trim(),
+    photo: _wardPhotoData,
+    created: Date.now()
+  };
+  await dbAdd('wardrobe', item);
+  toast('👗 Ajouté à la garde-robe !');
+  goTo('wardrobe');
+}
+async function wardOpen(id) {
+  const it = (await dbAll('wardrobe')).find(x => x.id === id);
+  if (!it) return;
+  if (confirm(`${it.name}\n${it.color || ''}\n\n${it.notes || ''}\n\nSupprimer ?`)) {
+    await dbDel('wardrobe', id);
+    toast('🗑 Supprimé');
+    renderWardrobe();
+  }
+}
+
+// === BEAUTY BOX ===
+function getBeauty() { try { return JSON.parse(localStorage.getItem('nw_beauty') || '[]'); } catch { return []; } }
+function saveBeauty(d) { localStorage.setItem('nw_beauty', JSON.stringify(d)); }
+function beautyAdd() {
+  document.getElementById('bty-name').value = '';
+  document.getElementById('bty-brand').value = '';
+  document.getElementById('bty-opened').value = todayKey();
+  goTo('beauty-add');
+}
+function beautySave() {
+  const name = document.getElementById('bty-name').value.trim();
+  if (!name) return toast('Nom requis');
+  const item = {
+    id: 'b_' + Date.now(),
+    type: document.getElementById('bty-type').value,
+    name,
+    brand: document.getElementById('bty-brand').value.trim(),
+    opened: document.getElementById('bty-opened').value,
+    pao: parseInt(document.getElementById('bty-pao').value),
+    rating: parseInt(document.getElementById('bty-rating').value)
+  };
+  const d = getBeauty(); d.push(item); saveBeauty(d);
+  toast('💄 Ajouté');
+  goTo('beauty');
+}
+function renderBeauty() {
+  const d = getBeauty();
+  if (!d.length) {
+    document.getElementById('beauty-list').innerHTML = '<p style="text-align:center; color:var(--textSec); padding:30px;">Beauty box vide. Tap + pour ajouter.</p>';
+    return;
+  }
+  // Trier par expiration la plus proche
+  const today = new Date();
+  d.forEach(it => {
+    if (it.opened) {
+      const exp = new Date(it.opened);
+      exp.setMonth(exp.getMonth() + (it.pao || 12));
+      it._exp = exp;
+      it._daysLeft = Math.floor((exp - today) / 86400000);
+    }
+  });
+  d.sort((a,b) => (a._daysLeft || 9999) - (b._daysLeft || 9999));
+  const types = {skincare:'✨', makeup:'💄', parfum:'🌸', cheveux:'💇', ongles:'💅', corps:'🧴'};
+  document.getElementById('beauty-list').innerHTML = d.map(it => {
+    let warn = '', col = 'var(--success)';
+    if (it._daysLeft != null) {
+      if (it._daysLeft < 0) { warn = '⚠️ EXPIRÉ'; col = 'var(--danger)'; }
+      else if (it._daysLeft < 30) { warn = `⚠️ Expire dans ${it._daysLeft} jours`; col = '#FF8C42'; }
+      else { warn = `${Math.floor(it._daysLeft/30)} mois restants`; col = 'var(--success)'; }
+    }
+    return `<div style="background:var(--surface); padding:12px 14px; border-radius:12px; margin-bottom:6px; border-left:4px solid ${col};">
+      <div style="display:flex; gap:10px; align-items:center;">
+        <div style="font-size:28px;">${types[it.type] || '💄'}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px; font-weight:700;">${escapeHtml(it.name)}</div>
+          ${it.brand ? `<div style="font-size:11px; color:var(--textSec);">${escapeHtml(it.brand)}</div>` : ''}
+          <div style="font-size:11px; color:${col}; margin-top:2px; font-weight:700;">${warn}</div>
+          ${it.rating > 0 ? `<div style="font-size:11px;">${'⭐'.repeat(it.rating)}</div>` : ''}
+        </div>
+        <button onclick="beautyDel('${it.id}')" style="background:none; border:none; color:var(--danger); font-size:18px;">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function beautyDel(id) {
+  if (!confirm('Supprimer ?')) return;
+  saveBeauty(getBeauty().filter(x => x.id !== id));
+  renderBeauty();
+}
+
+// === SELF CARE ===
+const SELFCARE_IDEAS = [
+  {emoji:'🛁', text:'Bain chaud avec mousse', cat:'corps'},
+  {emoji:'🧖‍♀️', text:'Masque visage', cat:'beauté'},
+  {emoji:'💅', text:'Manucure / pédicure', cat:'beauté'},
+  {emoji:'🍵', text:'Tasse de thé tranquille', cat:'cosy'},
+  {emoji:'🎵', text:'Playlist + chiller', cat:'cosy'},
+  {emoji:'📚', text:'Lire 30 min', cat:'mental'},
+  {emoji:'🚶‍♀️', text:'Promenade dans le parc', cat:'nature'},
+  {emoji:'🧘‍♀️', text:'Yoga / stretching 15 min', cat:'corps'},
+  {emoji:'📓', text:'Journaling', cat:'mental'},
+  {emoji:'🌸', text:'Mettre du parfum', cat:'beauté'},
+  {emoji:'💭', text:'Méditation 10 min', cat:'mental'},
+  {emoji:'🎨', text:'Faire un dessin', cat:'créatif'},
+  {emoji:'🍫', text:'S\'offrir un truc gourmand', cat:'plaisir'},
+  {emoji:'📞', text:'Appeler une amie', cat:'social'},
+  {emoji:'🎬', text:'Film cosy + popcorn', cat:'plaisir'},
+  {emoji:'🌷', text:'Acheter des fleurs', cat:'plaisir'},
+  {emoji:'☕', text:'Café latte au lit', cat:'cosy'},
+  {emoji:'🛍', text:'Lèche-vitrines', cat:'plaisir'},
+  {emoji:'📱', text:'Détox réseaux 1h', cat:'mental'},
+  {emoji:'💌', text:'Écrire à quelqu\'un qu\'on aime', cat:'social'},
+  {emoji:'🌙', text:'Coucher tôt avec routine', cat:'corps'},
+  {emoji:'💧', text:'Boire 2L d\'eau', cat:'corps'},
+  {emoji:'🥗', text:'Cuisiner un truc healthy', cat:'corps'},
+  {emoji:'🌿', text:'Tisane détente', cat:'cosy'}
+];
+function renderSelfcare() {
+  const today = todayKey();
+  // Stable seed pour 3 idées du jour
+  const seed = parseInt(today.replace(/-/g,''));
+  const indices = [];
+  let s = seed;
+  while (indices.length < 5) {
+    s = (s * 9301 + 49297) % 233280;
+    const idx = s % SELFCARE_IDEAS.length;
+    if (!indices.includes(idx)) indices.push(idx);
+  }
+  const ideas = indices.map(i => SELFCARE_IDEAS[i]);
+  let done; try { done = JSON.parse(localStorage.getItem('nw_selfcare_'+today) || '[]'); } catch { done = []; }
+  
+  let html = `<div style="background:linear-gradient(135deg, #FFB6D9, #FF6FA3); color:white; padding:16px; border-radius:16px;">
+    <div style="font-size:18px; font-weight:800;">💗 Prends soin de toi</div>
+    <p style="font-size:11px; opacity:0.95; margin-top:4px;">5 suggestions du jour pour te chouchouter</p>
+  </div>`;
+  ideas.forEach((idea, i) => {
+    const isDone = done.includes(i);
+    html += `<div onclick="selfcareToggle(${i})" style="background:var(--surface); padding:12px 14px; border-radius:12px; margin-top:8px; display:flex; gap:10px; align-items:center; cursor:pointer; ${isDone ? 'opacity:0.5;' : ''}">
+      <div style="font-size:30px;">${idea.emoji}</div>
+      <div style="flex:1; font-size:14px; ${isDone ? 'text-decoration:line-through;' : ''}">${escapeHtml(idea.text)}</div>
+      <div style="width:24px; height:24px; border-radius:50%; background:${isDone ? 'var(--success)' : 'transparent'}; border:2px solid ${isDone ? 'var(--success)' : 'var(--border)'}; color:white; display:flex; align-items:center; justify-content:center;">${isDone ? '✓' : ''}</div>
+    </div>`;
+  });
+  html += `<button class="btn alt full" onclick="renderSelfcare()" style="margin-top:14px;">🎲 Nouvelles suggestions</button>`;
+  document.getElementById('selfcare-content').innerHTML = html;
+}
+function selfcareToggle(i) {
+  const today = todayKey();
+  let done; try { done = JSON.parse(localStorage.getItem('nw_selfcare_'+today) || '[]'); } catch { done = []; }
+  if (done.includes(i)) done = done.filter(x => x !== i);
+  else done.push(i);
+  localStorage.setItem('nw_selfcare_'+today, JSON.stringify(done));
+  renderSelfcare();
+}
+
+
+
+// === MANIFESTATION ===
+function getManif() { try { return JSON.parse(localStorage.getItem('nw_manif') || '[]'); } catch { return []; } }
+function saveManif(d) { localStorage.setItem('nw_manif', JSON.stringify(d)); }
+function manifAdd() {
+  const txt = prompt('✨ Ton intention :\n(Ex: J\'attire l\'amour, je vais réussir mon bac, je deviens plus confiante...)');
+  if (!txt) return;
+  const d = getManif();
+  d.unshift({ id:'m_'+Date.now(), text:txt.trim(), created:Date.now(), reads:0, manifested:false });
+  saveManif(d); renderManif();
+}
+function manifRead(id) {
+  const d = getManif();
+  const it = d.find(x => x.id === id); if (!it) return;
+  it.reads = (it.reads || 0) + 1;
+  it.lastRead = Date.now();
+  saveManif(d); renderManif();
+  toast('✨ +1 lecture');
+}
+function manifToggle(id) {
+  const d = getManif();
+  const it = d.find(x => x.id === id); if (!it) return;
+  it.manifested = !it.manifested;
+  if (it.manifested) it.manifestedAt = Date.now();
+  saveManif(d); renderManif();
+  if (it.manifested) toast('🌟 Manifesté !');
+}
+function manifDel(id) {
+  if (!confirm('Supprimer cette intention ?')) return;
+  saveManif(getManif().filter(x => x.id !== id)); renderManif();
+}
+function renderManif() {
+  const d = getManif();
+  if (!d.length) {
+    document.getElementById('manif-list').innerHTML = '<p style="text-align:center; color:var(--textSec); padding:30px;">Pas d\'intention. Tap + pour ajouter ton 1er rêve.</p>';
+    return;
+  }
+  document.getElementById('manif-list').innerHTML = d.map(it => `<div style="background:${it.manifested ? 'linear-gradient(135deg, #5DD68F, #06FFA5)' : 'var(--surface)'}; color:${it.manifested ? 'white' : 'var(--text)'}; padding:14px; border-radius:14px; margin-bottom:8px;">
+    <div style="display:flex; gap:8px; align-items:flex-start;">
+      <div style="font-size:24px;">${it.manifested ? '🌟' : '✨'}</div>
+      <div style="flex:1; font-size:14px; line-height:1.5; font-weight:600;">${escapeHtml(it.text)}</div>
+    </div>
+    <div style="font-size:10px; opacity:0.8; margin-top:8px;">📖 Lu ${it.reads || 0}× · ${new Date(it.created).toLocaleDateString('fr-FR')}</div>
+    <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
+      ${!it.manifested ? `<button class="btn alt" onclick="manifRead('${it.id}')" style="font-size:11px; padding:4px 10px;">📖 Relire</button>` : ''}
+      <button class="btn alt" onclick="manifToggle('${it.id}')" style="font-size:11px; padding:4px 10px;">${it.manifested ? '✗ Annuler' : '🌟 Manifesté !'}</button>
+      <button class="btn alt" onclick="manifDel('${it.id}')" style="font-size:11px; padding:4px 10px; color:var(--danger);">🗑</button>
+    </div>
+  </div>`).join('');
+}
+
+// === ASTRO / HOROSCOPE ===
+const ZODIAC = [
+  {sign:'capricorne', start:[12,22], end:[1,19], emoji:'♑', name:'Capricorne', traits:'Ambitieuse, déterminée, patiente'},
+  {sign:'verseau', start:[1,20], end:[2,18], emoji:'♒', name:'Verseau', traits:'Indépendante, originale, idéaliste'},
+  {sign:'poissons', start:[2,19], end:[3,20], emoji:'♓', name:'Poissons', traits:'Rêveuse, intuitive, sensible'},
+  {sign:'belier', start:[3,21], end:[4,19], emoji:'♈', name:'Bélier', traits:'Fonceuse, courageuse, énergique'},
+  {sign:'taureau', start:[4,20], end:[5,20], emoji:'♉', name:'Taureau', traits:'Stable, sensuelle, déterminée'},
+  {sign:'gemeaux', start:[5,21], end:[6,20], emoji:'♊', name:'Gémeaux', traits:'Curieuse, communicative, vive'},
+  {sign:'cancer', start:[6,21], end:[7,22], emoji:'♋', name:'Cancer', traits:'Émotive, protectrice, intuitive'},
+  {sign:'lion', start:[7,23], end:[8,22], emoji:'♌', name:'Lion', traits:'Charismatique, généreuse, fière'},
+  {sign:'vierge', start:[8,23], end:[9,22], emoji:'♍', name:'Vierge', traits:'Perfectionniste, analytique, dévouée'},
+  {sign:'balance', start:[9,23], end:[10,22], emoji:'♎', name:'Balance', traits:'Équilibrée, charmante, diplomate'},
+  {sign:'scorpion', start:[10,23], end:[11,21], emoji:'♏', name:'Scorpion', traits:'Intense, mystérieuse, passionnée'},
+  {sign:'sagittaire', start:[11,22], end:[12,21], emoji:'♐', name:'Sagittaire', traits:'Aventurière, optimiste, libre'}
+];
+function getZodiacBy(month, day) {
+  for (const z of ZODIAC) {
+    if (z.start[0] === month && day >= z.start[1]) return z;
+    if (z.end[0] === month && day <= z.end[1]) return z;
+  }
+  return ZODIAC[0]; // capricorne fallback
+}
+const HOROSCOPES = {
+  amour: ['Une rencontre inattendue pourrait te toucher.', 'C\'est le moment de communiquer tes sentiments.', 'L\'amour est dans l\'air, ouvre ton cœur.', 'Une vieille flamme pourrait refaire surface.', 'Une discussion avec ton/ta partenaire renforce votre lien.', 'Concentre-toi sur l\'amour de toi-même aujourd\'hui.', 'Une amitié pourrait se transformer en quelque chose de plus.', 'Sois honnête avec tes émotions.'],
+  travail: ['Un projet sur lequel tu travailles va porter ses fruits.', 'Reste concentrée, l\'effort paye.', 'Une opportunité inattendue se présente.', 'C\'est le bon moment pour te lancer dans un nouveau défi.', 'Ta créativité est en ébullition, exploite-la.', 'Sois patiente, les résultats arrivent.', 'Une collaboration pourrait te surprendre positivement.'],
+  energie: ['Énergie au top, profites-en pour avancer.', 'Prends le temps de te reposer, ton corps en a besoin.', 'Hydrate-toi et bouge, tu te sentiras mieux.', 'Médite ou pratique du yoga pour aligner tes énergies.', 'Sors prendre l\'air, la nature te reboostera.', 'Évite la surcharge, prends une pause.', 'Ton énergie est magnétique aujourd\'hui.'],
+  conseil: ['Fais confiance à ton intuition.', 'Lâche prise sur ce qui ne dépend pas de toi.', 'Sois bienveillante avec toi-même.', 'Une pensée positive change tout.', 'Pardonne-toi tes erreurs passées.', 'Sourie, ça change ta journée.', 'Note 3 gratitudes ce soir.', 'Coupe les notifications 1h, respire.', 'Mange un truc qui te fait plaisir.', 'Appelle quelqu\'un que tu aimes.']
+};
+function getZodiacBirthday() {
+  return localStorage.getItem('nw_zodiac_bday') || '';
+}
+function astroSettings() {
+  const cur = getZodiacBirthday();
+  const v = prompt('Ta date de naissance (jj/mm/aaaa) :', cur);
+  if (v === null) return;
+  // Parse
+  const m = v.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!m) return toast('Format invalide');
+  localStorage.setItem('nw_zodiac_bday', v);
+  renderAstro();
+}
+function seedRandom(seed, arr) {
+  const s = (seed * 9301 + 49297) % 233280;
+  return arr[s % arr.length];
+}
+function renderAstro() {
+  const bday = getZodiacBirthday();
+  if (!bday) {
+    document.getElementById('astro-content').innerHTML = `<div style="text-align:center; padding:40px 14px;">
+      <div style="font-size:64px;">🌙</div>
+      <div style="font-size:16px; font-weight:700; margin-top:14px;">Configure ton signe</div>
+      <p style="font-size:12px; color:var(--textSec); margin-top:6px;">Renseigne ta date de naissance pour avoir ton horoscope du jour.</p>
+      <button class="btn primary" onclick="astroSettings()" style="margin-top:14px;">📅 Ajouter ma date</button>
+    </div>`;
+    return;
+  }
+  const m = bday.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  const day = parseInt(m[1]), month = parseInt(m[2]);
+  const z = getZodiacBy(month, day);
+  const today = todayKey();
+  const dateSeed = parseInt(today.replace(/-/g,''));
+  const ageSeed = ZODIAC.indexOf(z);
+  
+  const amour = seedRandom(dateSeed + ageSeed*7, HOROSCOPES.amour);
+  const travail = seedRandom(dateSeed * 2 + ageSeed*11, HOROSCOPES.travail);
+  const energie = seedRandom(dateSeed * 3 + ageSeed*13, HOROSCOPES.energie);
+  const conseil = seedRandom(dateSeed * 5 + ageSeed*17, HOROSCOPES.conseil);
+  // Score chiffres chance
+  let s = dateSeed + ageSeed;
+  const lucky = []; while (lucky.length < 3) { s = (s*97+13) % 99; if (!lucky.includes(s)) lucky.push(s); }
+  const colors = ['🔴','🟢','🔵','🟡','🟣','🟠','🟤','⚫','⚪','🩷'];
+  const luckyColor = colors[ageSeed % colors.length];
+  
+  const html = `<div style="background:linear-gradient(135deg, #9B59B6, #FF6FA3); color:white; padding:18px; border-radius:18px; text-align:center;">
+    <div style="font-size:60px;">${z.emoji}</div>
+    <div style="font-size:24px; font-weight:900; margin-top:4px;">${z.name}</div>
+    <div style="font-size:12px; opacity:0.9; margin-top:4px; font-style:italic;">${z.traits}</div>
+  </div>
+  <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:16px;">🔮 Horoscope du jour</h3>
+  <div style="background:var(--surface); padding:14px; border-radius:12px; margin-top:8px;">
+    <div style="font-size:12px; color:var(--primary); font-weight:700;">💕 Amour</div>
+    <div style="font-size:13px; line-height:1.5; margin-top:4px;">${escapeHtml(amour)}</div>
+  </div>
+  <div style="background:var(--surface); padding:14px; border-radius:12px; margin-top:6px;">
+    <div style="font-size:12px; color:var(--primary); font-weight:700;">💼 Travail / études</div>
+    <div style="font-size:13px; line-height:1.5; margin-top:4px;">${escapeHtml(travail)}</div>
+  </div>
+  <div style="background:var(--surface); padding:14px; border-radius:12px; margin-top:6px;">
+    <div style="font-size:12px; color:var(--primary); font-weight:700;">⚡ Énergie</div>
+    <div style="font-size:13px; line-height:1.5; margin-top:4px;">${escapeHtml(energie)}</div>
+  </div>
+  <div style="background:linear-gradient(135deg, #FFD166, #FF8C42); color:white; padding:14px; border-radius:12px; margin-top:6px;">
+    <div style="font-size:12px; font-weight:700;">💫 Conseil de l'univers</div>
+    <div style="font-size:13px; line-height:1.5; margin-top:4px;">${escapeHtml(conseil)}</div>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px;">
+    <div style="background:var(--surface); padding:10px; border-radius:10px; text-align:center;">
+      <div style="font-size:10px; color:var(--textSec);">Chiffres chance</div>
+      <div style="font-size:18px; font-weight:800;">${lucky.join(' · ')}</div>
+    </div>
+    <div style="background:var(--surface); padding:10px; border-radius:10px; text-align:center;">
+      <div style="font-size:10px; color:var(--textSec);">Couleur du jour</div>
+      <div style="font-size:24px;">${luckyColor}</div>
+    </div>
+  </div>`;
+  document.getElementById('astro-content').innerHTML = html;
+}
+
+// === COMPLIMENTS ===
+const COMPLIMENTS = [
+  'Ton sourire éclaire les pièces où tu rentres.',
+  'T\'as une force que tu sous-estimes.',
+  'Tes idées sont vraiment originales et précieuses.',
+  'Tu mérites tout ce que tu désires.',
+  'Y\'a quelque chose de magnétique dans ta présence.',
+  'Tu progresses chaque jour, même quand t\'as pas l\'impression.',
+  'Tes proches ont de la chance de t\'avoir.',
+  'Tu vaux beaucoup plus que ce que tu penses.',
+  'Ta sensibilité est une qualité, pas un défaut.',
+  'Tu fais de ton mieux et c\'est plus que suffisant.',
+  'Ton style est unique et ça te va à merveille.',
+  'Tu es enough. Tu l\'as toujours été.',
+  'Ta voix mérite d\'être entendue.',
+  'Tu inspires plus de gens que tu ne le sais.',
+  'Tes rêves sont valides et atteignables.',
+  'Ta gentillesse change la journée des autres.',
+  'Tu es une œuvre d\'art en construction.',
+  'Personne ne pourra jamais te remplacer.',
+  'Ta façon de voir le monde est précieuse.',
+  'T\'es une queen, n\'oublie jamais ça.',
+  'Ce truc qui te tracasse ? Tu vas y arriver.',
+  'Tu rayonnes même quand t\'as pas dormi.',
+  'Tes émotions sont valides, ne les minimise pas.',
+  'Tu fais peur à toutes les personnes médiocres, et c\'est bon signe.',
+  'Y\'a une magie en toi que personne d\'autre n\'a.',
+  'Ton intuition ne te trompe pas, écoute-la.',
+  'Tu es la version la plus belle que tu aies jamais été (et ça va continuer).',
+  'Tu peux pleurer ET être forte. Les deux à la fois.',
+  'Take up space. Tu mérites d\'exister entièrement.',
+  'Y\'a quelqu\'un quelque part qui pense à toi en sourient.'
+];
+function compNew() {
+  const idx = Math.floor(Math.random() * COMPLIMENTS.length);
+  const txt = COMPLIMENTS[idx];
+  document.getElementById('comp-content').innerHTML = `<div style="background:linear-gradient(135deg, #FFB6D9, #FF6FA3, #C77DFF); color:white; padding:30px 18px; border-radius:24px; text-align:center; min-height:50vh; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 12px 32px rgba(255,111,163,0.3);">
+    <div style="font-size:48px;">💕</div>
+    <div style="font-size:20px; font-weight:700; line-height:1.5; margin-top:18px; font-style:italic;">${escapeHtml(txt)}</div>
+    <div style="font-size:11px; opacity:0.8; margin-top:24px;">Compliment ${idx+1}/${COMPLIMENTS.length}</div>
+  </div>
+  <button class="btn primary full" onclick="compNew()" style="margin-top:14px;">💖 Un autre</button>
+  <button class="btn alt full" onclick="compShare(${idx})" style="margin-top:6px;">📤 Partager</button>`;
+}
+function compShare(idx) {
+  const txt = COMPLIMENTS[idx];
+  if (navigator.share) {
+    navigator.share({ text: txt + '\n\n💕' }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(txt);
+    toast('📋 Copié, partage-le !');
+  }
+}
+
+// === MAQUILLAGE TUTOS ===
+const MAKEUP_TUTOS = [
+  { id:'natural', emoji:'🌸', name:'Natural day', desc:'Look quotidien doux',
+    steps:[
+      {ico:'💧', name:'Préparation', desc:'Hydrate ton visage et applique un primer.'},
+      {ico:'🎨', name:'BB cream / fond léger', desc:'À tapoter avec un beauty blender.'},
+      {ico:'👁', name:'Concealer', desc:'Sous yeux + imperfections, en triangle inversé.'},
+      {ico:'🤎', name:'Bronzer', desc:'En 3 dans creux des joues, tempes, mâchoire.'},
+      {ico:'🌷', name:'Blush', desc:'Sur les pommettes, vers les tempes.'},
+      {ico:'✨', name:'Highlighter', desc:'Sur l\'arête du nez, pommettes hautes, arc de cupidon.'},
+      {ico:'👁', name:'Mascara', desc:'Étire bien depuis la racine.'},
+      {ico:'💋', name:'Gloss / baume', desc:'Pour finir ce look léger.'}
+    ]
+  },
+  { id:'soft-glam', emoji:'💖', name:'Soft glam', desc:'Look soirée doux',
+    steps:[
+      {ico:'💧', name:'Skincare + primer', desc:'Visage parfait avant tout.'},
+      {ico:'🎨', name:'Fond de teint moyen', desc:'Plus pigmenté que le natural.'},
+      {ico:'👁', name:'Concealer + setting powder', desc:'Pour que ça tienne.'},
+      {ico:'🎨', name:'Contouring léger', desc:'Sous pommettes, mâchoire, nez.'},
+      {ico:'👁', name:'Eyeshadow neutres', desc:'Tons rose/champagne avec un peu de marron dans le pli.'},
+      {ico:'🖤', name:'Eyeliner discret', desc:'Liner fin sur la racine des cils.'},
+      {ico:'💫', name:'Faux cils', desc:'Optionnel mais effet immédiat.'},
+      {ico:'🌹', name:'Lipstick rose mauve', desc:'Avec un peu de gloss au centre.'}
+    ]
+  },
+  { id:'graphic', emoji:'🎨', name:'Eyeliner graphique', desc:'Look statement',
+    steps:[
+      {ico:'👁', name:'Base eyelid', desc:'Primer sur les paupières.'},
+      {ico:'🤍', name:'Fard nude', desc:'Sur toute la paupière mobile.'},
+      {ico:'🖤', name:'Tracé liner', desc:'Trace une ligne fine puis épaissis vers l\'extérieur.'},
+      {ico:'⚡', name:'Flick exagéré', desc:'Étire le coin externe vers la tempe en pointe nette.'},
+      {ico:'🔍', name:'Corrections', desc:'Coton-tige + démaquillant pour les bavures.'},
+      {ico:'👁', name:'Mascara intense', desc:'Pour assortir.'},
+      {ico:'💋', name:'Lèvres nudes', desc:'Pour pas surcharger.'}
+    ]
+  },
+  { id:'red-lips', emoji:'❤️', name:'Red lips classique', desc:'Look intemporel',
+    steps:[
+      {ico:'💧', name:'Lèvres préparées', desc:'Exfolie + baume.'},
+      {ico:'🎨', name:'Maquillage neutre', desc:'Tout doit être discret pour mettre la bouche en avant.'},
+      {ico:'✏️', name:'Crayon à lèvres', desc:'Trace le contour précisément.'},
+      {ico:'❤️', name:'Rouge appliqué au pinceau', desc:'Pour précision maximale.'},
+      {ico:'🧻', name:'Tamponne', desc:'Avec un mouchoir, ré-applique pour effet stay-on.'},
+      {ico:'🌹', name:'Touche finale', desc:'Concealer autour pour nettoyer.'}
+    ]
+  },
+  { id:'no-makeup', emoji:'🌿', name:'No-makeup makeup', desc:'L\'effet "naturellement parfaite"',
+    steps:[
+      {ico:'💧', name:'Hydratation max', desc:'Sérum + crème + huile pour glow.'},
+      {ico:'✨', name:'Tinted moisturizer', desc:'Très léger, juste pour unifier.'},
+      {ico:'👁', name:'Concealer ciblé', desc:'Que sur les zones nécessaires.'},
+      {ico:'🤎', name:'Crème blush', desc:'Sur les pommettes, tapoté avec les doigts.'},
+      {ico:'👁', name:'Cils brossés', desc:'Avec mascara transparent ou un peu noir.'},
+      {ico:'🌸', name:'Lip stain rose', desc:'Pour bouche fraîche naturelle.'},
+      {ico:'✨', name:'Spray fixateur dewy', desc:'Pour le glow final.'}
+    ]
+  },
+  { id:'smokey', emoji:'🔥', name:'Smokey eyes', desc:'Soirée intense',
+    steps:[
+      {ico:'👁', name:'Primer paupières', desc:'Indispensable pour la tenue.'},
+      {ico:'🤎', name:'Base brun', desc:'Sur toute la paupière mobile.'},
+      {ico:'🖤', name:'Noir au coin externe', desc:'Bien fondu vers le centre.'},
+      {ico:'✨', name:'Touche scintillante', desc:'Au centre de la paupière.'},
+      {ico:'⚫', name:'Khôl ras de cils', desc:'Dessous et dessus des yeux.'},
+      {ico:'👁', name:'Mascara généreux', desc:'Plusieurs couches, faux cils si besoin.'},
+      {ico:'💋', name:'Lèvres neutres', desc:'Pour équilibrer.'}
+    ]
+  }
+];
+function renderMakeup() {
+  const list = document.getElementById('mk-list');
+  const detail = document.getElementById('mk-detail');
+  list.style.display = ''; detail.style.display = 'none';
+  list.innerHTML = MAKEUP_TUTOS.map(t => `<div onclick="mkOpen('${t.id}')" style="background:var(--surface); padding:14px; border-radius:14px; text-align:center; cursor:pointer;">
+    <div style="font-size:36px;">${t.emoji}</div>
+    <div style="font-size:13px; font-weight:700; margin-top:6px;">${escapeHtml(t.name)}</div>
+    <div style="font-size:10px; color:var(--textSec); margin-top:2px;">${escapeHtml(t.desc)}</div>
+  </div>`).join('');
+}
+function mkOpen(id) {
+  const t = MAKEUP_TUTOS.find(x => x.id === id); if (!t) return;
+  document.getElementById('mk-list').style.display = 'none';
+  const detail = document.getElementById('mk-detail');
+  detail.style.display = '';
+  detail.innerHTML = `<button class="btn alt" onclick="renderMakeup()" style="margin-bottom:14px;">‹ Retour aux tutos</button>
+  <div style="background:linear-gradient(135deg, #FF6FA3, #C77DFF); color:white; padding:18px; border-radius:18px; text-align:center;">
+    <div style="font-size:48px;">${t.emoji}</div>
+    <div style="font-size:18px; font-weight:800; margin-top:6px;">${escapeHtml(t.name)}</div>
+    <div style="font-size:12px; opacity:0.9;">${escapeHtml(t.desc)}</div>
+  </div>
+  <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:14px;">📝 Étapes</h3>
+  ${t.steps.map((s, i) => `<div style="background:var(--surface); padding:12px 14px; border-radius:12px; margin-bottom:6px; display:flex; gap:10px; align-items:flex-start;">
+    <div style="font-size:24px;">${s.ico}</div>
+    <div style="flex:1;">
+      <div style="font-size:13px; font-weight:700;">${i+1}. ${escapeHtml(s.name)}</div>
+      <div style="font-size:11px; color:var(--textSec); line-height:1.4; margin-top:2px;">${escapeHtml(s.desc)}</div>
+    </div>
+  </div>`).join('')}`;
+}
+
+// === MOOD TRACKER ===
+const EMO_LEVELS = ['😢','😞','😐','🙂','😊','😄','🤩','🥰'];
+const EMO_LABELS = ['Très triste','Triste','Neutre','Bien','Heureuse','Très heureuse','Excitée','Amoureuse'];
+function getMoods() { try { return JSON.parse(localStorage.getItem('nw_moods') || '{}'); } catch { return {}; } }
+function saveMoods(d) { localStorage.setItem('nw_moods', JSON.stringify(d)); }
+function moodSet(level) {
+  const moods = getMoods();
+  const today = todayKey();
+  if (!moods[today]) moods[today] = {};
+  moods[today].level = level;
+  moods[today].time = Date.now();
+  saveMoods(moods);
+  toast(`Humeur sauvée : ${EMO_LEVELS[level]}`);
+  renderEmotion();
+}
+function moodNote(text) {
+  const moods = getMoods();
+  const today = todayKey();
+  if (!moods[today]) moods[today] = {};
+  moods[today].note = text;
+  saveMoods(moods);
+}
+function renderEmotion() {
+  const moods = getMoods();
+  const today = todayKey();
+  const todayMood = moods[today] || {};
+  
+  let html = `<div style="background:linear-gradient(135deg, #FF9A8B, #FF6A88, #FF99AC); color:white; padding:18px; border-radius:18px; text-align:center;">
+    <div style="font-size:14px; opacity:0.9;">Comment tu te sens aujourd'hui ?</div>
+    <div style="display:flex; justify-content:space-between; margin-top:14px;">`;
+  EMO_LEVELS.forEach((em, i) => {
+    const sel = todayMood.level === i;
+    html += `<button onclick="moodSet(${i})" style="background:${sel ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)'}; border:${sel ? '2px solid white' : 'none'}; border-radius:50%; width:40px; height:40px; font-size:22px; cursor:pointer;">${em}</button>`;
+  });
+  html += `</div>${todayMood.level !== undefined ? `<div style="font-size:13px; margin-top:10px; font-weight:700;">${EMO_LABELS[todayMood.level]}</div>` : ''}</div>`;
+  
+  // Note du jour
+  html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📝 Note du jour</h3>
+    <textarea id="emotion-note" class="input" rows="3" placeholder="Qu'est-ce qui s'est passé aujourd'hui..." onblur="moodNote(this.value)">${escapeHtml(todayMood.note || '')}</textarea>`;
+  
+  // Historique 7 jours
+  html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📊 7 derniers jours</h3>
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:8px;">`;
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = d.toISOString().slice(0,10);
+    const m = moods[k];
+    const dayName = d.toLocaleDateString('fr-FR', {weekday:'short'}).slice(0,3);
+    html += `<div style="background:var(--surface); padding:8px 4px; border-radius:8px; text-align:center;">
+      <div style="font-size:9px; color:var(--textSec);">${dayName}</div>
+      <div style="font-size:24px;">${m?.level !== undefined ? EMO_LEVELS[m.level] : '·'}</div>
+    </div>`;
+  }
+  html += `</div>`;
+  
+  // Stats mois
+  const monthMoods = Object.entries(moods).filter(([k]) => k.startsWith(today.slice(0,7)));
+  if (monthMoods.length) {
+    const avg = monthMoods.reduce((s, [_, v]) => s + (v.level || 0), 0) / monthMoods.length;
+    html += `<div style="background:var(--surface); padding:14px; border-radius:12px; margin-top:14px; text-align:center;">
+      <div style="font-size:11px; color:var(--textSec);">Humeur moyenne ce mois</div>
+      <div style="font-size:36px; margin-top:4px;">${EMO_LEVELS[Math.round(avg)]}</div>
+      <div style="font-size:11px; color:var(--textSec);">${monthMoods.length} jours loggés</div>
+    </div>`;
+  }
+  
+  document.getElementById('emotion-content').innerHTML = html;
+}
+
+// === OUTFIT BUILDER ===
+function getOutfits() { try { return JSON.parse(localStorage.getItem('nw_outfits') || '[]'); } catch { return []; } }
+function saveOutfits(d) { localStorage.setItem('nw_outfits', JSON.stringify(d)); }
+
+let _outfitCurrent = { haut:null, bas:null, chaussure:null, acc:null };
+
+async function renderOutfit() {
+  const items = (await dbAll('wardrobe')) || [];
+  const slots = ['haut','bas','chaussure','acc'];
+  const slotNames = {haut:'👕 Haut', bas:'👖 Bas', chaussure:'👟 Chaussures', acc:'👜 Accessoires'};
+  
+  let html = '';
+  slots.forEach(slot => {
+    const cur = _outfitCurrent[slot] ? items.find(i => i.id === _outfitCurrent[slot]) : null;
+    const choices = items.filter(i => i.cat === slot);
+    html += `<div style="background:var(--surface); padding:10px; border-radius:12px; margin-bottom:8px;">
+      <div style="font-size:13px; font-weight:700; margin-bottom:6px;">${slotNames[slot]}</div>
+      ${cur ? `<div style="display:flex; gap:10px; align-items:center;">
+        ${cur.photo ? `<img src="${cur.photo}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">` : `<div style="width:60px; height:60px; background:var(--surfaceAlt); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:24px;">${WARD_CATS.find(c=>c.id===cur.cat)?.emoji || '👕'}</div>`}
+        <div style="flex:1; font-size:12px;">${escapeHtml(cur.name)}</div>
+        <button onclick="outfitClear('${slot}')" style="background:none; border:none; color:var(--danger); font-size:18px;">✗</button>
+      </div>` : ''}
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-top:6px; max-height:160px; overflow-y:auto;">
+        ${choices.map(c => `<div onclick="outfitPick('${slot}', ${c.id})" style="cursor:pointer; aspect-ratio:1; border-radius:8px; overflow:hidden; ${_outfitCurrent[slot] === c.id ? 'border:3px solid var(--primary);' : 'border:1px solid var(--border);'}">
+          ${c.photo ? `<img src="${c.photo}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="width:100%; height:100%; background:var(--surfaceAlt); display:flex; align-items:center; justify-content:center; font-size:20px;">${WARD_CATS.find(x=>x.id===c.cat)?.emoji || '👕'}</div>`}
+        </div>`).join('') || '<div style="grid-column:1/-1; text-align:center; padding:10px; color:var(--textSec); font-size:11px;">Pas d\'élément. Ajoute dans Garde-robe.</div>'}
+      </div>
+    </div>`;
+  });
+  document.getElementById('outfit-builder').innerHTML = html;
+  
+  // History
+  const hist = getOutfits();
+  if (hist.length) {
+    document.getElementById('outfit-history').innerHTML = hist.slice(0, 10).map(o => 
+      `<div style="background:var(--surface); padding:10px; border-radius:10px; margin-bottom:6px;">
+        <div style="font-size:11px; color:var(--textSec);">${new Date(o.date).toLocaleDateString('fr-FR')}${o.label ? ' · '+escapeHtml(o.label) : ''}</div>
+        <div style="display:flex; gap:6px; margin-top:6px; overflow-x:auto;">
+          ${(o.items || []).map(id => {
+            const item = items.find(i => i.id === id);
+            if (!item) return '';
+            return item.photo ? `<img src="${item.photo}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; flex-shrink:0;">` : '';
+          }).join('')}
+        </div>
+        <div style="display:flex; gap:4px; margin-top:6px;">
+          <button class="btn alt" onclick="outfitLoad('${o.id}')" style="font-size:10px; padding:4px 10px;">↻ Recharger</button>
+          <button class="btn alt" onclick="outfitDel('${o.id}')" style="font-size:10px; padding:4px 10px; color:var(--danger);">🗑</button>
+        </div>
+      </div>`
+    ).join('');
+  } else {
+    document.getElementById('outfit-history').innerHTML = '<p style="text-align:center; color:var(--textSec); font-size:11px; padding:14px;">Aucune tenue sauvée encore.</p>';
+  }
+}
+function outfitPick(slot, id) {
+  _outfitCurrent[slot] = _outfitCurrent[slot] === id ? null : id;
+  renderOutfit();
+}
+function outfitClear(slot) { _outfitCurrent[slot] = null; renderOutfit(); }
+function outfitSave() {
+  const items = Object.values(_outfitCurrent).filter(Boolean);
+  if (!items.length) return toast('Sélectionne au moins une pièce');
+  const label = prompt('Nom de la tenue (optionnel) :', '') || '';
+  const hist = getOutfits();
+  hist.unshift({ id:'o_'+Date.now(), date:Date.now(), items, label });
+  saveOutfits(hist);
+  toast('🪞 Tenue sauvée !');
+  renderOutfit();
+}
+function outfitLoad(id) {
+  const o = getOutfits().find(x => x.id === id); if (!o) return;
+  _outfitCurrent = { haut:null, bas:null, chaussure:null, acc:null };
+  o.items.forEach(itemId => {
+    // On doit retrouver le slot via le cat de l'item
+    dbAll('wardrobe').then(all => {
+      const it = all.find(x => x.id === itemId);
+      if (it && _outfitCurrent.hasOwnProperty(it.cat)) _outfitCurrent[it.cat] = itemId;
+      renderOutfit();
+    });
+  });
+}
+function outfitDel(id) {
+  if (!confirm('Supprimer ?')) return;
+  saveOutfits(getOutfits().filter(o => o.id !== id));
+  renderOutfit();
+}
+
+// === SOIRÉE PLANNER ===
+function getSoirees() { try { return JSON.parse(localStorage.getItem('nw_soirees') || '[]'); } catch { return []; } }
+function saveSoirees(d) { localStorage.setItem('nw_soirees', JSON.stringify(d)); }
+function renderSoirees() {
+  const d = getSoirees();
+  if (!d.length) {
+    document.getElementById('soiree-list').innerHTML = '<p style="text-align:center; color:var(--textSec); padding:30px;">Pas encore de soirée. Tap + pour planifier.</p>';
+    return;
+  }
+  document.getElementById('soiree-list').innerHTML = d.sort((a,b) => (a.date || '').localeCompare(b.date || '')).map(s => {
+    const dt = s.date ? new Date(s.date) : null;
+    const isPast = dt && dt < new Date();
+    return `<div onclick="soireeOpen('${s.id}')" style="background:var(--surface); padding:14px; border-radius:14px; margin-bottom:8px; cursor:pointer; ${isPast ? 'opacity:0.6;' : ''}">
+      <div style="font-size:15px; font-weight:700;">🎉 ${escapeHtml(s.title || 'Sans titre')}</div>
+      ${dt ? `<div style="font-size:11px; color:var(--primary); margin-top:2px;">📅 ${dt.toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'})}</div>` : ''}
+      ${s.location ? `<div style="font-size:11px; color:var(--textSec); margin-top:2px;">📍 ${escapeHtml(s.location)}</div>` : ''}
+      <div style="font-size:10px; color:var(--textSec); margin-top:6px;">${(s.guests || []).length} invités · ${(s.checklist || []).filter(c=>c.done).length}/${(s.checklist || []).length} tâches</div>
+    </div>`;
+  }).join('');
+}
+function soireeNew() {
+  const id = 's_' + Date.now();
+  const s = { id, title:'', date:'', location:'', dress:'', budget:0, guests:[], checklist:[], playlist:[], notes:'' };
+  const d = getSoirees(); d.push(s); saveSoirees(d);
+  soireeOpen(id);
+}
+let _curSoiree = null;
+function soireeOpen(id) {
+  _curSoiree = id;
+  goTo('soiree-edit');
+}
+function renderSoireeEdit() {
+  const s = getSoirees().find(x => x.id === _curSoiree);
+  if (!s) { goTo('soiree'); return; }
+  const html = `<input type="text" class="input" value="${escapeHtml(s.title || '')}" placeholder="🎉 Titre soirée" onchange="soireeUpdate('title', this.value)">
+    <span class="label">Date</span>
+    <input type="datetime-local" class="input" value="${s.date || ''}" onchange="soireeUpdate('date', this.value)">
+    <span class="label">Lieu</span>
+    <input type="text" class="input" value="${escapeHtml(s.location || '')}" placeholder="📍" onchange="soireeUpdate('location', this.value)">
+    <span class="label">Code vestimentaire / tenue prévue</span>
+    <input type="text" class="input" value="${escapeHtml(s.dress || '')}" placeholder="👗" onchange="soireeUpdate('dress', this.value)">
+    <span class="label">Budget</span>
+    <input type="number" class="input" value="${s.budget || 0}" placeholder="€" onchange="soireeUpdate('budget', parseFloat(this.value) || 0)">
+    
+    <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">👥 Invités (${(s.guests || []).length})</h3>
+    <div style="display:flex; gap:6px;">
+      <input type="text" id="soiree-guest" class="input" placeholder="Nom" onkeypress="if(event.key==='Enter')soireeAddGuest()">
+      <button class="btn primary" onclick="soireeAddGuest()" style="padding:8px 14px;">+</button>
+    </div>
+    <div style="margin-top:8px;">${(s.guests || []).map((g, i) => `<div style="background:var(--surface); padding:8px 12px; border-radius:8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;"><span>${escapeHtml(g)}</span><button onclick="soireeDelGuest(${i})" style="background:none; border:none; color:var(--danger);">✗</button></div>`).join('')}</div>
+    
+    <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">✅ Checklist</h3>
+    <div style="display:flex; gap:6px;">
+      <input type="text" id="soiree-task" class="input" placeholder="Tâche" onkeypress="if(event.key==='Enter')soireeAddTask()">
+      <button class="btn primary" onclick="soireeAddTask()" style="padding:8px 14px;">+</button>
+    </div>
+    <div style="margin-top:8px;">${(s.checklist || []).map((c, i) => `<div onclick="soireeToggleTask(${i})" style="background:var(--surface); padding:8px 12px; border-radius:8px; margin-bottom:4px; display:flex; gap:8px; align-items:center; cursor:pointer; ${c.done ? 'opacity:0.5;' : ''}">
+      <div style="width:18px; height:18px; border-radius:4px; background:${c.done ? 'var(--success)' : 'transparent'}; border:2px solid ${c.done ? 'var(--success)' : 'var(--border)'}; color:white; font-size:12px; display:flex; align-items:center; justify-content:center;">${c.done ? '✓' : ''}</div>
+      <span style="${c.done ? 'text-decoration:line-through;' : ''}">${escapeHtml(c.text)}</span>
+    </div>`).join('')}</div>
+    
+    <span class="label">Notes</span>
+    <textarea class="input" rows="3" onchange="soireeUpdate('notes', this.value)">${escapeHtml(s.notes || '')}</textarea>
+    
+    <button class="btn alt full" onclick="soireeDel()" style="margin-top:14px; color:var(--danger);">🗑 Supprimer cette soirée</button>`;
+  document.getElementById('soiree-edit-content').innerHTML = html;
+}
+function soireeUpdate(field, val) {
+  const d = getSoirees();
+  const s = d.find(x => x.id === _curSoiree);
+  if (!s) return;
+  s[field] = val;
+  saveSoirees(d);
+}
+function soireeAddGuest() {
+  const inp = document.getElementById('soiree-guest');
+  const v = inp.value.trim(); if (!v) return;
+  const d = getSoirees();
+  const s = d.find(x => x.id === _curSoiree); if (!s) return;
+  s.guests = s.guests || []; s.guests.push(v);
+  saveSoirees(d); inp.value = ''; renderSoireeEdit();
+}
+function soireeDelGuest(i) {
+  const d = getSoirees(); const s = d.find(x => x.id === _curSoiree);
+  s.guests.splice(i, 1); saveSoirees(d); renderSoireeEdit();
+}
+function soireeAddTask() {
+  const inp = document.getElementById('soiree-task');
+  const v = inp.value.trim(); if (!v) return;
+  const d = getSoirees(); const s = d.find(x => x.id === _curSoiree);
+  s.checklist = s.checklist || []; s.checklist.push({ text:v, done:false });
+  saveSoirees(d); inp.value = ''; renderSoireeEdit();
+}
+function soireeToggleTask(i) {
+  const d = getSoirees(); const s = d.find(x => x.id === _curSoiree);
+  s.checklist[i].done = !s.checklist[i].done;
+  saveSoirees(d); renderSoireeEdit();
+}
+function soireeDel() {
+  if (!confirm('Supprimer cette soirée ?')) return;
+  saveSoirees(getSoirees().filter(s => s.id !== _curSoiree));
+  goTo('soiree');
+}
+
+
+
+// ============================================================
+// PACK BOYS v21
+// ============================================================
+
+// === MUSCU TRACKER ===
+const MUSCU_PROGRAMS = {
+  ppl: {
+    name:'Push Pull Legs',
+    desc:'Programme classique 6 jours',
+    sessions: [
+      { name:'Push (Pec/Épaule/Triceps)', exos:['Développé couché 4×8', 'Développé militaire 4×8', 'Dips 3×10', 'Élévations latérales 3×12', 'Triceps poulie 3×12'] },
+      { name:'Pull (Dos/Biceps)', exos:['Tractions 4×8', 'Rowing barre 4×10', 'Tirage horizontal 3×10', 'Curl barre 3×10', 'Curl marteau 3×12'] },
+      { name:'Legs (Jambes)', exos:['Squat 4×8', 'Soulevé de terre roumain 4×8', 'Presse 3×10', 'Leg curl 3×12', 'Mollets 4×15'] }
+    ]
+  },
+  upper_lower: {
+    name:'Upper / Lower',
+    desc:'Haut bas - 4 jours',
+    sessions: [
+      { name:'Upper A', exos:['Développé couché 4×8', 'Tractions 4×8', 'Développé incliné 3×10', 'Rowing 3×10', 'Curl 3×12', 'Triceps 3×12'] },
+      { name:'Lower A', exos:['Squat 4×8', 'SDT 4×6', 'Fentes 3×10', 'Leg curl 3×12', 'Mollets 4×15', 'Abdos 3×15'] },
+      { name:'Upper B', exos:['DM 4×8', 'Tirage poulie 4×10', 'Pec écarté 3×12', 'Face pull 3×15', 'Curl marteau 3×12', 'Dips 3×10'] },
+      { name:'Lower B', exos:['Front squat 4×8', 'SDT roumain 4×8', 'Presse 3×12', 'Hip thrust 3×10', 'Mollets 4×20', 'Abdos roulette 3×10'] }
+    ]
+  },
+  fullbody: {
+    name:'Full Body débutant',
+    desc:'3× par semaine, idéal pour démarrer',
+    sessions: [
+      { name:'FB A', exos:['Squat 3×8', 'Développé couché 3×8', 'Rowing barre 3×8', 'Développé militaire 3×8', 'Curl 3×10', 'Abdos 3×15'] },
+      { name:'FB B', exos:['SDT 3×6', 'Dips 3×8', 'Tractions 3×6', 'Élévations latérales 3×10', 'Triceps 3×10', 'Mollets 3×15'] }
+    ]
+  },
+  arnold: {
+    name:'Arnold split',
+    desc:'Pec/Dos · Épaule/Bras · Jambes - 6 jours',
+    sessions: [
+      { name:'Pec / Dos', exos:['Développé couché 5×8', 'Tractions 5×8', 'Pec incliné 4×10', 'Rowing 4×10', 'Pull-over 3×12'] },
+      { name:'Épaules / Bras', exos:['Développé militaire 5×8', 'Élévations latérales 4×12', 'Curl barre 4×10', 'Dips 4×10', 'Curl marteau 3×12', 'Triceps français 3×12'] },
+      { name:'Jambes', exos:['Squat 5×8', 'SDT 4×6', 'Fentes 3×10', 'Leg curl 3×12', 'Mollets 5×15', 'Abdos 4×15'] }
+    ]
+  }
+};
+
+function getMuscu() { try { return JSON.parse(localStorage.getItem('nw_muscu') || '{}'); } catch { return {}; } }
+function saveMuscu(d) { localStorage.setItem('nw_muscu', JSON.stringify(d)); }
+function getMuscuLog() { try { return JSON.parse(localStorage.getItem('nw_muscu_log') || '[]'); } catch { return []; } }
+function saveMuscuLog(d) { localStorage.setItem('nw_muscu_log', JSON.stringify(d)); }
+
+let _curMuscuSession = null;
+
+function renderMuscu() {
+  const data = getMuscu();
+  const log = getMuscuLog();
+  const today = todayKey();
+  
+  let html = '';
+  if (!data.program) {
+    html = `<div style="background:linear-gradient(135deg, #FF4757, #FF8C42); color:white; padding:18px; border-radius:14px; text-align:center;">
+      <div style="font-size:48px;">💪</div>
+      <div style="font-size:18px; font-weight:800; margin-top:8px;">Choisis ton programme</div>
+    </div>`;
+    Object.entries(MUSCU_PROGRAMS).forEach(([k, p]) => {
+      html += `<div onclick="muscuPickProgram('${k}')" style="background:var(--surface); padding:14px; border-radius:14px; margin-top:10px; cursor:pointer; border-left:4px solid var(--primary);">
+        <div style="font-size:15px; font-weight:700;">${escapeHtml(p.name)}</div>
+        <div style="font-size:11px; color:var(--textSec); margin-top:2px;">${escapeHtml(p.desc)}</div>
+        <div style="font-size:10px; color:var(--primary); margin-top:6px;">${p.sessions.length} type${p.sessions.length>1?'s':''} de séance</div>
+      </div>`;
+    });
+    html += `<button class="btn alt full" onclick="muscuCustom()" style="margin-top:14px;">⚙ Programme custom</button>`;
+    document.getElementById('muscu-content').innerHTML = html;
+    return;
+  }
+  
+  const prog = MUSCU_PROGRAMS[data.program] || data.customProg;
+  const last7 = log.filter(l => {
+    const d = new Date(l.date); const now = new Date();
+    return (now - d) < 7 * 86400000;
+  });
+  
+  html = `<div style="background:linear-gradient(135deg, #FF4757, #FF8C42); color:white; padding:14px; border-radius:14px;">
+    <div style="font-size:11px; opacity:0.85;">Programme actuel</div>
+    <div style="font-size:18px; font-weight:800;">💪 ${escapeHtml(prog.name)}</div>
+    <div style="font-size:11px; opacity:0.9; margin-top:2px;">${escapeHtml(prog.desc || '')}</div>
+  </div>`;
+  
+  // Stats
+  html += `<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px;">
+    <div style="background:var(--surface); padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:10px; color:var(--textSec);">Cette semaine</div>
+      <div style="font-size:24px; font-weight:900; color:var(--primary);">${last7.length}</div>
+      <div style="font-size:10px; color:var(--textSec);">séances</div>
+    </div>
+    <div style="background:var(--surface); padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:10px; color:var(--textSec);">Total</div>
+      <div style="font-size:24px; font-weight:900; color:var(--primary);">${log.length}</div>
+      <div style="font-size:10px; color:var(--textSec);">séances</div>
+    </div>
+    <div style="background:var(--surface); padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:10px; color:var(--textSec);">Streak</div>
+      <div style="font-size:24px; font-weight:900; color:var(--primary);">${muscuStreak()}</div>
+      <div style="font-size:10px; color:var(--textSec);">jours</div>
+    </div>
+  </div>`;
+  
+  // Sessions du programme
+  html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:16px;">🔥 Choisis ta séance</h3>`;
+  prog.sessions.forEach((s, i) => {
+    const lastDone = log.filter(l => l.sessionIdx === i).sort((a,b) => b.date.localeCompare(a.date))[0];
+    html += `<div onclick="muscuStartSession(${i})" style="background:var(--surface); padding:14px; border-radius:12px; margin-bottom:6px; cursor:pointer;">
+      <div style="font-size:14px; font-weight:700;">${escapeHtml(s.name)}</div>
+      <div style="font-size:10px; color:var(--textSec); margin-top:2px;">${s.exos.length} exercices</div>
+      ${lastDone ? `<div style="font-size:10px; color:var(--primary); margin-top:4px;">Dernière fois : ${new Date(lastDone.date).toLocaleDateString('fr-FR')}</div>` : ''}
+    </div>`;
+  });
+  
+  // Historique
+  if (log.length) {
+    html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📊 Historique</h3>`;
+    log.slice(0, 10).forEach(l => {
+      const sess = (prog.sessions[l.sessionIdx]) || {name:'?'};
+      const totalSets = (l.exos || []).reduce((s, e) => s + (e.sets || []).length, 0);
+      html += `<div style="background:var(--surface); padding:10px 14px; border-radius:10px; margin-bottom:4px;">
+        <div style="font-size:11px; color:var(--textSec);">${new Date(l.date).toLocaleDateString('fr-FR')}</div>
+        <div style="font-size:13px; font-weight:700;">${escapeHtml(sess.name)}</div>
+        <div style="font-size:10px; color:var(--primary); margin-top:2px;">${totalSets} sets total</div>
+      </div>`;
+    });
+  }
+  
+  html += `<button class="btn alt full" onclick="muscuChangeProgram()" style="margin-top:14px;">↻ Changer de programme</button>`;
+  document.getElementById('muscu-content').innerHTML = html;
+}
+
+function muscuStreak() {
+  const log = getMuscuLog();
+  if (!log.length) return 0;
+  const sorted = log.map(l => l.date.slice(0,10)).sort();
+  const set = new Set(sorted);
+  let streak = 0;
+  let d = new Date(); d.setHours(0,0,0,0);
+  // Compte combien de jours consécutifs avec au moins 1 séance dans la fenêtre roulante (séance 1× tous les 1-3 jours)
+  for (let i = 0; i < 30; i++) {
+    const dd = new Date(d); dd.setDate(dd.getDate() - i);
+    const k = dd.toISOString().slice(0,10);
+    if (set.has(k)) { streak++; }
+    else if (streak > 0) break;
+  }
+  return streak;
+}
+
+function muscuPickProgram(k) {
+  const data = getMuscu();
+  data.program = k;
+  saveMuscu(data);
+  renderMuscu();
+}
+function muscuChangeProgram() {
+  if (!confirm('Changer de programme ? Ton historique est conservé.')) return;
+  const data = getMuscu(); delete data.program; saveMuscu(data);
+  renderMuscu();
+}
+function muscuCustom() {
+  toast('Bientôt : programme 100% personnalisé');
+}
+
+function muscuStartSession(idx) {
+  _curMuscuSession = {
+    sessionIdx: idx,
+    date: new Date().toISOString(),
+    exos: [],
+    notes: ''
+  };
+  const data = getMuscu();
+  const prog = MUSCU_PROGRAMS[data.program];
+  prog.sessions[idx].exos.forEach(name => {
+    _curMuscuSession.exos.push({ name, sets: [{ weight: '', reps: '' }] });
+  });
+  goTo('muscu-session');
+}
+function renderMuscuSession() {
+  if (!_curMuscuSession) { goTo('muscu'); return; }
+  const data = getMuscu();
+  const prog = MUSCU_PROGRAMS[data.program];
+  const sess = prog.sessions[_curMuscuSession.sessionIdx];
+  
+  let html = `<div style="background:linear-gradient(135deg, #FF4757, #FF8C42); color:white; padding:14px; border-radius:14px; text-align:center;">
+    <div style="font-size:18px; font-weight:800;">🔥 ${escapeHtml(sess.name)}</div>
+    <div style="font-size:11px; opacity:0.9; margin-top:2px;">${new Date(_curMuscuSession.date).toLocaleDateString('fr-FR')}</div>
+  </div>`;
+  
+  _curMuscuSession.exos.forEach((exo, ei) => {
+    const lastSession = getMuscuLog().filter(l => l.sessionIdx === _curMuscuSession.sessionIdx).sort((a,b) => b.date.localeCompare(a.date))[0];
+    const lastExo = lastSession?.exos?.find(e => e.name === exo.name);
+    const lastSet = lastExo?.sets?.[lastExo.sets.length - 1];
+    const hint = lastSet ? `Dernière fois: ${lastSet.weight}kg × ${lastSet.reps}` : '';
+    
+    html += `<div style="background:var(--surface); padding:14px; border-radius:14px; margin-top:10px;">
+      <div style="font-size:14px; font-weight:700;">${escapeHtml(exo.name)}</div>
+      ${hint ? `<div style="font-size:10px; color:var(--primary); margin-top:2px;">💡 ${hint}</div>` : ''}
+      <div style="margin-top:10px;">`;
+    exo.sets.forEach((set, si) => {
+      html += `<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+        <div style="width:24px; font-size:12px; color:var(--textSec); font-weight:700;">#${si+1}</div>
+        <input type="number" value="${set.weight || ''}" placeholder="kg" onchange="muscuSet(${ei},${si},'weight',this.value)" style="flex:1; min-width:50px; padding:8px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;" inputmode="decimal">
+        <span style="color:var(--textSec); font-size:11px;">×</span>
+        <input type="number" value="${set.reps || ''}" placeholder="reps" onchange="muscuSet(${ei},${si},'reps',this.value)" style="flex:1; min-width:50px; padding:8px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;" inputmode="numeric">
+        ${exo.sets.length > 1 ? `<button onclick="muscuDelSet(${ei},${si})" style="background:none; border:none; color:var(--danger); font-size:18px; cursor:pointer;">✗</button>` : ''}
+      </div>`;
+    });
+    html += `<button class="btn alt" onclick="muscuAddSet(${ei})" style="font-size:11px; padding:6px 12px; margin-top:4px;">+ Set</button>
+    </div></div>`;
+  });
+  
+  html += `<textarea class="input" placeholder="Notes (forme, énergie, douleurs...)" rows="2" onchange="_curMuscuSession.notes=this.value" style="margin-top:14px;">${escapeHtml(_curMuscuSession.notes || '')}</textarea>
+    <button class="btn primary full" onclick="muscuFinishSession()" style="margin-top:14px;">✓ Terminer la séance</button>`;
+  
+  document.getElementById('muscu-session-content').innerHTML = html;
+}
+function muscuSet(ei, si, field, val) {
+  if (!_curMuscuSession) return;
+  _curMuscuSession.exos[ei].sets[si][field] = val;
+}
+function muscuAddSet(ei) {
+  _curMuscuSession.exos[ei].sets.push({ weight:'', reps:'' });
+  renderMuscuSession();
+}
+function muscuDelSet(ei, si) {
+  _curMuscuSession.exos[ei].sets.splice(si, 1);
+  renderMuscuSession();
+}
+function muscuFinishSession() {
+  if (!_curMuscuSession) return goTo('muscu');
+  // Filter sets vides
+  _curMuscuSession.exos.forEach(e => {
+    e.sets = e.sets.filter(s => s.weight || s.reps);
+  });
+  _curMuscuSession.exos = _curMuscuSession.exos.filter(e => e.sets.length);
+  if (!_curMuscuSession.exos.length) {
+    if (!confirm('Séance vide. Quitter sans sauvegarder ?')) return;
+    _curMuscuSession = null;
+    goTo('muscu');
+    return;
+  }
+  const log = getMuscuLog();
+  log.unshift(_curMuscuSession);
+  saveMuscuLog(log);
+  _curMuscuSession = null;
+  toast('💪 Séance enregistrée !');
+  goTo('muscu');
+}
+
+// === PR PERSONNELS ===
+const PR_PRESETS = [
+  {key:'squat', name:'Squat', emoji:'🦵', unit:'kg'},
+  {key:'bench', name:'Développé couché', emoji:'💪', unit:'kg'},
+  {key:'sdt', name:'Soulevé de terre', emoji:'🏋️', unit:'kg'},
+  {key:'dm', name:'Développé militaire', emoji:'🏋️‍♂️', unit:'kg'},
+  {key:'pullup', name:'Tractions max', emoji:'🤸', unit:'reps'},
+  {key:'pushup', name:'Pompes max', emoji:'🦾', unit:'reps'},
+  {key:'plank', name:'Gainage max', emoji:'⏱', unit:'secondes'},
+  {key:'run5k', name:'5km course', emoji:'🏃', unit:'min'},
+  {key:'run10k', name:'10km course', emoji:'🏃‍♂️', unit:'min'},
+  {key:'sprint100', name:'100m sprint', emoji:'⚡', unit:'sec'},
+];
+function getPRs() { try { return JSON.parse(localStorage.getItem('nw_prs') || '[]'); } catch { return []; } }
+function savePRs(d) { localStorage.setItem('nw_prs', JSON.stringify(d)); }
+function renderPR() {
+  const prs = getPRs();
+  let html = `<div style="background:linear-gradient(135deg, #FFD700, #FF8C42); color:white; padding:14px; border-radius:14px; text-align:center;">
+    <div style="font-size:36px;">🏆</div>
+    <div style="font-size:16px; font-weight:800; margin-top:4px;">Mes records personnels</div>
+    <div style="font-size:11px; opacity:0.9;">${prs.length} record${prs.length>1?'s':''}</div>
+  </div>`;
+  
+  if (!prs.length) {
+    html += '<p style="text-align:center; color:var(--textSec); padding:30px;">Aucun PR. Tap + pour ajouter ton 1er record.</p>';
+  } else {
+    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px;">`;
+    prs.forEach(pr => {
+      const preset = PR_PRESETS.find(p => p.key === pr.type) || {};
+      html += `<div style="background:var(--surface); padding:12px; border-radius:12px; text-align:center;">
+        <div style="font-size:28px;">${preset.emoji || '🏆'}</div>
+        <div style="font-size:11px; color:var(--textSec); margin-top:4px;">${escapeHtml(preset.name || pr.name)}</div>
+        <div style="font-size:22px; font-weight:900; color:var(--primary); margin-top:4px;">${pr.value}<span style="font-size:11px; color:var(--textSec); font-weight:400;"> ${escapeHtml(preset.unit || pr.unit || '')}</span></div>
+        <div style="font-size:9px; color:var(--textSec); margin-top:2px;">${new Date(pr.date).toLocaleDateString('fr-FR')}</div>
+        <div style="display:flex; gap:4px; margin-top:6px;">
+          <button class="btn alt" onclick="prUpdate('${pr.id}')" style="font-size:10px; padding:3px 6px; flex:1;">✎</button>
+          <button class="btn alt" onclick="prDel('${pr.id}')" style="font-size:10px; padding:3px 6px; color:var(--danger);">🗑</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  document.getElementById('pr-content').innerHTML = html;
+}
+function prAdd() {
+  let opts = PR_PRESETS.map((p, i) => `${i+1}. ${p.emoji} ${p.name}`).join('\n');
+  opts += '\n0. Custom (autre)';
+  const ch = prompt('Type de PR :\n\n' + opts);
+  if (!ch) return;
+  const idx = parseInt(ch);
+  let preset = null, name = '', unit = '';
+  if (idx > 0 && idx <= PR_PRESETS.length) {
+    preset = PR_PRESETS[idx - 1];
+    name = preset.name; unit = preset.unit;
+  } else {
+    name = prompt('Nom du PR ?'); if (!name) return;
+    unit = prompt('Unité ? (kg, reps, sec, min, m...)') || '';
+  }
+  const value = prompt(`${name} (${unit}) :`);
+  if (!value) return;
+  const prs = getPRs();
+  prs.push({
+    id: 'pr_'+Date.now(),
+    type: preset ? preset.key : 'custom',
+    name, unit,
+    value: parseFloat(value) || value,
+    date: new Date().toISOString()
+  });
+  savePRs(prs);
+  toast('🏆 PR enregistré !');
+  renderPR();
+}
+function prUpdate(id) {
+  const prs = getPRs();
+  const pr = prs.find(p => p.id === id); if (!pr) return;
+  const preset = PR_PRESETS.find(p => p.key === pr.type) || {};
+  const v = prompt(`Nouveau record pour ${preset.name || pr.name} (${preset.unit || pr.unit}) :`, pr.value);
+  if (v === null) return;
+  pr.value = parseFloat(v) || v;
+  pr.date = new Date().toISOString();
+  savePRs(prs);
+  toast('🏆 Record battu !');
+  renderPR();
+}
+function prDel(id) {
+  if (!confirm('Supprimer ce PR ?')) return;
+  savePRs(getPRs().filter(p => p.id !== id));
+  renderPR();
+}
+
+// === FITNESS DAILY (compteur rapide) ===
+function getFit() { try { return JSON.parse(localStorage.getItem('nw_fit') || '{}'); } catch { return {}; } }
+function saveFit(d) { localStorage.setItem('nw_fit', JSON.stringify(d)); }
+const FIT_TYPES = [
+  {id:'pushup', name:'Pompes', emoji:'🦾', color:'#FF4757'},
+  {id:'situp', name:'Abdos', emoji:'🔥', color:'#FF8C42'},
+  {id:'pullup', name:'Tractions', emoji:'🤸', color:'#5DD68F'},
+  {id:'squat', name:'Squats', emoji:'🦵', color:'#A78BFA'},
+  {id:'plank', name:'Gainage (sec)', emoji:'⏱', color:'#5DADE2'},
+  {id:'run', name:'Course (km)', emoji:'🏃', color:'#FFD166'}
+];
+function renderFit() {
+  const today = todayKey();
+  const data = getFit();
+  const todayFit = data[today] || {};
+  
+  let html = `<div style="background:linear-gradient(135deg, #FF4757, #FF8C42); color:white; padding:14px; border-radius:14px; text-align:center;">
+    <div style="font-size:18px; font-weight:800;">⚡ Fitness daily</div>
+    <div style="font-size:11px; opacity:0.9;">Logge tes exos express du jour</div>
+  </div>`;
+  
+  html += `<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px;">`;
+  FIT_TYPES.forEach(t => {
+    const v = todayFit[t.id] || 0;
+    html += `<div style="background:var(--surface); padding:14px; border-radius:14px; text-align:center; border-top:4px solid ${t.color};">
+      <div style="font-size:32px;">${t.emoji}</div>
+      <div style="font-size:11px; color:var(--textSec); margin-top:4px;">${escapeHtml(t.name)}</div>
+      <div style="font-size:28px; font-weight:900; color:${t.color}; margin-top:4px;">${v}</div>
+      <div style="display:flex; gap:4px; margin-top:6px;">
+        <button class="btn alt" onclick="fitAdd('${t.id}', -10)" style="font-size:10px; padding:4px; flex:1;">-10</button>
+        <button class="btn alt" onclick="fitAdd('${t.id}', -1)" style="font-size:10px; padding:4px; flex:1;">-1</button>
+        <button class="btn primary" onclick="fitAdd('${t.id}', 1)" style="font-size:10px; padding:4px; flex:1;">+1</button>
+        <button class="btn primary" onclick="fitAdd('${t.id}', 10)" style="font-size:10px; padding:4px; flex:1;">+10</button>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  
+  // Stats 7 jours
+  html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📈 7 derniers jours</h3>`;
+  let totals = {};
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = d.toISOString().slice(0,10);
+    const day = data[k] || {};
+    Object.entries(day).forEach(([id, v]) => { totals[id] = (totals[id] || 0) + v; });
+  }
+  html += `<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-top:8px;">`;
+  FIT_TYPES.forEach(t => {
+    const total = totals[t.id] || 0;
+    html += `<div style="background:var(--surface); padding:10px; border-radius:10px; display:flex; gap:8px; align-items:center;">
+      <div style="font-size:20px;">${t.emoji}</div>
+      <div style="flex:1;">
+        <div style="font-size:10px; color:var(--textSec);">${escapeHtml(t.name)}</div>
+        <div style="font-size:14px; font-weight:800;">${total}</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  
+  document.getElementById('fit-content').innerHTML = html;
+}
+function fitAdd(id, delta) {
+  const today = todayKey();
+  const data = getFit();
+  if (!data[today]) data[today] = {};
+  data[today][id] = Math.max(0, (data[today][id] || 0) + delta);
+  saveFit(data);
+  renderFit();
+}
+
+
+
+// === WALLET FINANCES ===
+const WALLET_CATS = {
+  argent_poche: {emoji:'💸', name:'Argent de poche', type:'in', color:'#5DD68F'},
+  cadeau: {emoji:'🎁', name:'Cadeau', type:'in', color:'#FF6FA3'},
+  job: {emoji:'💼', name:'Petit job', type:'in', color:'#5DADE2'},
+  autre_in: {emoji:'➕', name:'Autre revenu', type:'in', color:'#A78BFA'},
+  bouffe: {emoji:'🍔', name:'Bouffe', type:'out', color:'#FF8C42'},
+  sortie: {emoji:'🎉', name:'Sortie', type:'out', color:'#FFD166'},
+  vetement: {emoji:'👕', name:'Vêtements', type:'out', color:'#FF6FA3'},
+  tech: {emoji:'📱', name:'Tech', type:'out', color:'#5DADE2'},
+  jeux: {emoji:'🎮', name:'Jeux', type:'out', color:'#A78BFA'},
+  transport: {emoji:'🚌', name:'Transport', type:'out', color:'#06FFA5'},
+  autre_out: {emoji:'🛒', name:'Autre dépense', type:'out', color:'#888'}
+};
+let _walletType = 'out';
+function getWallet() { try { return JSON.parse(localStorage.getItem('nw_wallet2') || '[]'); } catch { return []; } }
+function saveWallet(d) { localStorage.setItem('nw_wallet2', JSON.stringify(d)); }
+function renderWallet2() {
+  const tx = getWallet().sort((a,b) => b.date.localeCompare(a.date));
+  const now = new Date();
+  const monthKey = now.toISOString().slice(0, 7);
+  const monthTx = tx.filter(t => t.date.startsWith(monthKey));
+  const totalIn = monthTx.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0);
+  const totalOut = monthTx.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const balance = totalIn - totalOut;
+  const allBalance = tx.reduce((s, t) => s + t.amount, 0);
+  
+  let html = `<div style="background:linear-gradient(135deg, ${balance >= 0 ? '#5DD68F, #06FFA5' : '#FF4757, #FF8C42'}); color:white; padding:18px; border-radius:14px; text-align:center;">
+    <div style="font-size:11px; opacity:0.85;">Balance ce mois</div>
+    <div style="font-size:36px; font-weight:900;">${balance >= 0 ? '+' : ''}${balance.toFixed(2)}€</div>
+    <div style="display:flex; justify-content:space-around; margin-top:10px; font-size:12px;">
+      <div>📥 +${totalIn.toFixed(2)}€</div>
+      <div>📤 -${totalOut.toFixed(2)}€</div>
+    </div>
+  </div>`;
+  
+  html += `<div style="background:var(--surface); padding:12px; border-radius:10px; margin-top:8px; text-align:center;">
+    <div style="font-size:10px; color:var(--textSec);">Total cumulé depuis le début</div>
+    <div style="font-size:20px; font-weight:800; color:${allBalance >= 0 ? 'var(--success)' : 'var(--danger)'};">${allBalance >= 0 ? '+' : ''}${allBalance.toFixed(2)}€</div>
+  </div>`;
+  
+  // Bouton goals
+  html += `<button class="btn alt full" onclick="goTo('wallet2-goals')" style="margin-top:8px;">🎯 Mes objectifs épargne</button>`;
+  
+  // Stats par catégorie ce mois
+  if (monthTx.length) {
+    html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📊 Top dépenses ce mois</h3>`;
+    const byCat = {};
+    monthTx.filter(t => t.amount < 0).forEach(t => {
+      byCat[t.cat] = (byCat[t.cat] || 0) + Math.abs(t.amount);
+    });
+    const sorted = Object.entries(byCat).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    sorted.forEach(([cat, amt]) => {
+      const c = WALLET_CATS[cat] || {};
+      const pct = (amt / totalOut * 100) || 0;
+      html += `<div style="background:var(--surface); padding:10px 12px; border-radius:10px; margin-bottom:4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div><span style="font-size:18px;">${c.emoji || '💸'}</span> <span style="font-size:13px; font-weight:700;">${escapeHtml(c.name || cat)}</span></div>
+          <div style="font-size:14px; font-weight:800; color:var(--danger);">-${amt.toFixed(2)}€</div>
+        </div>
+        <div style="background:var(--surfaceAlt); height:5px; border-radius:3px; margin-top:4px; overflow:hidden;">
+          <div style="background:${c.color || 'var(--danger)'}; height:100%; width:${pct}%;"></div>
+        </div>
+      </div>`;
+    });
+  }
+  
+  // Historique récent
+  if (tx.length) {
+    html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📜 Dernières transactions</h3>`;
+    tx.slice(0, 20).forEach(t => {
+      const c = WALLET_CATS[t.cat] || {};
+      const isPositive = t.amount > 0;
+      html += `<div style="background:var(--surface); padding:10px 12px; border-radius:10px; margin-bottom:4px; display:flex; gap:8px; align-items:center;">
+        <div style="font-size:24px;">${c.emoji || '💸'}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(t.desc || c.name || '')}</div>
+          <div style="font-size:10px; color:var(--textSec);">${new Date(t.date).toLocaleDateString('fr-FR')}</div>
+        </div>
+        <div style="font-size:14px; font-weight:800; color:${isPositive ? 'var(--success)' : 'var(--danger)'};">${isPositive ? '+' : ''}${t.amount.toFixed(2)}€</div>
+        <button onclick="walletDel('${t.id}')" style="background:none; border:none; color:var(--danger); font-size:16px;">✗</button>
+      </div>`;
+    });
+  } else {
+    html += `<p style="text-align:center; color:var(--textSec); padding:30px;">Aucune transaction. Tap + pour commencer.</p>`;
+  }
+  
+  document.getElementById('wallet2-content').innerHTML = html;
+}
+function walletAdd() {
+  document.getElementById('wt-amount').value = '';
+  document.getElementById('wt-desc').value = '';
+  document.getElementById('wt-date').value = todayKey();
+  walletSetType('out');
+  goTo('wallet2-add');
+}
+function walletSetType(t) {
+  _walletType = t;
+  document.getElementById('wt-in-btn').className = 'btn full ' + (t === 'in' ? 'primary' : 'alt');
+  document.getElementById('wt-out-btn').className = 'btn full ' + (t === 'out' ? 'primary' : 'alt');
+  // Filter cat options
+  const sel = document.getElementById('wt-cat');
+  Array.from(sel.options).forEach(opt => {
+    const ot = opt.dataset.type;
+    if (!ot) opt.style.display = (t === 'in' ? '' : 'none');
+    else opt.style.display = (ot === t ? '' : 'none');
+  });
+  // Set first visible
+  const visible = Array.from(sel.options).filter(o => o.style.display !== 'none')[0];
+  if (visible) sel.value = visible.value;
+}
+function walletSave() {
+  const amt = parseFloat(document.getElementById('wt-amount').value);
+  if (!amt) return toast('Montant requis');
+  const tx = {
+    id: 't_' + Date.now(),
+    cat: document.getElementById('wt-cat').value,
+    amount: _walletType === 'in' ? Math.abs(amt) : -Math.abs(amt),
+    desc: document.getElementById('wt-desc').value.trim(),
+    date: document.getElementById('wt-date').value || todayKey()
+  };
+  const all = getWallet(); all.unshift(tx); saveWallet(all);
+  toast('💰 Sauvegardé');
+  goTo('wallet2');
+}
+function walletDel(id) {
+  if (!confirm('Supprimer ?')) return;
+  saveWallet(getWallet().filter(t => t.id !== id));
+  renderWallet2();
+}
+
+// === GOALS ÉPARGNE ===
+function getGoals() { try { return JSON.parse(localStorage.getItem('nw_goals') || '[]'); } catch { return []; } }
+function saveGoals(d) { localStorage.setItem('nw_goals', JSON.stringify(d)); }
+function renderGoals() {
+  const goals = getGoals();
+  let html = `<p style="font-size:11px; color:var(--textSec);">Définis tes objectifs (PS5, voyage, vélo...) et suis ta progression.</p>`;
+  if (!goals.length) {
+    html += '<p style="text-align:center; color:var(--textSec); padding:30px;">Pas d\'objectif. Tap + pour démarrer.</p>';
+  } else {
+    goals.forEach(g => {
+      const pct = Math.min(100, (g.current / g.target) * 100);
+      const isDone = g.current >= g.target;
+      html += `<div style="background:var(--surface); padding:14px; border-radius:14px; margin-top:10px; ${isDone ? 'border:2px solid var(--success);' : ''}">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-size:15px; font-weight:700;">${isDone ? '✅' : '🎯'} ${escapeHtml(g.name)}</div>
+          <button onclick="goalDel('${g.id}')" style="background:none; border:none; color:var(--danger); font-size:16px;">✗</button>
+        </div>
+        <div style="font-size:11px; color:var(--textSec); margin-top:4px;">${g.current.toFixed(2)}€ / ${g.target.toFixed(2)}€</div>
+        <div style="background:var(--surfaceAlt); height:10px; border-radius:5px; margin-top:6px; overflow:hidden;">
+          <div style="background:linear-gradient(90deg, var(--primary), var(--accent)); height:100%; width:${pct}%; transition:width 0.3s;"></div>
+        </div>
+        <div style="font-size:11px; color:var(--primary); font-weight:700; margin-top:4px; text-align:right;">${pct.toFixed(0)}%</div>
+        <div style="display:flex; gap:4px; margin-top:8px;">
+          <button class="btn alt" onclick="goalAddAmount('${g.id}', 5)" style="font-size:11px; padding:4px 8px; flex:1;">+5€</button>
+          <button class="btn alt" onclick="goalAddAmount('${g.id}', 10)" style="font-size:11px; padding:4px 8px; flex:1;">+10€</button>
+          <button class="btn alt" onclick="goalAddAmount('${g.id}', 50)" style="font-size:11px; padding:4px 8px; flex:1;">+50€</button>
+          <button class="btn alt" onclick="goalCustom('${g.id}')" style="font-size:11px; padding:4px 8px; flex:1;">€...</button>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('wallet2-goals-content').innerHTML = html;
+}
+function goalAdd() {
+  const name = prompt('Nom de l\'objectif (ex: PS5, voyage Italie, vélo) :');
+  if (!name) return;
+  const target = parseFloat(prompt(`Montant à atteindre pour "${name}" (€) ?`));
+  if (!target) return;
+  const goals = getGoals();
+  goals.push({ id:'g_'+Date.now(), name, target, current:0, created:Date.now() });
+  saveGoals(goals); renderGoals();
+}
+function goalAddAmount(id, amt) {
+  const goals = getGoals();
+  const g = goals.find(x => x.id === id); if (!g) return;
+  g.current = Math.max(0, g.current + amt);
+  saveGoals(goals); renderGoals();
+  if (g.current >= g.target) toast('🎉 Objectif atteint !');
+}
+function goalCustom(id) {
+  const v = parseFloat(prompt('Montant à ajouter (négatif pour retirer) :'));
+  if (!v) return;
+  goalAddAmount(id, v);
+}
+function goalDel(id) {
+  if (!confirm('Supprimer cet objectif ?')) return;
+  saveGoals(getGoals().filter(g => g.id !== id));
+  renderGoals();
+}
+
+// === GAMING HUB ===
+let _gamingTab = 'playing';
+function getGames() { try { return JSON.parse(localStorage.getItem('nw_games2') || '[]'); } catch { return []; } }
+function saveGames(d) { localStorage.setItem('nw_games2', JSON.stringify(d)); }
+function gamingTab(t) {
+  _gamingTab = t;
+  ['playing','done','wishlist','drop'].forEach(x => {
+    const el = document.getElementById('gt-'+x);
+    if (el) el.className = 'btn ' + (x === t ? 'primary' : 'alt');
+    if (el) el.style.cssText = 'font-size:11px; padding:6px 10px; flex-shrink:0;';
+  });
+  renderGames();
+}
+function renderGames() {
+  const games = getGames().filter(g => g.status === _gamingTab);
+  const grid = document.getElementById('gaming-list');
+  const platEmojis = {ps5:'🎮 PS5', ps4:'🎮 PS4', xbox:'🎮 Xbox', switch:'🎮 Switch', pc:'💻 PC', mobile:'📱'};
+  if (!games.length) {
+    grid.innerHTML = '<p style="text-align:center; color:var(--textSec); padding:30px;">Aucun jeu dans cette catégorie.</p>';
+    return;
+  }
+  grid.innerHTML = games.map(g => `<div style="background:var(--surface); padding:14px; border-radius:14px; margin-bottom:6px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div style="flex:1;">
+        <div style="font-size:14px; font-weight:700;">🎮 ${escapeHtml(g.name)}</div>
+        <div style="font-size:11px; color:var(--textSec); margin-top:2px;">${platEmojis[g.platform] || g.platform}${g.genre ? ' · ' + escapeHtml(g.genre) : ''}</div>
+        ${g.hours ? `<div style="font-size:11px; color:var(--primary); margin-top:2px;">⏱ ${g.hours}h</div>` : ''}
+        ${g.rating ? `<div style="font-size:11px; margin-top:2px;">${'⭐'.repeat(Math.round(g.rating/2))} ${g.rating}/10</div>` : ''}
+        ${g.notes ? `<div style="font-size:11px; color:var(--textSec); margin-top:6px; line-height:1.4;">${escapeHtml(g.notes)}</div>` : ''}
+      </div>
+    </div>
+    <div style="display:flex; gap:4px; margin-top:8px; flex-wrap:wrap;">
+      <button class="btn alt" onclick="gameMove('${g.id}', 'playing')" style="font-size:10px; padding:3px 8px;">🎮 En cours</button>
+      <button class="btn alt" onclick="gameMove('${g.id}', 'done')" style="font-size:10px; padding:3px 8px;">✅ Fini</button>
+      <button class="btn alt" onclick="gameMove('${g.id}', 'wishlist')" style="font-size:10px; padding:3px 8px;">⭐ Wish</button>
+      <button class="btn alt" onclick="gameMove('${g.id}', 'drop')" style="font-size:10px; padding:3px 8px;">⏸ Drop</button>
+      <button class="btn alt" onclick="gameDel('${g.id}')" style="font-size:10px; padding:3px 8px; color:var(--danger);">🗑</button>
+    </div>
+  </div>`).join('');
+}
+function gameAdd() {
+  document.getElementById('gm-name').value = '';
+  document.getElementById('gm-genre').value = '';
+  document.getElementById('gm-hours').value = '';
+  document.getElementById('gm-rating').value = '';
+  document.getElementById('gm-notes').value = '';
+  goTo('gaming-add');
+}
+function gameSave() {
+  const name = document.getElementById('gm-name').value.trim();
+  if (!name) return toast('Nom requis');
+  const game = {
+    id: 'g_'+Date.now(),
+    name,
+    platform: document.getElementById('gm-plat').value,
+    status: document.getElementById('gm-status').value,
+    genre: document.getElementById('gm-genre').value.trim(),
+    hours: parseFloat(document.getElementById('gm-hours').value) || 0,
+    rating: parseInt(document.getElementById('gm-rating').value) || 0,
+    notes: document.getElementById('gm-notes').value.trim(),
+    added: Date.now()
+  };
+  const games = getGames(); games.unshift(game); saveGames(games);
+  toast('🎮 Ajouté');
+  goTo('gaming');
+}
+function gameMove(id, status) {
+  const games = getGames();
+  const g = games.find(x => x.id === id); if (!g) return;
+  g.status = status;
+  if (status === 'done') g.finished = Date.now();
+  saveGames(games);
+  renderGames();
+}
+function gameDel(id) {
+  if (!confirm('Supprimer ce jeu ?')) return;
+  saveGames(getGames().filter(g => g.id !== id));
+  renderGames();
+}
+
+// === MODE FOCUS ===
+let _focusInterval = null;
+let _focusEnd = 0;
+let _focusDuration = 0;
+
+function getFocusStats() { try { return JSON.parse(localStorage.getItem('nw_focus') || '[]'); } catch { return []; } }
+function saveFocusStats(d) { localStorage.setItem('nw_focus', JSON.stringify(d)); }
+
+function renderFocus() {
+  const stats = getFocusStats();
+  const today = todayKey();
+  const todayMins = stats.filter(s => s.date.startsWith(today)).reduce((sum, s) => sum + s.duration, 0);
+  const totalMins = stats.reduce((sum, s) => sum + s.duration, 0);
+  
+  let html = '';
+  if (_focusEnd && _focusEnd > Date.now()) {
+    const remaining = _focusEnd - Date.now();
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    html = `<div style="background:linear-gradient(135deg, #5DD68F, #06FFA5); color:white; padding:30px 18px; border-radius:24px; text-align:center;">
+      <div style="font-size:16px; opacity:0.9;">🎯 Mode Focus actif</div>
+      <div style="font-size:64px; font-weight:900; line-height:1; margin-top:12px;">${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}</div>
+      <div style="font-size:13px; opacity:0.9; margin-top:14px;">📵 Pose ton téléphone</div>
+      <div style="font-size:11px; opacity:0.8; margin-top:6px;">Reste fort 💪</div>
+    </div>
+    <button class="btn alt full" onclick="focusStop()" style="margin-top:14px; color:var(--danger);">✗ Arrêter (perd la session)</button>`;
+  } else {
+    html = `<div style="background:linear-gradient(135deg, #FF4757, #A78BFA); color:white; padding:18px; border-radius:18px; text-align:center;">
+      <div style="font-size:36px;">🎯</div>
+      <div style="font-size:18px; font-weight:800; margin-top:6px;">Mode Focus</div>
+      <div style="font-size:11px; opacity:0.9; margin-top:4px;">Pose ton tel et concentre-toi.</div>
+    </div>
+    <h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">⏱ Durée</h3>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-top:8px;">
+      <button class="btn alt" onclick="focusStart(15)">15 min</button>
+      <button class="btn alt" onclick="focusStart(25)">25 min (Pomodoro)</button>
+      <button class="btn alt" onclick="focusStart(45)">45 min</button>
+      <button class="btn alt" onclick="focusStart(60)">1h</button>
+      <button class="btn alt" onclick="focusStart(90)">1h30</button>
+      <button class="btn alt" onclick="focusStart(120)">2h</button>
+    </div>
+    <button class="btn primary full" onclick="focusCustom()" style="margin-top:8px;">⚙ Durée custom</button>`;
+  }
+  
+  // Stats
+  html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">📊 Stats</h3>
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:8px;">
+      <div style="background:var(--surface); padding:14px; border-radius:12px; text-align:center;">
+        <div style="font-size:10px; color:var(--textSec);">Aujourd'hui</div>
+        <div style="font-size:24px; font-weight:900; color:var(--primary);">${todayMins}</div>
+        <div style="font-size:10px; color:var(--textSec);">min focus</div>
+      </div>
+      <div style="background:var(--surface); padding:14px; border-radius:12px; text-align:center;">
+        <div style="font-size:10px; color:var(--textSec);">Total</div>
+        <div style="font-size:24px; font-weight:900; color:var(--primary);">${(totalMins/60).toFixed(1)}h</div>
+        <div style="font-size:10px; color:var(--textSec);">cumulés</div>
+      </div>
+    </div>`;
+  
+  if (stats.length) {
+    html += `<h3 style="font-size:13px; font-weight:700; color:var(--textSec); margin-top:14px;">🕐 Sessions récentes</h3>`;
+    stats.slice(-5).reverse().forEach(s => {
+      html += `<div style="background:var(--surface); padding:10px 12px; border-radius:8px; margin-top:4px; display:flex; justify-content:space-between;">
+        <span style="font-size:12px;">${new Date(s.date).toLocaleString('fr-FR', {weekday:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+        <span style="font-size:12px; font-weight:700; color:var(--success);">${s.duration} min</span>
+      </div>`;
+    });
+  }
+  
+  document.getElementById('focus-content').innerHTML = html;
+}
+function focusStart(mins) {
+  if (!confirm(`Démarrer ${mins} min de focus ?\n\n📵 Pose ton tel et reviens dans ${mins} min.\n\nSi tu reviens avant, la session ne compte pas.`)) return;
+  _focusDuration = mins;
+  _focusEnd = Date.now() + mins * 60000;
+  if (_focusInterval) clearInterval(_focusInterval);
+  _focusInterval = setInterval(() => {
+    if (Date.now() >= _focusEnd) {
+      clearInterval(_focusInterval);
+      _focusInterval = null;
+      // Save session
+      const stats = getFocusStats();
+      stats.push({ date:new Date().toISOString(), duration:_focusDuration });
+      saveFocusStats(stats);
+      _focusEnd = 0;
+      // Vibrate
+      if (navigator.vibrate) navigator.vibrate([200,100,200,100,200]);
+      toast('🎉 Bravo, session focus terminée !');
+      renderFocus();
+    } else if (document.querySelector('.page.active')?.id === 'page-focus') {
+      renderFocus();
+    }
+  }, 1000);
+  renderFocus();
+}
+function focusStop() {
+  if (!confirm('Arrêter ? La session ne sera pas comptabilisée.')) return;
+  clearInterval(_focusInterval); _focusInterval = null;
+  _focusEnd = 0;
+  toast('Session arrêtée');
+  renderFocus();
+}
+function focusCustom() {
+  const v = parseInt(prompt('Durée en minutes :', '30'));
+  if (v && v > 0) focusStart(v);
+}
+function focusStats() { goTo('focus'); renderFocus(); }
+
+
+
+// === GROOMING ===
+const GROOMING_ROUTINES = {
+  daily: {
+    title: '🚿 Routine quotidienne',
+    items: [
+      {ico:'🚿', name:'Douche', desc:'Avec gel douche neutre, eau pas trop chaude'},
+      {ico:'🪥', name:'Brossage dents', desc:'2 min, 2× par jour minimum'},
+      {ico:'💦', name:'Nettoyer le visage', desc:'Avec un gel doux, pas de savon classique'},
+      {ico:'💧', name:'Hydrater visage', desc:'Crème légère matin et soir'},
+      {ico:'☀️', name:'SPF si soleil', desc:'Indispensable pour pas vieillir trop vite'},
+      {ico:'🧴', name:'Déodorant', desc:'Sans aluminium si possible'},
+      {ico:'🌸', name:'Parfum / EDT', desc:'2-3 sprays max sur cou/poignet'}
+    ]
+  },
+  beard: {
+    title: '🧔 Entretien barbe',
+    items: [
+      {ico:'🚿', name:'Lavage', desc:'2-3× par semaine avec shampoing barbe'},
+      {ico:'💆', name:'Hydratation', desc:'Huile à barbe quotidiennement'},
+      {ico:'🪮', name:'Brossage', desc:'Avec brosse en poils de sanglier ou peigne'},
+      {ico:'✂️', name:'Trim', desc:'Tonte régulière au sabot pour la longueur'},
+      {ico:'🪒', name:'Contour propre', desc:'Rasage cou + joues pour les contours nets'},
+      {ico:'🧴', name:'Baume coiffant', desc:'Pour structurer si barbe longue'}
+    ]
+  },
+  shave: {
+    title: '🪒 Rasage propre',
+    items: [
+      {ico:'💧', name:'Préparer la peau', desc:'Eau chaude + gel hydratant pendant 1 min'},
+      {ico:'🧴', name:'Mousse / crème à raser', desc:'Application avec un blaireau de préférence'},
+      {ico:'🪒', name:'Rasage dans le sens du poil', desc:'Premier passage'},
+      {ico:'🔄', name:'2e passage', desc:'Perpendiculaire au sens du poil'},
+      {ico:'❄️', name:'Eau froide', desc:'Resserre les pores'},
+      {ico:'💧', name:'After-shave', desc:'Sans alcool si peau sensible'}
+    ]
+  },
+  hair: {
+    title: '💇 Cheveux',
+    items: [
+      {ico:'🚿', name:'Shampoing', desc:'2-3× par semaine, pas tous les jours'},
+      {ico:'🌿', name:'Conditionner', desc:'1× par semaine pour nourrir'},
+      {ico:'🧴', name:'Cuir chevelu', desc:'Masser pour activer la circulation'},
+      {ico:'💨', name:'Sèche-cheveux', desc:'Faible chaleur, à 20cm'},
+      {ico:'🧴', name:'Coiffant', desc:'Cire mat / pommade selon style voulu'},
+      {ico:'💈', name:'Coupe régulière', desc:'Toutes les 4-6 semaines'}
+    ]
+  }
+};
+function getGrooming() { try { return JSON.parse(localStorage.getItem('nw_grooming') || '{}'); } catch { return {}; } }
+function saveGrooming(d) { localStorage.setItem('nw_grooming', JSON.stringify(d)); }
+function renderGrooming() {
+  const today = todayKey();
+  const data = getGrooming();
+  const todayDone = data[today] || [];
+  
+  let html = `<div style="background:linear-gradient(135deg, #5DADE2, #A78BFA); color:white; padding:14px; border-radius:14px; text-align:center;">
+    <div style="font-size:18px; font-weight:800;">💈 Grooming</div>
+    <div style="font-size:11px; opacity:0.9;">Routine soin homme</div>
+  </div>`;
+  
+  Object.entries(GROOMING_ROUTINES).forEach(([k, r]) => {
+    html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">${escapeHtml(r.title)}</h3>`;
+    r.items.forEach((it, i) => {
+      const itemId = k + '_' + i;
+      const checked = todayDone.includes(itemId);
+      html += `<div onclick="groomingToggle('${itemId}')" style="background:var(--surface); padding:12px 14px; border-radius:12px; margin-top:6px; display:flex; gap:10px; align-items:center; cursor:pointer; ${checked ? 'opacity:0.5;' : ''}">
+        <div style="font-size:24px;">${it.ico}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px; font-weight:700; ${checked ? 'text-decoration:line-through;' : ''}">${escapeHtml(it.name)}</div>
+          <div style="font-size:11px; color:var(--textSec); line-height:1.4;">${escapeHtml(it.desc)}</div>
+        </div>
+        <div style="width:24px; height:24px; border-radius:50%; background:${checked ? 'var(--success)' : 'transparent'}; border:2px solid ${checked ? 'var(--success)' : 'var(--border)'}; color:white; font-size:14px; display:flex; align-items:center; justify-content:center;">${checked ? '✓' : ''}</div>
+      </div>`;
+    });
+  });
+  
+  document.getElementById('grooming-content').innerHTML = html;
+}
+function groomingToggle(id) {
+  const today = todayKey();
+  const data = getGrooming();
+  if (!data[today]) data[today] = [];
+  if (data[today].includes(id)) data[today] = data[today].filter(x => x !== id);
+  else data[today].push(id);
+  saveGrooming(data);
+  renderGrooming();
+}
+
+// === DIET MACROS ===
+const DIET_PRESETS = [
+  {name:'Œufs ×3', kcal:215, prot:18, carb:1, fat:15},
+  {name:'Riz blanc 100g cuit', kcal:130, prot:3, carb:28, fat:0},
+  {name:'Pâtes 100g cuites', kcal:150, prot:5, carb:30, fat:1},
+  {name:'Poulet 100g', kcal:165, prot:31, carb:0, fat:4},
+  {name:'Bœuf haché 5% 100g', kcal:135, prot:21, carb:0, fat:5},
+  {name:'Saumon 100g', kcal:208, prot:20, carb:0, fat:13},
+  {name:'Thon en boîte 100g', kcal:115, prot:26, carb:0, fat:1},
+  {name:'Banane', kcal:90, prot:1, carb:23, fat:0},
+  {name:'Pomme', kcal:95, prot:0, carb:25, fat:0},
+  {name:'Avoine 50g', kcal:185, prot:7, carb:30, fat:3},
+  {name:'Yaourt grec 100g', kcal:60, prot:10, carb:4, fat:0},
+  {name:'Whey 30g', kcal:120, prot:24, carb:3, fat:1},
+  {name:'Pain complet 1 tranche', kcal:80, prot:3, carb:15, fat:1},
+  {name:'Beurre de cacahuète 1 cs', kcal:95, prot:4, carb:3, fat:8},
+  {name:'McDo BigMac', kcal:550, prot:25, carb:46, fat:30},
+  {name:'McDo Frites M', kcal:340, prot:4, carb:42, fat:17},
+  {name:'Coca 33cL', kcal:140, prot:0, carb:35, fat:0},
+  {name:'Pizza 1 part', kcal:285, prot:12, carb:36, fat:10}
+];
+function getDiet() { try { return JSON.parse(localStorage.getItem('nw_diet') || '{}'); } catch { return {}; } }
+function saveDiet(d) { localStorage.setItem('nw_diet', JSON.stringify(d)); }
+function getDietGoals() { try { return JSON.parse(localStorage.getItem('nw_diet_goals') || '{"kcal":2500,"prot":150,"carb":300,"fat":80}'); } catch { return {kcal:2500,prot:150,carb:300,fat:80}; } }
+function saveDietGoals(d) { localStorage.setItem('nw_diet_goals', JSON.stringify(d)); }
+function renderDiet() {
+  const today = todayKey();
+  const data = getDiet();
+  const todayMeals = data[today] || [];
+  const goals = getDietGoals();
+  const totals = todayMeals.reduce((t, m) => ({
+    kcal: t.kcal + (m.kcal || 0),
+    prot: t.prot + (m.prot || 0),
+    carb: t.carb + (m.carb || 0),
+    fat: t.fat + (m.fat || 0)
+  }), {kcal:0, prot:0, carb:0, fat:0});
+  
+  let html = `<div style="background:linear-gradient(135deg, #5DD68F, #06FFA5); color:white; padding:14px; border-radius:14px; text-align:center;">
+    <div style="font-size:11px; opacity:0.9;">Aujourd'hui</div>
+    <div style="font-size:36px; font-weight:900;">${totals.kcal}<span style="font-size:14px; opacity:0.85;">/${goals.kcal} kcal</span></div>
+    <div style="background:rgba(255,255,255,0.3); height:6px; border-radius:3px; margin-top:6px; overflow:hidden;">
+      <div style="background:white; height:100%; width:${Math.min(100, (totals.kcal/goals.kcal)*100)}%;"></div>
+    </div>
+  </div>`;
+  
+  html += `<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px;">`;
+  [['prot','💪','#FF4757','Prot'],['carb','🌾','#FFD166','Glucides'],['fat','🥑','#5DADE2','Lipides']].forEach(([k, em, col, name]) => {
+    const v = totals[k], g = goals[k];
+    const pct = Math.min(100, (v/g)*100) || 0;
+    html += `<div style="background:var(--surface); padding:10px; border-radius:10px; text-align:center;">
+      <div style="font-size:18px;">${em}</div>
+      <div style="font-size:10px; color:var(--textSec);">${name}</div>
+      <div style="font-size:14px; font-weight:800; color:${col};">${v}<span style="font-size:10px; color:var(--textSec); font-weight:400;">/${g}g</span></div>
+      <div style="background:var(--surfaceAlt); height:4px; border-radius:2px; margin-top:4px; overflow:hidden;"><div style="background:${col}; height:100%; width:${pct}%;"></div></div>
+    </div>`;
+  });
+  html += `</div>`;
+  
+  html += `<button class="btn primary full" onclick="goTo('diet-add')" style="margin-top:14px;">+ Ajouter un repas</button>`;
+  
+  // Liste repas du jour
+  if (todayMeals.length) {
+    html += `<h3 style="font-size:14px; font-weight:700; color:var(--primary); margin-top:18px;">🍽 Repas du jour</h3>`;
+    todayMeals.forEach((m, i) => {
+      html += `<div style="background:var(--surface); padding:10px 12px; border-radius:10px; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="flex:1;">
+          <div style="font-size:13px; font-weight:700;">${escapeHtml(m.name)}</div>
+          <div style="font-size:10px; color:var(--textSec);">${m.kcal} kcal · P${m.prot}g · G${m.carb}g · L${m.fat}g</div>
+        </div>
+        <button onclick="dietDel(${i})" style="background:none; border:none; color:var(--danger); font-size:18px;">✗</button>
+      </div>`;
+    });
+  }
+  
+  document.getElementById('diet-content').innerHTML = html;
+}
+function dietSave() {
+  const meal = {
+    name: document.getElementById('dt-name').value.trim(),
+    kcal: parseFloat(document.getElementById('dt-kcal').value) || 0,
+    prot: parseFloat(document.getElementById('dt-prot').value) || 0,
+    carb: parseFloat(document.getElementById('dt-carb').value) || 0,
+    fat: parseFloat(document.getElementById('dt-fat').value) || 0,
+    time: Date.now()
+  };
+  if (!meal.name) return toast('Nom requis');
+  const today = todayKey();
+  const data = getDiet();
+  if (!data[today]) data[today] = [];
+  data[today].push(meal);
+  saveDiet(data);
+  toast('🍽 Ajouté');
+  goTo('diet');
+}
+function dietDel(i) {
+  const today = todayKey();
+  const data = getDiet();
+  if (!data[today]) return;
+  data[today].splice(i, 1);
+  saveDiet(data);
+  renderDiet();
+}
+function dietPickPreset(i) {
+  const p = DIET_PRESETS[i];
+  document.getElementById('dt-name').value = p.name;
+  document.getElementById('dt-kcal').value = p.kcal;
+  document.getElementById('dt-prot').value = p.prot;
+  document.getElementById('dt-carb').value = p.carb;
+  document.getElementById('dt-fat').value = p.fat;
+}
+function renderDietPresets() {
+  const grid = document.getElementById('dt-presets');
+  grid.innerHTML = DIET_PRESETS.map((p, i) => `<button onclick="dietPickPreset(${i})" style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:8px; text-align:left; cursor:pointer;">
+    <div style="font-size:12px; font-weight:700;">${escapeHtml(p.name)}</div>
+    <div style="font-size:10px; color:var(--textSec);">${p.kcal} kcal · P${p.prot}g</div>
+  </button>`).join('');
+}
+function dietSettings() {
+  const goals = getDietGoals();
+  const kcal = parseInt(prompt('Objectif kcal/jour :', goals.kcal));
+  if (!kcal) return;
+  const prot = parseInt(prompt('Objectif protéines/jour (g) :', goals.prot)) || goals.prot;
+  const carb = parseInt(prompt('Objectif glucides/jour (g) :', goals.carb)) || goals.carb;
+  const fat = parseInt(prompt('Objectif lipides/jour (g) :', goals.fat)) || goals.fat;
+  saveDietGoals({kcal, prot, carb, fat});
+  renderDiet();
+}
+
+// === MENTOR DU JOUR ===
+const MENTORS = [
+  {auteur:'David Goggins', cat:'Mental', txt:'Quand tu penses que t\'es à 100%, t\'es vraiment qu\'à 40%. Le reste c\'est dans ta tête.'},
+  {auteur:'Bruce Lee', cat:'Discipline', txt:'Je crains pas l\'homme qui a pratiqué 10000 coups de pied une fois, je crains celui qui a pratiqué un coup de pied 10000 fois.'},
+  {auteur:'Marc Aurèle', cat:'Stoïcisme', txt:'Tu as le pouvoir sur ton esprit, pas sur les évènements extérieurs. Réalise-le et tu trouveras la force.'},
+  {auteur:'Arnold Schwarzenegger', cat:'Sport', txt:'La force ne vient pas de ce que tu peux faire. Elle vient de surmonter ce que tu pensais ne pas pouvoir faire.'},
+  {auteur:'Mike Tyson', cat:'Combat', txt:'Tout le monde a un plan jusqu\'à ce qu\'il se prenne un coup dans la gueule.'},
+  {auteur:'Naval Ravikant', cat:'Business', txt:'Apprends à vendre. Apprends à construire. Si tu sais faire les deux, tu seras imparable.'},
+  {auteur:'Steve Jobs', cat:'Vision', txt:'Ton temps est limité, alors le gaspille pas à vivre la vie de quelqu\'un d\'autre.'},
+  {auteur:'Elon Musk', cat:'Travail', txt:'Si quelque chose est suffisamment important, tu le fais même quand les chances sont contre toi.'},
+  {auteur:'Sénèque', cat:'Stoïcisme', txt:'Ce n\'est pas parce que les choses sont difficiles qu\'on n\'ose pas, mais parce qu\'on n\'ose pas qu\'elles sont difficiles.'},
+  {auteur:'Conor McGregor', cat:'Mental', txt:'Il n\'y a pas de talent ici, c\'est de l\'obsession et un travail acharné.'},
+  {auteur:'Kobe Bryant', cat:'Sport', txt:'Si tu es prêt à mettre le travail, tout le reste viendra.'},
+  {auteur:'Jocko Willink', cat:'Discipline', txt:'La discipline égale la liberté.'},
+  {auteur:'Sun Tzu', cat:'Stratégie', txt:'Tous les hommes peuvent voir la tactique par laquelle je conquiers, mais ce que personne ne voit c\'est la stratégie hors de laquelle naît la victoire.'},
+  {auteur:'Cal Newport', cat:'Travail', txt:'L\'attention est devenue la nouvelle compétence rare. Maîtrise-la et tu domineras.'},
+  {auteur:'Ryan Holiday', cat:'Stoïcisme', txt:'L\'obstacle est le chemin. Ce qui te bloque finit par te montrer la voie.'},
+  {auteur:'Kanye West', cat:'Confiance', txt:'Ils ont essayé de me casser ? Ils ont juste rajouté du carburant à ce qu\'ils voulaient éteindre.'},
+  {auteur:'Drake', cat:'Réussite', txt:'Started from the bottom, now we here. Le chemin était nécessaire.'},
+  {auteur:'Eminem', cat:'Mental', txt:'Tu n\'as qu\'une seule chance, ne la laisse pas passer parce que cette opportunité ne reviendra peut-être plus.'},
+  {auteur:'Tony Robbins', cat:'Action', txt:'Le moment où tu fais une vraie décision, ta vie change. Pas dans 10 ans. Maintenant.'},
+  {auteur:'Teddy Roosevelt', cat:'Action', txt:'Fais ce que tu peux, avec ce que tu as, là où tu es.'},
+  {auteur:'Confucius', cat:'Sagesse', txt:'Peu importe que tu avances lentement, tant que tu n\'arrêtes pas.'},
+  {auteur:'Floyd Mayweather', cat:'Argent', txt:'Le travail dur est sans talent ce que les diamants sont sans poussière. Inutile.'},
+  {auteur:'Cristiano Ronaldo', cat:'Sport', txt:'Le talent sans travail acharné, c\'est rien.'},
+  {auteur:'Goku (en mode joke)', cat:'Anime', txt:'Plus fort. Toujours plus fort. Le power-up ne s\'arrête jamais.'}
+];
+function mentorNew() {
+  const today = todayKey();
+  const seed = parseInt(today.replace(/-/g,'')) + Math.floor(Math.random() * 1000);
+  const m = MENTORS[seed % MENTORS.length];
+  document.getElementById('mentor-content').innerHTML = `<div style="background:linear-gradient(135deg, #FF4757, #1A1A1A); color:white; padding:30px 18px; border-radius:24px; text-align:center; min-height:50vh; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="font-size:60px;">🎯</div>
+    <div style="font-size:11px; opacity:0.7; margin-top:14px; text-transform:uppercase; letter-spacing:3px;">${escapeHtml(m.cat)}</div>
+    <div style="font-size:18px; font-weight:600; line-height:1.5; margin-top:18px; font-style:italic;">« ${escapeHtml(m.txt)} »</div>
+    <div style="font-size:14px; font-weight:700; margin-top:18px; color:#FFD700;">— ${escapeHtml(m.auteur)}</div>
+  </div>
+  <button class="btn primary full" onclick="mentorNew()" style="margin-top:14px;">↻ Un autre</button>
+  <button class="btn alt full" onclick="mentorShare(${seed % MENTORS.length})" style="margin-top:6px;">📤 Partager</button>`;
+}
+function mentorShare(idx) {
+  const m = MENTORS[idx];
+  const txt = `« ${m.txt} »\n— ${m.auteur}`;
+  if (navigator.share) navigator.share({ text: txt }).catch(() => {});
+  else { navigator.clipboard?.writeText(txt); toast('📋 Copié'); }
+}
+
+// === SIDE PROJECTS ===
+function getProjects() { try { return JSON.parse(localStorage.getItem('nw_projects') || '[]'); } catch { return []; } }
+function saveProjects(d) { localStorage.setItem('nw_projects', JSON.stringify(d)); }
+function projAdd() {
+  const name = prompt('Nom du projet ?');
+  if (!name) return;
+  const desc = prompt('Description courte ?') || '';
+  const projs = getProjects();
+  projs.unshift({ id:'p_'+Date.now(), name, desc, status:'idea', tasks:[], created:Date.now() });
+  saveProjects(projs);
+  renderProjects();
+}
+function renderProjects() {
+  const projs = getProjects();
+  if (!projs.length) {
+    document.getElementById('proj-list').innerHTML = '<p style="text-align:center; color:var(--textSec); padding:30px;">Aucun projet. Tap + pour démarrer.</p>';
+    return;
+  }
+  const STATUS = {
+    idea: {emoji:'💡', name:'Idée', color:'#FFD166'},
+    active: {emoji:'🚀', name:'En cours', color:'#5DD68F'},
+    pause: {emoji:'⏸', name:'En pause', color:'#A78BFA'},
+    done: {emoji:'✅', name:'Terminé', color:'#5DADE2'},
+    drop: {emoji:'❌', name:'Abandonné', color:'#888'}
+  };
+  document.getElementById('proj-list').innerHTML = projs.map(p => {
+    const s = STATUS[p.status] || STATUS.idea;
+    const tasksDone = (p.tasks || []).filter(t => t.done).length;
+    return `<div style="background:var(--surface); padding:14px; border-radius:14px; margin-bottom:8px; border-left:4px solid ${s.color};">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="flex:1;">
+          <div style="font-size:14px; font-weight:700;">${s.emoji} ${escapeHtml(p.name)}</div>
+          ${p.desc ? `<div style="font-size:11px; color:var(--textSec); margin-top:2px; line-height:1.4;">${escapeHtml(p.desc)}</div>` : ''}
+          <div style="font-size:10px; color:var(--primary); margin-top:6px;">${s.name}${p.tasks?.length ? ` · ${tasksDone}/${p.tasks.length} tâches` : ''}</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:8px;">
+        <button class="btn alt" onclick="projChangeStatus('${p.id}')" style="font-size:10px; padding:3px 8px;">↻ Statut</button>
+        <button class="btn alt" onclick="projAddTask('${p.id}')" style="font-size:10px; padding:3px 8px;">+ Tâche</button>
+        <button class="btn alt" onclick="projViewTasks('${p.id}')" style="font-size:10px; padding:3px 8px;">📋 Voir</button>
+        <button class="btn alt" onclick="projDel('${p.id}')" style="font-size:10px; padding:3px 8px; color:var(--danger);">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function projChangeStatus(id) {
+  const projs = getProjects();
+  const p = projs.find(x => x.id === id); if (!p) return;
+  const order = ['idea','active','pause','done','drop'];
+  const cur = order.indexOf(p.status);
+  p.status = order[(cur + 1) % order.length];
+  saveProjects(projs);
+  renderProjects();
+}
+function projAddTask(id) {
+  const text = prompt('Tâche à ajouter ?');
+  if (!text) return;
+  const projs = getProjects();
+  const p = projs.find(x => x.id === id); if (!p) return;
+  if (!p.tasks) p.tasks = [];
+  p.tasks.push({ id:'t_'+Date.now(), text, done:false });
+  saveProjects(projs);
+  renderProjects();
+}
+function projViewTasks(id) {
+  const projs = getProjects();
+  const p = projs.find(x => x.id === id); if (!p) return;
+  if (!p.tasks?.length) return toast('Pas de tâches');
+  let txt = `📋 ${p.name}\n\n`;
+  p.tasks.forEach((t, i) => txt += `${t.done ? '✅' : '⬜'} ${t.text}\n`);
+  txt += '\nTap OK pour continuer';
+  alert(txt);
+  // Toggle via prompt
+  const toggle = prompt('Numéro de tâche à toggle (1-' + p.tasks.length + ') ou Annuler :');
+  const idx = parseInt(toggle) - 1;
+  if (idx >= 0 && idx < p.tasks.length) {
+    p.tasks[idx].done = !p.tasks[idx].done;
+    saveProjects(projs);
+    renderProjects();
+  }
+}
+function projDel(id) {
+  if (!confirm('Supprimer ce projet ?')) return;
+  saveProjects(getProjects().filter(p => p.id !== id));
+  renderProjects();
+}
+
+// === PSEUDOS ===
+function getPseudos() { try { return JSON.parse(localStorage.getItem('nw_pseudos') || '[]'); } catch { return []; } }
+function savePseudos(d) { localStorage.setItem('nw_pseudos', JSON.stringify(d)); }
+function psAdd() {
+  const platform = prompt('Plateforme (Discord, Insta, Steam, Riot, etc.) ?');
+  if (!platform) return;
+  const pseudo = prompt(`Ton pseudo sur ${platform} ?`);
+  if (!pseudo) return;
+  const list = getPseudos();
+  list.unshift({ id:'ps_'+Date.now(), platform, pseudo });
+  savePseudos(list);
+  renderPseudos();
+}
+function renderPseudos() {
+  const list = getPseudos();
+  if (!list.length) {
+    document.getElementById('ps-list').innerHTML = '<p style="text-align:center; color:var(--textSec); padding:30px;">Aucun pseudo. Tap + pour ajouter.</p>';
+    return;
+  }
+  const PLAT_EMOJI = {
+    discord:'🎮', insta:'📷', instagram:'📷', tiktok:'🎵', twitter:'🐦', x:'❌',
+    snap:'👻', snapchat:'👻', steam:'🎮', riot:'🎮', epic:'🎮', xbox:'🎮',
+    psn:'🎮', playstation:'🎮', nintendo:'🎮', switch:'🎮', pinterest:'📌',
+    youtube:'📺', twitch:'💜', spotify:'🎧', github:'💻', linkedin:'💼',
+    facebook:'👥', fb:'👥', telegram:'✈️', whatsapp:'💬', signal:'💬',
+    reddit:'🤖', bereal:'📷'
+  };
+  document.getElementById('ps-list').innerHTML = list.map(p => {
+    const em = PLAT_EMOJI[p.platform.toLowerCase()] || '🌐';
+    return `<div style="background:var(--surface); padding:12px 14px; border-radius:12px; margin-bottom:6px; display:flex; gap:10px; align-items:center;">
+      <div style="font-size:24px;">${em}</div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:12px; color:var(--textSec); font-weight:700; text-transform:uppercase;">${escapeHtml(p.platform)}</div>
+        <div style="font-size:14px; font-weight:700; word-break:break-all;">${escapeHtml(p.pseudo)}</div>
+      </div>
+      <button onclick="psCopy('${p.id}')" style="background:none; border:none; color:var(--primary); font-size:18px;" title="Copier">📋</button>
+      <button onclick="psDel('${p.id}')" style="background:none; border:none; color:var(--danger); font-size:18px;">🗑</button>
+    </div>`;
+  }).join('');
+}
+function psCopy(id) {
+  const p = getPseudos().find(x => x.id === id); if (!p) return;
+  navigator.clipboard?.writeText(p.pseudo);
+  toast('📋 Pseudo copié !');
+}
+function psDel(id) {
+  if (!confirm('Supprimer ?')) return;
+  savePseudos(getPseudos().filter(p => p.id !== id));
+  renderPseudos();
+}
+
+
+
+// ============================================================
+// DASHBOARD HOME (page sobre)
+// ============================================================
+
+// Shortcuts par défaut
+const DEFAULT_SHORTCUTS = ['notes','homework','flashcards','muscu','wardrobe','cycle','games','wallet2'];
+function getDashShortcuts() {
+  let arr; try { arr = JSON.parse(localStorage.getItem('nw_dash_shortcuts') || 'null'); } catch { arr = null; }
+  return arr || DEFAULT_SHORTCUTS.slice();
+}
+function saveDashShortcuts(arr) { localStorage.setItem('nw_dash_shortcuts', JSON.stringify(arr)); }
+
+let _dashEditMode = false;
+
+function renderDash() {
+  // Salutation
+  const h = new Date().getHours();
+  let greet = '';
+  if (h < 6) greet = '🌙 Encore éveillé(e) ?';
+  else if (h < 12) greet = '☀️ Bon matin';
+  else if (h < 18) greet = '🌤 Bon après-midi';
+  else if (h < 22) greet = '🌆 Bonne soirée';
+  else greet = '🌙 Bonne nuit';
+  
+  const day = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('dash-greeting').innerHTML = `<div style="font-size:13px; color:var(--textSec); font-weight:600;">${greet}</div>
+    <div style="font-size:11px; color:var(--textSec); opacity:0.7; margin-top:2px; text-transform:capitalize;">${day}</div>`;
+  
+  // Shortcuts
+  renderDashShortcuts();
+  
+  // Widget bandeau (si activé)
+  if (typeof renderHomeWidget === 'function') renderHomeWidget();
+  
+  // Quick stats
+  renderDashQuick();
+  
+  // Inspiration
+  renderDashInspire();
+}
+
+function renderDashShortcuts() {
+  const shortcuts = getDashShortcuts();
+  const wrap = document.getElementById('dash-shortcuts');
+  if (!wrap) return;
+  
+  // Trouver les infos depuis PAGE_INDEX
+  const pages = (typeof PAGE_INDEX !== 'undefined') ? PAGE_INDEX : [];
+  
+  let html = '';
+  shortcuts.forEach(id => {
+    const p = pages.find(x => x.page === id);
+    if (!p) return;
+    if (_dashEditMode) {
+      html += `<button onclick="dashRemoveShortcut('${id}')" style="background:var(--surface); border:1px solid var(--danger); border-radius:14px; padding:12px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; position:relative;">
+        <div style="position:absolute; top:-6px; right:-6px; background:var(--danger); color:white; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;">−</div>
+        <div style="font-size:24px;">${p.ico || '·'}</div>
+        <div style="font-size:10px; line-height:1.2; color:var(--text); font-weight:600; text-align:center;">${escapeHtml(p.name)}</div>
+      </button>`;
+    } else {
+      html += `<button onclick="goTo('${id}')" style="background:var(--surface); border:none; border-radius:14px; padding:12px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;">
+        <div style="font-size:24px;">${p.ico || '·'}</div>
+        <div style="font-size:10px; line-height:1.2; color:var(--text); font-weight:600; text-align:center; word-break:break-word;">${escapeHtml(p.name)}</div>
+      </button>`;
+    }
+  });
+  
+  // Bouton "Ajouter" en mode édition
+  if (_dashEditMode) {
+    html += `<button onclick="dashAddShortcut()" style="background:transparent; border:2px dashed var(--primary); border-radius:14px; padding:12px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--primary);">
+      <div style="font-size:24px;">+</div>
+      <div style="font-size:10px; font-weight:700;">Ajouter</div>
+    </button>`;
+  }
+  
+  if (!html && !_dashEditMode) {
+    html = `<div style="grid-column:1/-1; text-align:center; padding:14px; color:var(--textSec); font-size:12px;">
+      Aucun raccourci. Tap "Modifier" pour en ajouter.
+    </div>`;
+  }
+  
+  wrap.innerHTML = html;
+}
+
+function dashEditMode() {
+  _dashEditMode = !_dashEditMode;
+  const btn = document.getElementById('dash-edit-btn');
+  if (btn) btn.textContent = _dashEditMode ? '✓ Terminé' : '✎ Modifier';
+  renderDashShortcuts();
+}
+
+function dashRemoveShortcut(id) {
+  if (!confirm('Retirer ce raccourci ?')) return;
+  const shortcuts = getDashShortcuts().filter(s => s !== id);
+  saveDashShortcuts(shortcuts);
+  renderDashShortcuts();
+}
+
+function dashAddShortcut() {
+  const cur = getDashShortcuts();
+  const pages = (typeof PAGE_INDEX !== 'undefined') ? PAGE_INDEX : [];
+  const available = pages.filter(p => !cur.includes(p.page));
+  
+  // Afficher modal avec liste des pages disponibles
+  const modalHtml = `<div id="dash-add-modal" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:flex-end;" onclick="if(event.target===this)closeDashAdd()">
+    <div style="background:var(--bg); width:100%; max-height:80vh; border-radius:20px 20px 0 0; padding:20px; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="font-size:16px; font-weight:700; margin:0;">+ Ajouter un raccourci</h3>
+        <button onclick="closeDashAdd()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text);">✗</button>
+      </div>
+      <input type="text" class="input" id="dash-search" placeholder="🔍 Chercher..." oninput="dashFilterAdd(this.value)" style="margin-bottom:10px;">
+      <div id="dash-add-list" style="max-height:60vh; overflow-y:auto;"></div>
+    </div>
+  </div>`;
+  
+  const div = document.createElement('div');
+  div.innerHTML = modalHtml;
+  document.body.appendChild(div.firstElementChild);
+  
+  dashFilterAdd('');
+  setTimeout(() => document.getElementById('dash-search')?.focus(), 100);
+}
+
+function dashFilterAdd(q) {
+  const cur = getDashShortcuts();
+  const pages = (typeof PAGE_INDEX !== 'undefined') ? PAGE_INDEX : [];
+  const ql = (q || '').toLowerCase();
+  const list = pages.filter(p => 
+    !cur.includes(p.page) && 
+    (!ql || (p.name||'').toLowerCase().includes(ql) || (p.kw||'').toLowerCase().includes(ql) || (p.cat||'').toLowerCase().includes(ql))
+  );
+  
+  // Grouper par catégorie
+  const grouped = {};
+  list.forEach(p => {
+    const cat = p.cat || 'Autres';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(p);
+  });
+  
+  let html = '';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div style="font-size:11px; color:var(--primary); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin:10px 0 4px;">${escapeHtml(cat)}</div>`;
+    items.forEach(p => {
+      html += `<div onclick="dashConfirmAdd('${p.page}')" style="display:flex; gap:10px; align-items:center; padding:10px 12px; background:var(--surface); border-radius:8px; margin-bottom:4px; cursor:pointer;">
+        <div style="font-size:20px;">${p.ico || '·'}</div>
+        <div style="flex:1; font-size:13px; font-weight:600;">${escapeHtml(p.name)}</div>
+        <div style="font-size:18px; color:var(--primary);">+</div>
+      </div>`;
+    });
+  });
+  
+  if (!html) html = '<p style="text-align:center; color:var(--textSec); padding:30px;">Aucune fonctionnalité trouvée</p>';
+  
+  document.getElementById('dash-add-list').innerHTML = html;
+}
+
+function dashConfirmAdd(id) {
+  const shortcuts = getDashShortcuts();
+  if (shortcuts.length >= 12) {
+    if (!confirm('T\'as déjà 12 raccourcis. Continuer ?')) return;
+  }
+  shortcuts.push(id);
+  saveDashShortcuts(shortcuts);
+  closeDashAdd();
+  renderDashShortcuts();
+  toast('✓ Raccourci ajouté');
+}
+
+function closeDashAdd() {
+  const m = document.getElementById('dash-add-modal');
+  if (m) m.remove();
+}
+
+async function renderDashQuick() {
+  const wrap = document.getElementById('dash-quick');
+  if (!wrap) return;
+  let cards = [];
+  const today = todayKey();
+  
+  // Devoirs urgents
+  try {
+    const hw = (await dbAll('homework')) || [];
+    const urgent = hw.filter(h => !h.done && h.due && h.due <= today);
+    if (urgent.length) cards.push({
+      ico:'📝', label:`${urgent.length} devoir${urgent.length>1?'s':''} urgent${urgent.length>1?'s':''}`,
+      val: urgent[0].title.slice(0, 22), color:'#FF4757', route:'homework'
+    });
+  } catch {}
+  
+  // Hydratation
+  try {
+    const hyd = JSON.parse(localStorage.getItem('nw_hydra') || '{}')[today] || 0;
+    const goal = parseInt(localStorage.getItem('nw_hydra_goal') || 2000);
+    const pct = Math.round((hyd/goal)*100);
+    cards.push({
+      ico:'💧', label:'Hydratation',
+      val:`${pct}%`, color: pct >= 100 ? '#5DD68F' : '#5DADE2', route:'hydra'
+    });
+  } catch {}
+  
+  // Habitudes
+  try {
+    const habits = (await dbAll('habits')) || [];
+    if (habits.length) {
+      const logs = (await dbAll('habit_logs')) || [];
+      const todayLogs = logs.filter(l => l.date === today).map(l => l.habit_id);
+      const done = habits.filter(h => todayLogs.includes(h.id)).length;
+      cards.push({
+        ico:'🎯', label:'Habitudes',
+        val:`${done}/${habits.length}`, color: done === habits.length ? '#5DD68F' : '#FFD166', route:'habits'
+      });
+    }
+  } catch {}
+  
+  // Bac countdown
+  try {
+    const bd = localStorage.getItem('nw_bac_date');
+    if (bd) {
+      const t = new Date(bd); t.setHours(0,0,0,0);
+      const n = new Date(); n.setHours(0,0,0,0);
+      const days = Math.floor((t-n)/86400000);
+      if (days > 0) cards.push({ ico:'🎓', label:'Bac dans', val:`${days}j`, color:'#A78BFA', route:'home' });
+    }
+  } catch {}
+  
+  // Limiter à 4 cartes
+  cards = cards.slice(0, 4);
+  
+  if (!cards.length) {
+    wrap.innerHTML = `<div style="grid-column:1/-1; background:var(--surface); padding:18px; border-radius:14px; text-align:center;">
+      <div style="font-size:32px;">📊</div>
+      <div style="font-size:12px; color:var(--textSec); margin-top:6px;">Aucune donnée à afficher</div>
+      <div style="font-size:11px; color:var(--textSec); margin-top:2px;">Configure tes habitudes, devoirs, etc. pour voir tes stats ici</div>
+    </div>`;
+    return;
+  }
+  
+  wrap.innerHTML = cards.map(c => `<div onclick="goTo('${c.route}')" style="background:var(--surface); border-left:4px solid ${c.color}; padding:12px; border-radius:10px; cursor:pointer;">
+    <div style="display:flex; gap:6px; align-items:center;">
+      <div style="font-size:22px;">${c.ico}</div>
+      <div style="font-size:10px; color:var(--textSec); font-weight:600;">${escapeHtml(c.label)}</div>
+    </div>
+    <div style="font-size:18px; font-weight:800; color:${c.color}; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(c.val)}</div>
+  </div>`).join('');
+}
+
+function renderDashInspire() {
+  const wrap = document.getElementById('dash-inspire');
+  if (!wrap) return;
+  // Soit citation soit compliment soit mentor selon le jour
+  const today = todayKey();
+  const seed = parseInt(today.replace(/-/g,''));
+  const choice = seed % 3;
+  
+  let html = '';
+  if (choice === 0 && typeof CITATIONS !== 'undefined' && CITATIONS.length) {
+    const c = CITATIONS[seed % CITATIONS.length];
+    html = `<div onclick="goTo('quotes')" style="background:linear-gradient(135deg, var(--primary), var(--accent)); color:white; padding:16px; border-radius:14px; cursor:pointer;">
+      <div style="font-size:11px; opacity:0.85; text-transform:uppercase; letter-spacing:1.5px;">💭 Citation du jour</div>
+      <p style="font-style:italic; font-size:13px; line-height:1.5; margin-top:8px;">« ${escapeHtml(c.texte)} »</p>
+      <div style="font-size:11px; text-align:right; opacity:0.85; margin-top:4px;">— ${escapeHtml(c.auteur)}</div>
+    </div>`;
+  } else if (choice === 1 && typeof COMPLIMENTS !== 'undefined') {
+    const txt = COMPLIMENTS[seed % COMPLIMENTS.length];
+    html = `<div onclick="goTo('compliment')" style="background:linear-gradient(135deg, #FFB6D9, #FF6FA3); color:white; padding:16px; border-radius:14px; cursor:pointer;">
+      <div style="font-size:11px; opacity:0.85; text-transform:uppercase; letter-spacing:1.5px;">💕 Compliment</div>
+      <p style="font-size:14px; line-height:1.5; margin-top:8px; font-style:italic; font-weight:600;">${escapeHtml(txt)}</p>
+    </div>`;
+  } else if (typeof MENTORS !== 'undefined') {
+    const m = MENTORS[seed % MENTORS.length];
+    html = `<div onclick="goTo('mentor')" style="background:linear-gradient(135deg, #FF4757, #1A1A1A); color:white; padding:16px; border-radius:14px; cursor:pointer;">
+      <div style="font-size:11px; opacity:0.85; text-transform:uppercase; letter-spacing:1.5px;">🎯 Mentor du jour</div>
+      <p style="font-size:13px; line-height:1.5; margin-top:8px; font-style:italic;">« ${escapeHtml(m.txt)} »</p>
+      <div style="font-size:11px; text-align:right; color:#FFD700; font-weight:700; margin-top:4px;">— ${escapeHtml(m.auteur)}</div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+
 // ============================================================
 // SERVICE WORKER
 // ============================================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW failed', e));
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      // Vérifier les updates au démarrage
+      reg.update().catch(() => {});
+      // Détecter une nouvelle version
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('Nouvelle version disponible');
+            }
+          });
+        }
+      });
+    }).catch(e => console.warn('SW failed', e));
   });
+}
+
+// Reset complet du cache + reload (en cas de bug iOS)
+async function resetAppCache() {
+  if (!confirm('⚠️ Vider tout le cache de l\'app et recharger ?\n\nTes données (notes, devoirs, etc.) ne seront PAS perdues.')) return;
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    toast('🧹 Cache vidé, rechargement...');
+    setTimeout(() => location.reload(true), 800);
+  } catch (e) {
+    alert('Erreur: ' + e.message);
+  }
 }
 
 // ============================================================
