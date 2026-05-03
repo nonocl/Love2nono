@@ -14417,23 +14417,53 @@ async function delKV(key) { return dbDel('kv', key); }
 // ============================================================
 // === Back navigation using history ===
 function goBack() {
-  if (typeof window._navHistory === 'undefined') window._navHistory = [];
-  // Pop pages from history until we find one that isn't the current page
-  let prev = null;
-  while (window._navHistory.length > 0) {
-    const candidate = window._navHistory.pop();
-    if (candidate && candidate !== state.page) {
-      prev = candidate;
-      break;
-    }
-  }
-  if (prev) {
-    window._goingBack = true; // flag to skip the next push
-    goTo(prev);
-  } else {
+  // V60 LOGIC : retour intelligent
+  // - Si on est sur une feature → retour à 'all' filtré sur sa catégorie
+  // - Si on est sur 'all', 'settings', 'recent', 'menu', ou page hors features → retour à 'home'
+  
+  const currentPage = state.page;
+  
+  // Pages "système" qui retournent toujours à home
+  const systemPages = ['home', 'all', 'recent', 'search', 'menu', 'settings', 'custom-theme', 'palette'];
+  if (systemPages.includes(currentPage)) {
     window._goingBack = true;
     goTo('home');
+    return;
   }
+  
+  // Sinon, c'est une feature : trouve sa catégorie dans PAGE_INDEX
+  if (typeof PAGE_INDEX !== 'undefined') {
+    const item = PAGE_INDEX.find(p => p.page === currentPage);
+    if (item && item.cat) {
+      // Retour à 'all' avec le filtre sur la bonne catégorie
+      window._goingBack = true;
+      goTo('all');
+      // Applique le filtre catégorie après que la page soit rendue
+      setTimeout(() => {
+        if (typeof filterCat === 'function') {
+          try { filterCat(item.cat); } catch(e) { console.warn('filterCat err', e); }
+        }
+        // Scroll vers la section
+        try {
+          const pageAll = document.getElementById('page-all');
+          if (pageAll) {
+            const sections = pageAll.querySelectorAll('.home-section');
+            sections.forEach(s => {
+              const title = s.querySelector('.home-section-title');
+              if (title && title.textContent.toLowerCase().includes(item.cat.toLowerCase())) {
+                s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            });
+          }
+        } catch(e) {}
+      }, 100);
+      return;
+    }
+  }
+  
+  // Fallback : si on trouve pas de catégorie, retour home
+  window._goingBack = true;
+  goTo('home');
 }
 
 function goTo(page) {

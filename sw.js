@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v60-pages';
+const CACHE = 'love2nono-v60-goback';
 const ASSETS = [
   './',
   './index.html',
