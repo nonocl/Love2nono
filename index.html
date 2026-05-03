@@ -8198,6 +8198,131 @@ button, a, [role="button"], input[type="button"], input[type="submit"] {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary, #FF6FA3); }
 
+
+
+/* V60 GAP FIX */
+/* ============================================================
+   V60 RADICAL FIX — vides énormes dans home cat-scroll & recent
+   ============================================================ */
+
+/* CONTAINER PRINCIPAL HOME : flex column strict, gap unique */
+body.v56-active #page-home {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.v56-active #page-home > .v56-home-bg,
+body.v56-active #page-home > div:not(.topbar):not(.v56-bottom-nav):not(.toast):not(.modal) {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+}
+
+/* Tous les v56-home-content : padding cohérent, pas de margin */
+body.v56-active .v56-home-content {
+  padding: 8px 16px 0 !important;
+  margin: 0 !important;
+}
+
+/* Le DERNIER v56-home-content (qui contient mood-card) garde padding-bottom */
+body.v56-active .v56-home-content:last-of-type {
+  padding-bottom: 100px !important;
+}
+
+/* Quand v56-home-content suit un scroll horizontal (cat ou recent),
+   pas de padding-top */
+body.v56-active .v56-cat-scroll + .v56-home-content,
+body.v56-active .v56-recent-list + .v56-home-content {
+  padding-top: 0 !important;
+}
+
+/* Quand v56-home-content précède un scroll horizontal,
+   pas de padding-bottom */
+body.v56-active .v56-home-content:has(+ .v56-cat-scroll),
+body.v56-active .v56-home-content:has(+ .v56-recent-list) {
+  padding-bottom: 0 !important;
+}
+
+/* Section title compact */
+body.v56-active .v56-section-title {
+  margin: 6px 0 4px !important;
+  padding: 0 !important;
+}
+
+/* Scrolls horizontaux : padding minimal */
+body.v56-active .v56-cat-scroll,
+body.v56-active .v56-recent-list {
+  margin: 0 !important;
+  padding: 0 16px 8px !important;
+  min-height: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+}
+
+/* Cards des scrolls : tailles RIGIDES */
+body.v56-active .v56-cat-card {
+  flex: 0 0 auto !important;
+  width: 120px !important;
+  height: 130px !important;
+  padding: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  margin: 0 !important;
+}
+
+body.v56-active .v56-recent-card {
+  flex: 0 0 auto !important;
+  width: 88px !important;
+  height: 80px !important;
+  padding: 10px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+}
+
+/* Cacher les recent-list vides */
+body.v56-active .v56-recent-list:empty {
+  display: none !important;
+}
+
+/* Cacher les section-title qui n'ont rien après (prévention) */
+body.v56-active .v56-section-title:has(+ :empty) {
+  display: none !important;
+}
+
+/* Fix CRITIQUE : retirer les margin entre éléments adjacents */
+body.v56-active #page-home > * + * {
+  margin-top: 0 !important;
+}
+
+/* Body home-content structure : pas de white-space ou de gap */
+body.v56-active #page-home {
+  white-space: normal !important;
+}
+
+/* Hero card et autres blocs : margin contrôlé */
+body.v56-active .v56-hero-card {
+  margin: 0 0 8px 0 !important;
+}
+body.v56-active .v56-greeting {
+  margin: 0 0 8px 0 !important;
+}
+body.v56-active .v56-stats-row {
+  margin: 0 0 8px 0 !important;
+}
+body.v56-active .v56-quick-grid {
+  margin: 0 0 8px 0 !important;
+}
+body.v56-active .v56-inspire {
+  margin: 0 0 8px 0 !important;
+}
+body.v56-active .v56-mood-card {
+  margin: 8px 0 0 0 !important;
+}
+
 </style>
 
 <!-- HUB -->
