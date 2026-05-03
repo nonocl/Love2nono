@@ -1,11 +1,19 @@
-const CACHE = 'love2nono-v60-final';
+const CACHE = 'love2nono-v60-pages';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-180.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './icons-pack/icon-aesthetic-180.png',
+  './icons-pack/icon-aesthetic-512.png',
+  './icons-pack/icon-kawaii-180.png',
+  './icons-pack/icon-kawaii-512.png',
+  './icons-pack/icon-manga-180.png',
+  './icons-pack/icon-manga-512.png',
+  './icons-pack/icon-plush-180.png',
+  './icons-pack/icon-plush-512.png'
 ];
 
 const EXT_CACHE = 'nonosworld-ext-libs-v2';

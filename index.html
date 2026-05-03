@@ -8387,6 +8387,30 @@ button:active, .btn:active {
   transform: scale(0.97);
 }
 
+
+
+/* V60 FORCE PAGES (must be last for priority) */
+/* ============================================================
+   V60 FORCE — pages cachées vraiment cachées
+   AVEC sécurité click (jamais de pointer-events: none sur active)
+   ============================================================ */
+
+/* Force display none sur TOUTES les pages non-active */
+body .page:not(.active) {
+  display: none !important;
+}
+
+/* Force display block sur la page active */
+body .page.active {
+  display: block !important;
+}
+
+/* PAS de pointer-events bloqué sur la page active */
+body .page.active,
+body .page.active * {
+  /* hands off — laisser les clicks passer normalement */
+}
+
 </style>
 
 <!-- HUB -->
