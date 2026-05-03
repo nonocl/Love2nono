@@ -4106,7 +4106,7 @@ mark.fuzzy-match {
 <!-- ======= PFP DETAIL ======= -->
 <div class="page" id="page-pfp-detail">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('gallery')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title" id="pfp-detail-title">PFP</div>
     <div style="width: 40px;"></div>
   </div>
@@ -4156,7 +4156,7 @@ mark.fuzzy-match {
 <!-- ======= ALBUM DETAIL ======= -->
 <div class="page" id="page-album-detail">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('albums')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title" id="album-detail-title">Album</div>
     <div style="width:40px;"></div>
   </div>
@@ -4559,7 +4559,7 @@ mark.fuzzy-match {
 <!-- ======= WATCHLIST DETAIL ======= -->
 <div class="page" id="page-watch-detail">
   <div class="page-header" style="position:absolute; top:0; left:0; right:0; z-index:2; padding:env(safe-area-inset-top) 16px 0;">
-    <button class="back-btn" onclick="goTo('watch')" style="background:rgba(0,0,0,0.4); color:white;">‹</button>
+    <button class="back-btn" onclick="goBack()" style="background:rgba(0,0,0,0.4); color:white;">‹</button>
     <div style="flex:1;"></div>
     <button class="icon-btn" onclick="openWatchModal(_curWatch)" style="background:rgba(0,0,0,0.4); color:white;">✏️</button>
   </div>
@@ -4603,7 +4603,7 @@ mark.fuzzy-match {
 <!-- ======= MUSIC CATEGORIES ======= -->
 <div class="page" id="page-music-cats">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('music')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">Catégories musique</div>
     <button class="icon-btn" style="background:var(--primary); color:white;" onclick="openMusicCatModal(null)">+</button>
   </div>
@@ -4613,7 +4613,7 @@ mark.fuzzy-match {
 <!-- ======= PLAYER FULL ======= -->
 <div class="page" id="page-player">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('music')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">En lecture</div>
     <button class="icon-btn" onclick="openPlayerMenu()">⋯</button>
   </div>
@@ -4657,7 +4657,7 @@ mark.fuzzy-match {
 <!-- ======= PLAYLIST DETAIL ======= -->
 <div class="page" id="page-playlist-detail">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('playlists')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title" id="playlist-detail-title">Playlist</div>
     <button class="icon-btn" onclick="editCurrentPlaylist()">✏️</button>
   </div>
@@ -4718,7 +4718,7 @@ mark.fuzzy-match {
 
 <div class="page" id="page-deck-detail">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('flashcards')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title" id="deck-detail-title">Deck</div>
     <button class="icon-btn" onclick="editCurrentDeck()">✏️</button>
   </div>
@@ -4988,7 +4988,7 @@ mark.fuzzy-match {
 <!-- ======= PHRASEBOOK ======= -->
 <div class="page" id="page-phrasebook">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('translator')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">Phrases utiles</div>
     <div style="width:40px;"></div>
   </div>
@@ -5210,7 +5210,7 @@ mark.fuzzy-match {
 <!-- ====== 2048 ====== -->
 <div class="page" id="page-game-2048">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🔢 2048</div>
     <button class="icon-btn" onclick="init2048()" title="Recommencer">↻</button>
   </div>
@@ -5227,7 +5227,7 @@ mark.fuzzy-match {
 <!-- ====== Snake ====== -->
 <div class="page" id="page-game-snake">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🐍 Snake</div>
     <button class="icon-btn" onclick="initSnake()" title="Recommencer">↻</button>
   </div>
@@ -5254,7 +5254,7 @@ mark.fuzzy-match {
 <!-- ====== Memory ====== -->
 <div class="page" id="page-game-memory">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🧠 Memory</div>
     <button class="icon-btn" onclick="initMemory()" title="Recommencer">↻</button>
   </div>
@@ -5270,7 +5270,7 @@ mark.fuzzy-match {
 <!-- ====== Tic-Tac-Toe ====== -->
 <div class="page" id="page-game-tictac">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">⭕ Morpion</div>
     <button class="icon-btn" onclick="initTicTac()" title="Recommencer">↻</button>
   </div>
@@ -5290,7 +5290,7 @@ mark.fuzzy-match {
 <!-- ====== Démineur ====== -->
 <div class="page" id="page-game-mines">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">💣 Démineur</div>
     <button class="icon-btn" onclick="initMines()" title="Recommencer">↻</button>
   </div>
@@ -5307,7 +5307,7 @@ mark.fuzzy-match {
 <!-- ====== Taquin ====== -->
 <div class="page" id="page-game-puzzle">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🧩 Taquin 15</div>
     <button class="icon-btn" onclick="initPuzzle()" title="Mélanger">🔀</button>
   </div>
@@ -5324,7 +5324,7 @@ mark.fuzzy-match {
 <!-- ====== Pierre/Feuille/Ciseaux ====== -->
 <div class="page" id="page-game-rps">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">✊ Pierre/Feuille/Ciseaux</div>
     <button class="icon-btn" onclick="resetRps()" title="Reset">↻</button>
   </div>
@@ -5350,7 +5350,7 @@ mark.fuzzy-match {
 <!-- ====== Devine nombre ====== -->
 <div class="page" id="page-game-guess">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎯 Devine le nombre</div>
     <button class="icon-btn" onclick="initGuess()" title="Nouveau">↻</button>
   </div>
@@ -5369,7 +5369,7 @@ mark.fuzzy-match {
 <!-- ====== Simon ====== -->
 <div class="page" id="page-game-simon">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎵 Simon</div>
     <button class="icon-btn" onclick="initSimon()" title="Reset">↻</button>
   </div>
@@ -5392,7 +5392,7 @@ mark.fuzzy-match {
 <!-- ====== Flags Quiz ====== -->
 <div class="page" id="page-game-flags">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🌍 Quiz drapeaux</div>
     <button class="icon-btn" onclick="initFlags()" title="Recommencer">↻</button>
   </div>
@@ -5850,7 +5850,7 @@ mark.fuzzy-match {
 
 <div class="page" id="page-wheel-spin">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('wheel')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title" id="wheel-spin-title">Roue</div>
     <button class="icon-btn" onclick="editCurrentWheel()">✏️</button>
   </div>
@@ -5902,7 +5902,7 @@ mark.fuzzy-match {
 <!-- Sudoku -->
 <div class="page" id="page-game-sudoku">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🔢 Sudoku</div>
     <button class="icon-btn" onclick="newSudoku()" title="Nouveau">↻</button>
   </div>
@@ -5931,7 +5931,7 @@ mark.fuzzy-match {
 <!-- Tetris -->
 <div class="page" id="page-game-tetris">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🟦 Tetris</div>
     <button class="icon-btn" onclick="initTetris()" title="Recommencer">↻</button>
   </div>
@@ -5955,7 +5955,7 @@ mark.fuzzy-match {
 <!-- Pong -->
 <div class="page" id="page-game-pong">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🏓 Pong</div>
     <button class="icon-btn" onclick="initPong()" title="Recommencer">↻</button>
   </div>
@@ -5969,7 +5969,7 @@ mark.fuzzy-match {
 <!-- Wordle -->
 <div class="page" id="page-game-wordle">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">📝 Wordle FR</div>
     <button class="icon-btn" onclick="initWordle()" title="Nouveau">↻</button>
   </div>
@@ -5983,7 +5983,7 @@ mark.fuzzy-match {
 <!-- Mots mêlés -->
 <div class="page" id="page-game-wordsearch">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🔍 Mots mêlés</div>
     <button class="icon-btn" onclick="newWordSearch()" title="Nouveau">↻</button>
   </div>
@@ -8435,7 +8435,7 @@ body .page.active * {
 <!-- DISCORD EDITOR -->
 <div class="page" id="page-sim-discord">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('socialsim')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">💜 Discord</div>
     <button class="icon-btn" onclick="saveSocialSim('discord')" title="Enregistrer">💾</button>
   </div>
@@ -8561,7 +8561,7 @@ body .page.active * {
 <!-- INSTAGRAM EDITOR -->
 <div class="page" id="page-sim-instagram">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('socialsim')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">📷 Instagram</div>
     <button class="icon-btn" onclick="saveSocialSim('instagram')" title="Enregistrer">💾</button>
   </div>
@@ -8616,7 +8616,7 @@ body .page.active * {
 <!-- TIKTOK EDITOR -->
 <div class="page" id="page-sim-tiktok">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('socialsim')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎵 TikTok</div>
     <button class="icon-btn" onclick="saveSocialSim('tiktok')" title="Enregistrer">💾</button>
   </div>
@@ -8657,7 +8657,7 @@ body .page.active * {
 <!-- X EDITOR -->
 <div class="page" id="page-sim-x">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('socialsim')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">𝕏 X (Twitter)</div>
     <button class="icon-btn" onclick="saveSocialSim('x')" title="Enregistrer">💾</button>
   </div>
@@ -8698,7 +8698,7 @@ body .page.active * {
 <!-- SNAPCHAT EDITOR -->
 <div class="page" id="page-sim-snapchat">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('socialsim')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">👻 Snapchat</div>
     <button class="icon-btn" onclick="saveSocialSim('snapchat')" title="Enregistrer">💾</button>
   </div>
@@ -9046,7 +9046,7 @@ body .page.active * {
 <!-- ====== PENDU ====== -->
 <div class="page" id="page-game-hang">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">💀 Pendu</div>
     <button class="icon-btn" onclick="newHangman()" title="Nouveau">↻</button>
   </div>
@@ -9066,7 +9066,7 @@ body .page.active * {
 <!-- ====== BATAILLE NAVALE ====== -->
 <div class="page" id="page-game-naval">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🚢 Bataille navale</div>
     <button class="icon-btn" onclick="newNaval()" title="Nouveau">↻</button>
   </div>
@@ -9083,7 +9083,7 @@ body .page.active * {
 <!-- ====== PUISSANCE 4 ====== -->
 <div class="page" id="page-game-c4">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🔴 Puissance 4</div>
     <button class="icon-btn" onclick="newC4()" title="Nouveau">↻</button>
   </div>
@@ -9096,7 +9096,7 @@ body .page.active * {
 <!-- ====== MASTERMIND ====== -->
 <div class="page" id="page-game-master">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎯 Mastermind</div>
     <button class="icon-btn" onclick="newMaster()" title="Nouveau">↻</button>
   </div>
@@ -9113,7 +9113,7 @@ body .page.active * {
 <!-- ====== TYPE RACER ====== -->
 <div class="page" id="page-game-typer">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">⌨️ Type Racer</div>
     <button class="icon-btn" onclick="newTyper()" title="Nouveau">↻</button>
   </div>
@@ -9190,7 +9190,7 @@ body .page.active * {
 <!-- ======= CUSTOM THEME EDITOR ======= -->
 <div class="page" id="page-custom-theme">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('settings')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">Thème custom</div>
     <button class="icon-btn" onclick="saveCustomTheme()" style="background:var(--primary); color:white; font-size:14px; font-weight:700; width:auto; padding:0 12px;">OK</button>
   </div>
@@ -10551,7 +10551,7 @@ body .page.active * {
 <!-- ====== JEU: ÉCHECS (vs IA) ====== -->
 <div class="page" id="page-game-chess">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">♟️ Échecs</div>
     <button class="icon-btn" onclick="newChess()">↻</button>
   </div>
@@ -10565,7 +10565,7 @@ body .page.active * {
 <!-- ====== JEU: FLAPPY ====== -->
 <div class="page" id="page-game-flappy">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🐦 Flappy</div>
     <button class="icon-btn" onclick="newFlappy()">↻</button>
   </div>
@@ -10579,7 +10579,7 @@ body .page.active * {
 <!-- ====== JEU: DOODLE JUMP ====== -->
 <div class="page" id="page-game-doodle">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🦘 Doodle Jump</div>
     <button class="icon-btn" onclick="newDoodle()">↻</button>
   </div>
@@ -10597,7 +10597,7 @@ body .page.active * {
 <!-- ====== JEU: WHACK-A-MOLE ====== -->
 <div class="page" id="page-game-mole">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🐹 Whack-a-mole</div>
     <button class="icon-btn" onclick="newMole()">↻</button>
   </div>
@@ -10614,7 +10614,7 @@ body .page.active * {
 <!-- ====== JEU: PAC-MAN simplifié ====== -->
 <div class="page" id="page-game-pacman">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">👻 Pac-Man</div>
     <button class="icon-btn" onclick="newPacman()">↻</button>
   </div>
@@ -10638,7 +10638,7 @@ body .page.active * {
 <!-- ====== JEU: QUIZ CULTURE ====== -->
 <div class="page" id="page-game-quiz">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🧠 Quiz culture</div>
     <button class="icon-btn" onclick="newQuiz()">↻</button>
   </div>
@@ -10659,7 +10659,7 @@ body .page.active * {
 <!-- ====== JEU: DEVINE EMOJI (Films/séries) ====== -->
 <div class="page" id="page-game-emoji-quiz">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎬 Devine les emojis</div>
     <button class="icon-btn" onclick="newEmojiQuizGame()">↻</button>
   </div>
@@ -10949,7 +10949,7 @@ body .page.active * {
 <!-- ====== DÉTAIL FICHIER ====== -->
 <div class="page" id="page-file-detail">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('files')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title" id="fd-title">Fichier</div>
     <button class="icon-btn" onclick="fdMenu()">⋯</button>
   </div>
@@ -11570,7 +11570,7 @@ body .page.active * {
 </div>
 <div class="page" id="page-invent-edit">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('invent')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">📦 Objet</div>
     <button class="icon-btn" onclick="invDel()" style="color:var(--danger);">🗑</button>
   </div>
@@ -11679,7 +11679,7 @@ body .page.active * {
 </div>
 <div class="page" id="page-capsule-edit">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('capsule')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">⏳ Nouvelle capsule</div>
     <div style="width:40px;"></div>
   </div>
@@ -11794,7 +11794,7 @@ body .page.active * {
 <!-- ====== JEUX ====== -->
 <div class="page" id="page-game-sokoban">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">📦 Sokoban</div>
     <button class="icon-btn" onclick="sokInit(_sokLevel)" title="Restart">↻</button>
   </div>
@@ -11818,7 +11818,7 @@ body .page.active * {
 
 <div class="page" id="page-game-pendu">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('games')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🪢 Pendu</div>
     <button class="icon-btn" onclick="penNew()" title="Nouveau">↻</button>
   </div>
@@ -11902,7 +11902,7 @@ body .page.active * {
 <!-- ====== PACKS ====== -->
 <div class="page" id="page-widget-packs">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('widgets')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">📦 Packs de widgets</div>
     <div style="width:40px;"></div>
   </div>
@@ -11917,7 +11917,7 @@ body .page.active * {
 <!-- ====== GÉNÉRATEUR CUSTOM ====== -->
 <div class="page" id="page-widget-custom">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('widgets')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎨 Widget perso</div>
     <button class="icon-btn" onclick="wgRandomize()" title="Aléatoire">🎲</button>
   </div>
@@ -12027,7 +12027,7 @@ body .page.active * {
 
 <div class="page" id="page-cycle-log">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('cycle')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">📝 Logger</div>
     <div style="width:40px;"></div>
   </div>
@@ -12064,7 +12064,7 @@ body .page.active * {
 
 <div class="page" id="page-skincare-edit">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('skincare')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">✎ Routine</div>
     <div style="width:40px;"></div>
   </div>
@@ -12096,7 +12096,7 @@ body .page.active * {
 
 <div class="page" id="page-wardrobe-add">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('wardrobe')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">+ Vêtement</div>
     <div style="width:40px;"></div>
   </div>
@@ -12162,7 +12162,7 @@ body .page.active * {
 
 <div class="page" id="page-beauty-add">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('beauty')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">+ Produit</div>
     <div style="width:40px;"></div>
   </div>
@@ -12278,7 +12278,7 @@ body .page.active * {
 
 <div class="page" id="page-soiree-edit">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('soiree')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎉 Soirée</div>
     <div style="width:40px;"></div>
   </div>
@@ -12311,7 +12311,7 @@ body .page.active * {
 
 <div class="page" id="page-muscu-session">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('muscu')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🔥 Séance</div>
     <button class="icon-btn" onclick="muscuFinishSession()" title="Terminer">✓</button>
   </div>
@@ -12350,7 +12350,7 @@ body .page.active * {
 
 <div class="page" id="page-wallet2-add">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('wallet2')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">+ Transaction</div>
     <div style="width:40px;"></div>
   </div>
@@ -12386,7 +12386,7 @@ body .page.active * {
 
 <div class="page" id="page-wallet2-goals">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('wallet2')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🎯 Objectifs épargne</div>
     <button class="icon-btn" onclick="goalAdd()">+</button>
   </div>
@@ -12413,7 +12413,7 @@ body .page.active * {
 
 <div class="page" id="page-gaming-add">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('gaming')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">+ Jeu</div>
     <div style="width:40px;"></div>
   </div>
@@ -12480,7 +12480,7 @@ body .page.active * {
 
 <div class="page" id="page-diet-add">
   <div class="page-header">
-    <button class="back-btn" onclick="goTo('diet')">‹</button>
+    <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">+ Repas</div>
     <div style="width:40px;"></div>
   </div>
