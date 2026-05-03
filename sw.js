@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v60-gapfix';
+const CACHE = 'love2nono-v60-final';
 const ASSETS = [
   './',
   './index.html',

@@ -3631,7 +3631,7 @@ mark.fuzzy-match {
 
 <!-- ======= HOME ======= -->
 <!-- ====== DASHBOARD ACCUEIL SOBRE ====== -->
-<div class="page active" id="page-home" style="background: #050505;">
+<div class="page active" id="page-home">
   <div class="topbar" style="background:transparent; border:none;">
     <button class="icon-btn" onclick="openCmdPalette()" style="opacity:0.6;" title="Recherche (⌘K)">🔍</button>
     <div class="title" id="home-title" style="font-size:15px; font-weight:600; opacity:0.5; letter-spacing:0.5px;">love2nono</div>
@@ -3688,7 +3688,7 @@ mark.fuzzy-match {
   </div>
   <div class="searchbar-wrap" style="padding:8px 16px 4px;">
     <div style="position:relative;">
-      <input type="text" class="searchbar" id="home-search" placeholder="🔍 Cherche dans 285 fonctionnalités..." oninput="onHomeSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false" style="padding-left:14px; padding-right:14px; border-radius:14px; font-size:14px; height:44px; width:100%; background:var(--surface); border:1.5px solid var(--border); box-shadow:0 2px 8px var(--shadow); cursor:pointer;">
+      <input type="text" class="searchbar" id="home-search" placeholder="🔍 Cherche dans 503 fonctionnalités..." oninput="onHomeSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false" style="padding-left:14px; padding-right:14px; border-radius:14px; font-size:14px; height:44px; width:100%; background:var(--surface); border:1.5px solid var(--border); box-shadow:0 2px 8px var(--shadow); cursor:pointer;">
       <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:var(--surfaceAlt); padding:3px 7px; border-radius:5px; font-size:10px; font-family:ui-monospace,monospace; color:var(--textSec); font-weight:600; pointer-events:none;">⌘K</span>
     </div>
   </div>
@@ -8200,127 +8200,191 @@ button, a, [role="button"], input[type="button"], input[type="submit"] {
 
 
 
-/* V60 GAP FIX */
+
+
+
+
+/* V60 MINIMAL SAFE */
 /* ============================================================
-   V60 RADICAL FIX — vides énormes dans home cat-scroll & recent
+   V60 MINIMAL FIX — espacement uniquement, JAMAIS pointer-events
    ============================================================ */
 
-/* CONTAINER PRINCIPAL HOME : flex column strict, gap unique */
-body.v56-active #page-home {
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-body.v56-active #page-home > .v56-home-bg,
-body.v56-active #page-home > div:not(.topbar):not(.v56-bottom-nav):not(.toast):not(.modal) {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 0 !important;
-}
-
-/* Tous les v56-home-content : padding cohérent, pas de margin */
+/* === Réduire les paddings de v56-home-content === */
 body.v56-active .v56-home-content {
-  padding: 8px 16px 0 !important;
-  margin: 0 !important;
+  padding: 10px 16px 0;
 }
 
-/* Le DERNIER v56-home-content (qui contient mood-card) garde padding-bottom */
 body.v56-active .v56-home-content:last-of-type {
-  padding-bottom: 100px !important;
+  padding-bottom: 110px;
 }
 
-/* Quand v56-home-content suit un scroll horizontal (cat ou recent),
-   pas de padding-top */
 body.v56-active .v56-cat-scroll + .v56-home-content,
 body.v56-active .v56-recent-list + .v56-home-content {
-  padding-top: 0 !important;
+  padding-top: 0;
 }
 
-/* Quand v56-home-content précède un scroll horizontal,
-   pas de padding-bottom */
-body.v56-active .v56-home-content:has(+ .v56-cat-scroll),
-body.v56-active .v56-home-content:has(+ .v56-recent-list) {
-  padding-bottom: 0 !important;
-}
-
-/* Section title compact */
-body.v56-active .v56-section-title {
-  margin: 6px 0 4px !important;
-  padding: 0 !important;
-}
-
-/* Scrolls horizontaux : padding minimal */
+/* === Scrolls horizontaux compacts === */
 body.v56-active .v56-cat-scroll,
 body.v56-active .v56-recent-list {
-  margin: 0 !important;
-  padding: 0 16px 8px !important;
-  min-height: 0 !important;
-  display: flex !important;
-  align-items: flex-start !important;
+  margin: 0;
+  padding: 4px 16px 8px;
 }
 
-/* Cards des scrolls : tailles RIGIDES */
+/* === Cards stricte taille === */
 body.v56-active .v56-cat-card {
-  flex: 0 0 auto !important;
-  width: 120px !important;
-  height: 130px !important;
-  padding: 12px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  margin: 0 !important;
+  flex: 0 0 auto;
+  width: 120px;
+  height: 130px;
 }
 
 body.v56-active .v56-recent-card {
-  flex: 0 0 auto !important;
-  width: 88px !important;
-  height: 80px !important;
-  padding: 10px 6px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 !important;
+  flex: 0 0 auto;
+  width: 88px;
+  min-height: 78px;
 }
 
-/* Cacher les recent-list vides */
+/* === Section title compact === */
+body.v56-active .v56-section-title {
+  margin: 8px 0 4px;
+}
+
+/* === Cacher la liste des récents si vide === */
 body.v56-active .v56-recent-list:empty {
-  display: none !important;
+  display: none;
 }
 
-/* Cacher les section-title qui n'ont rien après (prévention) */
-body.v56-active .v56-section-title:has(+ :empty) {
-  display: none !important;
+/* === Empêcher overflow horizontal === */
+html, body {
+  overflow-x: hidden;
 }
 
-/* Fix CRITIQUE : retirer les margin entre éléments adjacents */
-body.v56-active #page-home > * + * {
-  margin-top: 0 !important;
+
+
+/* V60 WALLPAPER UNIVERSAL */
+/* ============================================================
+   V60 FINAL — wallpaper universel + audit graphique
+   ============================================================ */
+
+/* ============================================================
+   1. WALLPAPER UNIVERSEL
+   Le body::before est déjà fixed mais certaines pages ont
+   un background opaque qui le masque. Solution : forcer toutes
+   les .page à avoir un fond transparent quand un wallpaper est actif
+   ============================================================ */
+
+/* Quand un wallpaper est défini, toutes les pages deviennent transparentes */
+body.has-wallpaper #page-home,
+body.has-wallpaper .page {
+  background: transparent !important;
 }
 
-/* Body home-content structure : pas de white-space ou de gap */
-body.v56-active #page-home {
-  white-space: normal !important;
+/* Le body::before (qui contient le wallpaper) doit être bien visible */
+body.has-wallpaper::before {
+  z-index: -1 !important;
 }
 
-/* Hero card et autres blocs : margin contrôlé */
-body.v56-active .v56-hero-card {
-  margin: 0 0 8px 0 !important;
+/* Mais les surfaces des cards/headers gardent leur surface pour la lisibilité */
+body.has-wallpaper .v56-greeting,
+body.has-wallpaper .v56-stat,
+body.has-wallpaper .v56-hero-card,
+body.has-wallpaper .v56-quick-card,
+body.has-wallpaper .v56-cat-card,
+body.has-wallpaper .v56-recent-card,
+body.has-wallpaper .v56-inspire,
+body.has-wallpaper .v56-mood-card {
+  /* Ces éléments gardent leur background pour rester lisibles sur le wallpaper */
 }
-body.v56-active .v56-greeting {
-  margin: 0 0 8px 0 !important;
+
+/* Pour les pages internes : ajouter un overlay subtil pour la lisibilité */
+body.has-wallpaper .page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: -1;
+  pointer-events: none;
 }
-body.v56-active .v56-stats-row {
-  margin: 0 0 8px 0 !important;
+body.has-wallpaper.dark .page::before {
+  background: rgba(0, 0, 0, 0.4);
 }
-body.v56-active .v56-quick-grid {
-  margin: 0 0 8px 0 !important;
+body.has-wallpaper:not(.dark) .page::before {
+  background: rgba(255, 255, 255, 0.15);
 }
-body.v56-active .v56-inspire {
-  margin: 0 0 8px 0 !important;
+
+/* Topbar et bottom nav avec léger blur quand wallpaper */
+body.has-wallpaper .topbar,
+body.has-wallpaper .v56-bottom-nav {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
-body.v56-active .v56-mood-card {
-  margin: 8px 0 0 0 !important;
+
+/* ============================================================
+   2. AUDIT FIXES — corriger les bugs graphiques détectés
+   ============================================================ */
+
+/* Hiérarchie z-index claire et cohérente */
+.v56-bottom-nav { z-index: 100 !important; }
+.modal, .bottom-sheet { z-index: 1000 !important; }
+.toast { z-index: 10000 !important; }
+.v56-search-overlay { z-index: 9999 !important; }
+.theme-fab, #fab-quick { z-index: 90 !important; }
+body::before { z-index: -1 !important; }
+
+/* Fade-in animation des pages plus douce */
+.page.active {
+  animation: v60FadeIn 0.25s ease;
+}
+@keyframes v60FadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Empêcher la transition transform qui peut casser le rendu */
+.page {
+  transform: none !important;
+}
+
+/* Fix scrollbar fine et discrète sur tous les scrolls */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Le scroll horizontal des cat/recent : bien masquer la scrollbar */
+.v56-cat-scroll::-webkit-scrollbar,
+.v56-recent-list::-webkit-scrollbar { display: none; }
+
+/* Pas de highlight bleu Android sur tap */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fix images qui peuvent dépasser leur container */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Corriger l'overflow horizontal sur les pages */
+.page {
+  overflow-x: hidden;
+}
+
+/* Les modales doivent bien se centrer */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Boutons : transition douce */
+button, .btn {
+  transition: transform 0.1s ease, opacity 0.2s ease;
+}
+button:active, .btn:active {
+  transform: scale(0.97);
 }
 
 </style>
@@ -14233,6 +14297,7 @@ function saveCustomTheme() {
 function applyWallpaper() {
   const root = document.documentElement;
   if (state.wallpaper) {
+    document.body.classList.add('has-wallpaper');
     root.style.setProperty('--bgImage', `url(${state.wallpaper})`);
     root.style.setProperty('--bgOpacity', state.wallpaperOpacity / 100);
     root.style.setProperty('--bgBlur', state.wallpaperBlur + 'px');
@@ -14242,6 +14307,7 @@ function applyWallpaper() {
     document.getElementById('wallpaper-op-val').textContent = state.wallpaperOpacity + '%';
     document.getElementById('wallpaper-bl-val').textContent = state.wallpaperBlur + 'px';
   } else {
+    document.body.classList.remove('has-wallpaper');
     root.style.setProperty('--bgImage', 'none');
     document.getElementById('wallpaper-controls').style.display = 'none';
   }
@@ -49804,7 +49870,7 @@ const _v42origGoTo = window.goTo;
 if (_v42origGoTo && !window._goToHooked) {
   window._goToHooked = true;
   window.goTo = function(page) {
-    trackRecent(page);
+    try { if (typeof trackRecent === 'function') trackRecent(page); } catch(e) { console.warn('trackRecent err', e); }
     return _v42origGoTo.apply(this, arguments);
   };
 }
@@ -50101,10 +50167,11 @@ if (_v42origGoTo2 && !window._goToHooked2) {
     const r = _v42origGoTo2.apply(this, arguments);
     if (page === 'all') {
       setTimeout(() => {
-        renderCatChips();
-        // Also reset filter to show all
-        const allChip = document.querySelector('.cat-chip[data-cat=""]');
-        if (allChip && !document.querySelector('.cat-chip.active')) allChip.classList.add('active');
+        try {
+          if (typeof renderCatChips === 'function') renderCatChips();
+          const allChip = document.querySelector('.cat-chip[data-cat=""]');
+          if (allChip && !document.querySelector('.cat-chip.active')) allChip.classList.add('active');
+        } catch(e) { console.warn('renderCatChips err', e); }
       }, 30);
     }
     return r;
@@ -59877,21 +59944,23 @@ function v56_goSearch(page) {
 // === HOOK PAGE CHANGES ===
 (function v56_hookNav() {
   // Patch goTo if exists to update bottom nav
-  if (typeof window.goTo === 'function') {
+  if (typeof window.goTo === 'function' && !window._v56HookDone) {
+    window._v56HookDone = true;
     const origGoTo = window.goTo;
+    const _v56args = [];
     window.goTo = function() {
-      const r = origGoTo.apply(this, arguments);
+      const args = arguments;
+      const r = origGoTo.apply(this, args);
       setTimeout(() => {
-        v56_updateActiveNav();
-        // Save to recents
         try {
-          const args = arguments[0];
-          if (args && args !== 'home' && args !== 'all' && args !== 'recent') {
+          if (typeof v56_updateActiveNav === 'function') v56_updateActiveNav();
+          const arg0 = args[0];
+          if (arg0 && arg0 !== 'home' && arg0 !== 'all' && arg0 !== 'recent') {
             let recent = JSON.parse(localStorage.getItem('nw_recent') || '[]');
-            recent = [args, ...recent.filter(x => x !== args)].slice(0, 30);
+            recent = [arg0, ...recent.filter(x => x !== arg0)].slice(0, 30);
             localStorage.setItem('nw_recent', JSON.stringify(recent));
           }
-        } catch {}
+        } catch(e) { console.warn('v56 hook err', e); }
       }, 50);
       return r;
     };
@@ -60423,53 +60492,10 @@ window.safeHtml = function(str) {
   }[c]));
 };
 
-// === 5. HOOK : exécuter v58_audit_a11y après chaque navigation ===
-(function v58_hook_nav() {
-  if (typeof window.goTo === 'function') {
-    const orig = window.goTo;
-    window.goTo = function() {
-      const r = orig.apply(this, arguments);
-      setTimeout(v58_audit_a11y, 100);
-      return r;
-    };
-  }
-})();
+// === 5. HOOK désactivé : v58_audit_a11y se lance via MutationObserver à la place ===
+// (function v58_hook_nav() { ... }) // disabled to avoid goTo chain issues
 
-// === 6. PERFORMANCE : lazy-clean des state objects énormes ===
-// Quand on quitte une page de jeu, libérer la mémoire
-(function v58_cleanup_states() {
-  if (typeof window.goTo === 'function') {
-    const orig = window.goTo;
-    window.goTo = function(page) {
-      // Cleanup states de jeux quand on quitte
-      const previousPage = document.querySelector('.page.active')?.id?.replace('page-','');
-      if (previousPage && previousPage !== page) {
-        // Free game states
-        const cleanups = {
-          'connect4': '_c4State',
-          'battleship': '_bnState',
-          'mastermind': '_mmState',
-          'mahjong': '_mahjongState',
-          'mines': '_mineState',
-          'crazy8': '_ceState',
-          'wordle': '_wdState',
-          'yahtzee': '_yzState',
-          'blackjack': '_bjState',
-          'hanoi': '_v55_hanoiState'
-        };
-        if (cleanups[previousPage] && window[cleanups[previousPage]]) {
-          // Ne pas free systématiquement (l'utilisateur pourrait revenir)
-          // mais après 5 min d'inactivité on libère
-          if (window['_v58_cleanupTimer_' + previousPage]) clearTimeout(window['_v58_cleanupTimer_' + previousPage]);
-          window['_v58_cleanupTimer_' + previousPage] = setTimeout(() => {
-            try { window[cleanups[previousPage]] = null; } catch {}
-          }, 5 * 60 * 1000);
-        }
-      }
-      return orig.apply(this, arguments);
-    };
-  }
-})();
+// === 6. PERFORMANCE désactivé : ne pas hook goTo pour cleanup states ===
 
 // === 7. AUDIT FONCTIONNEL : tester les renders sans erreur ===
 window.v58_auditFeatures = function() {
@@ -60562,6 +60588,45 @@ function v58_setupA11yObserver() {
 }
 setTimeout(v58_setupA11yObserver, 1000);
 
+
+
+// V60 FINAL : update placeholder dynamiquement + ensure pages mutually exclusive
+(function() {
+  function v60UpdatePlaceholder() {
+    if (typeof PAGE_INDEX === 'undefined') return;
+    const sb = document.getElementById('home-search');
+    if (sb) {
+      sb.placeholder = `🔍 Cherche dans ${PAGE_INDEX.length} fonctionnalités...`;
+    }
+    // Update aussi v56 search overlay si présent
+    const vsb = document.getElementById('v56-search-input');
+    if (vsb) {
+      vsb.placeholder = `Cherche dans ${PAGE_INDEX.length} outils...`;
+    }
+  }
+  
+  // Ensure ONLY ONE page is active at any time
+  function v60EnsureSinglePage() {
+    const actives = document.querySelectorAll('.page.active');
+    if (actives.length > 1) {
+      // Keep only the LAST one (most recently shown)
+      for (let i = 0; i < actives.length - 1; i++) {
+        actives[i].classList.remove('active');
+        actives[i].style.display = 'none';
+      }
+    }
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { v60UpdatePlaceholder(); v60EnsureSinglePage(); }, 300);
+    });
+  } else {
+    setTimeout(() => { v60UpdatePlaceholder(); v60EnsureSinglePage(); }, 300);
+  }
+  
+  // (ensureSinglePage hook désactivé pour éviter d'interférer avec goTo)
+})();
 
 </script>
 </body>
