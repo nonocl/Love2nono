@@ -14575,20 +14575,43 @@ function saveCustomTheme() {
 // ============================================================
 function applyWallpaper() {
   const root = document.documentElement;
-  if (state.wallpaper) {
-    document.body.classList.add('has-wallpaper');
-    root.style.setProperty('--bgImage', `url(${state.wallpaper})`);
-    root.style.setProperty('--bgOpacity', state.wallpaperOpacity / 100);
-    root.style.setProperty('--bgBlur', state.wallpaperBlur + 'px');
-    document.getElementById('wallpaper-controls').style.display = 'block';
-    document.getElementById('wallpaper-opacity').value = state.wallpaperOpacity;
-    document.getElementById('wallpaper-blur').value = state.wallpaperBlur;
-    document.getElementById('wallpaper-op-val').textContent = state.wallpaperOpacity + '%';
-    document.getElementById('wallpaper-bl-val').textContent = state.wallpaperBlur + 'px';
-  } else {
-    document.body.classList.remove('has-wallpaper');
-    root.style.setProperty('--bgImage', 'none');
-    document.getElementById('wallpaper-controls').style.display = 'none';
+  
+  // V60 : protection contre crash sur grosses images (>2Mo)
+  // Si on a déjà appliqué le même wallpaper, on saute pour éviter les renders inutiles
+  const currentBg = root.style.getPropertyValue('--bgImage');
+  
+  try {
+    if (state.wallpaper) {
+      document.body.classList.add('has-wallpaper');
+      // N'applique le wallpaper que si différent du précédent (évite les freezes)
+      const newBg = `url(${state.wallpaper})`;
+      if (currentBg !== newBg) {
+        root.style.setProperty('--bgImage', newBg);
+      }
+      root.style.setProperty('--bgOpacity', state.wallpaperOpacity / 100);
+      root.style.setProperty('--bgBlur', state.wallpaperBlur + 'px');
+      
+      // Update controls UI seulement si présents (page settings ouverte)
+      const ctrl = document.getElementById('wallpaper-controls');
+      if (ctrl) ctrl.style.display = 'block';
+      const op = document.getElementById('wallpaper-opacity');
+      if (op) op.value = state.wallpaperOpacity;
+      const bl = document.getElementById('wallpaper-blur');
+      if (bl) bl.value = state.wallpaperBlur;
+      const opv = document.getElementById('wallpaper-op-val');
+      if (opv) opv.textContent = state.wallpaperOpacity + '%';
+      const blv = document.getElementById('wallpaper-bl-val');
+      if (blv) blv.textContent = state.wallpaperBlur + 'px';
+    } else {
+      document.body.classList.remove('has-wallpaper');
+      if (currentBg !== 'none') {
+        root.style.setProperty('--bgImage', 'none');
+      }
+      const ctrl = document.getElementById('wallpaper-controls');
+      if (ctrl) ctrl.style.display = 'none';
+    }
+  } catch(e) {
+    console.warn('applyWallpaper error:', e);
   }
 }
 
@@ -61183,55 +61206,6 @@ setTimeout(v58_setupA11yObserver, 1000);
   console.log('✅ V60 games patch loaded');
 })();
 
-
-// V60 SETTINGS FORCE FIX
-(function() {
-  // Wrapper goTo pour debug + force pour settings
-  const origGoTo = window.goTo;
-  if (typeof origGoTo === 'function' && !window._settingsForceFix) {
-    window._settingsForceFix = true;
-    window.goTo = function(page) {
-      try {
-        const result = origGoTo.apply(this, arguments);
-        // Force visibility for settings
-        if (page === 'settings') {
-          setTimeout(() => {
-            const settingsEl = document.getElementById('page-settings');
-            if (settingsEl) {
-              // Vire toutes les autres .active
-              document.querySelectorAll('.page.active').forEach(p => {
-                if (p.id !== 'page-settings') p.classList.remove('active');
-              });
-              // Force settings active
-              settingsEl.classList.add('active');
-              settingsEl.style.display = 'block';
-              window.scrollTo(0, 0);
-              // Update state
-              if (typeof state !== 'undefined') state.page = 'settings';
-              // Re-render
-              try { if (typeof renderThemeGrid === 'function') renderThemeGrid(); } catch(e) { console.warn('renderThemeGrid err', e); }
-              try { if (typeof applyWallpaper === 'function') applyWallpaper(); } catch(e) { console.warn('applyWallpaper err', e); }
-            } else {
-              console.error('page-settings element NOT FOUND');
-            }
-          }, 30);
-        }
-        return result;
-      } catch(e) {
-        console.error('goTo error for page', page, ':', e);
-        // Try fallback : direct DOM manipulation
-        if (page === 'settings') {
-          const settingsEl = document.getElementById('page-settings');
-          if (settingsEl) {
-            document.querySelectorAll('.page.active').forEach(p => p.classList.remove('active'));
-            settingsEl.classList.add('active');
-          }
-        }
-      }
-    };
-    console.log('✅ V60 settings force fix loaded');
-  }
-})();
 
 </script>
 </body>

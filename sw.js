@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v60-setfix';
+const CACHE = 'love2nono-v60-revert';
 const ASSETS = [
   './',
   './index.html',
