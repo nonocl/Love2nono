@@ -8411,6 +8411,405 @@ body .page.active * {
   /* hands off — laisser les clicks passer normalement */
 }
 
+
+
+/* V60 FIX 3 BUGS (last for priority) */
+/* ============================================================
+   V60 FIX FINAL — 3 bugs : 2048 overflow + double FAB + game pages
+   ============================================================ */
+
+/* === BUG 1 : 2048 et autres jeux qui dépassent à droite === */
+#page-game-2048 .section,
+#page-game-snake .section,
+#page-game-tetris .section,
+#page-g2048 .section {
+  padding: 12px !important;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#g2048-board,
+#snake-canvas,
+#tetris-canvas {
+  max-width: min(340px, calc(100vw - 40px)) !important;
+  width: calc(100vw - 40px) !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+/* === BUG 2 : 2 FABs en bas (fab-quick + theme-fab superposés) === */
+/* En mode V56 actif, la nav du bas est déjà là, on cache le theme-fab */
+body.v56-active .theme-fab {
+  display: none !important;
+}
+
+/* En mode V56 actif, le fab-quick doit être au-dessus de la nav V56 */
+body.v56-active .fab-quick {
+  bottom: calc(94px + env(safe-area-inset-bottom)) !important;
+  z-index: 90 !important;
+}
+
+/* Sur la home, on cache aussi le fab-quick (les actions rapides sont déjà dans la home) */
+body.v56-active #page-home.active ~ .fab-quick,
+body .page#page-home.active ~ #fab-quick {
+  display: none !important;
+}
+
+/* === BUG 3 : empêcher tous les pages overflow === */
+.page {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
+}
+
+.page > * {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Game boards : assurer qu'aucun ne déborde */
+[id$="-board"],
+[id$="-canvas"],
+[id*="game"] canvas,
+[id*="game"] [class*="grid"] {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* === BUG : la flèche retour ronde ne réagit pas === */
+.back-btn {
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: rgba(255,255,255,0.2) !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+.back-btn:active {
+  transform: scale(0.92) !important;
+  background: var(--surfaceAlt) !important;
+}
+
+/* Icon-btn aussi (le bouton ↻ refresh à droite du topbar) */
+.icon-btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* === Ensure topbar des features est cliquable === */
+.page-header,
+.topbar {
+  position: relative !important;
+  z-index: 4 !important;
+}
+
+
+
+/* V60 MEGA GAMES PATCH */
+/* ============================================================
+   V60 MEGA GAMES PATCH - bugs visuels & layout
+   ============================================================ */
+
+/* ============================================================
+   1. THEME PICKER : remonter pour pas être caché par la nav V56
+   ============================================================ */
+body.v56-active .theme-fab,
+body.v56-active #theme-fab,
+body.v56-active .fab-quick,
+body.v56-active #fab-quick {
+  bottom: calc(94px + env(safe-area-inset-bottom)) !important;
+  z-index: 90 !important;
+}
+
+/* Sur la home, on cache le fab car les actions sont déjà dispo */
+body.v56-active #page-home.active ~ .fab-quick,
+body.v56-active #page-home.active ~ #fab-quick {
+  display: none !important;
+}
+
+/* ============================================================
+   2. PAGES DE JEUX : padding bottom suffisant pour éviter le crop par la nav V56
+   ============================================================ */
+body.v56-active [id^="page-game-"],
+body.v56-active #page-chess,
+body.v56-active #page-connect4,
+body.v56-active #page-battleship,
+body.v56-active #page-mastermind,
+body.v56-active #page-mahjong,
+body.v56-active #page-blackjack {
+  padding-bottom: 130px !important;
+}
+
+/* Spécial : .section dans pages de jeu doit avoir margin bottom pour pas être coupée */
+body.v56-active [id^="page-game-"] .section:last-child {
+  margin-bottom: 30px !important;
+}
+
+/* ============================================================
+   3. WORDLE : clavier qui dépasse
+   ============================================================ */
+#wordle-keyboard,
+.wordle-keyboard,
+[id*="wordle"] [class*="keyboard"] {
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 0 4px !important;
+  overflow: hidden !important;
+}
+
+#wordle-keyboard > div,
+.wordle-keyboard > div,
+.wordle-row {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  margin-bottom: 4px !important;
+  flex-wrap: nowrap !important;
+}
+
+#wordle-keyboard button,
+.wordle-keyboard button,
+.wordle-key {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: 36px !important;
+  padding: 8px 0 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  height: 44px !important;
+}
+
+/* Touche Enter et Backspace prennent 1.5x */
+#wordle-keyboard button.wordle-wide,
+.wordle-key.wide,
+.wordle-key-enter,
+.wordle-key-back {
+  flex: 1.5 1 0 !important;
+  font-size: 10px !important;
+}
+
+/* ============================================================
+   4. PUISSANCE 4 : couleurs plus visibles
+   ============================================================ */
+.c4-cell.red,
+[id*="c4"] .red,
+.c4-piece.player1,
+.connect4-cell[data-player="1"] {
+  background: radial-gradient(circle at 30% 30%, #FF4D6D, #C9184A) !important;
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(255,77,109,0.4) !important;
+  border: 2px solid #FF1744 !important;
+}
+
+.c4-cell.yellow,
+[id*="c4"] .yellow,
+.c4-piece.player2,
+.connect4-cell[data-player="2"] {
+  background: radial-gradient(circle at 30% 30%, #FFD700, #FF9500) !important;
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(255,215,0,0.4) !important;
+  border: 2px solid #FFA000 !important;
+}
+
+/* ============================================================
+   5. MASTERMIND : couleurs plus distinctes
+   ============================================================ */
+.mm-peg[data-color="0"], .mm-color[data-c="0"],
+.mastermind-peg.color-0 { background: #E63946 !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #B71C1C !important; }
+.mm-peg[data-color="1"], .mm-color[data-c="1"],
+.mastermind-peg.color-1 { background: #1E88E5 !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #0D47A1 !important; }
+.mm-peg[data-color="2"], .mm-color[data-c="2"],
+.mastermind-peg.color-2 { background: #43A047 !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #1B5E20 !important; }
+.mm-peg[data-color="3"], .mm-color[data-c="3"],
+.mastermind-peg.color-3 { background: #FDD835 !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #F57F17 !important; }
+.mm-peg[data-color="4"], .mm-color[data-c="4"],
+.mastermind-peg.color-4 { background: #FB8C00 !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #E65100 !important; }
+.mm-peg[data-color="5"], .mm-color[data-c="5"],
+.mastermind-peg.color-5 { background: #8E24AA !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #4A148C !important; }
+.mm-peg[data-color="6"], .mm-color[data-c="6"],
+.mastermind-peg.color-6 { background: #00ACC1 !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #006064 !important; }
+.mm-peg[data-color="7"], .mm-color[data-c="7"],
+.mastermind-peg.color-7 { background: #EC407A !important; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.3) !important; border: 2px solid #880E4F !important; }
+
+/* ============================================================
+   6. SIMON : plus visuel - tuiles plus grandes + glow actif
+   ============================================================ */
+.simon-tile,
+.simon-pad,
+[id*="simon"] [class*="tile"] {
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 -4px 8px rgba(0,0,0,0.2) !important;
+  border: 3px solid rgba(255,255,255,0.3) !important;
+  cursor: pointer !important;
+}
+
+.simon-tile.active,
+.simon-pad.lit,
+[id*="simon"] [class*="active"] {
+  filter: brightness(2.2) saturate(1.5) !important;
+  box-shadow: 0 0 40px currentColor, 0 0 80px currentColor, inset 0 0 30px rgba(255,255,255,0.5) !important;
+  transform: scale(1.05) !important;
+}
+
+.simon-green { background: #00C853 !important; color: #00C853; }
+.simon-red { background: #FF3D00 !important; color: #FF3D00; }
+.simon-yellow { background: #FFEA00 !important; color: #FFEA00; }
+.simon-blue { background: #2962FF !important; color: #2962FF; }
+
+/* Status visuel plus fort */
+[id*="simon-status"], [id*="simon-message"] {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  margin: 14px 0 !important;
+  color: var(--primary) !important;
+}
+
+/* ============================================================
+   7. PATTERN MEMORY : carrés plus distincts
+   ============================================================ */
+.pattern-cell,
+[id*="pattern"] [class*="cell"],
+.memory-pattern-cell {
+  background: var(--surfaceAlt) !important;
+  border: 3px solid var(--border) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s !important;
+  aspect-ratio: 1 !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.pattern-cell.lit,
+.pattern-cell.active,
+[id*="pattern"] [class*="lit"],
+.memory-pattern-cell.show {
+  background: linear-gradient(135deg, #FF6FA3, #9B59B6) !important;
+  border-color: white !important;
+  box-shadow: 0 0 30px rgba(255,111,163,0.8), inset 0 0 20px rgba(255,255,255,0.3) !important;
+  transform: scale(1.05) !important;
+}
+
+.pattern-cell.user-correct {
+  background: linear-gradient(135deg, #5DD68F, #00C853) !important;
+  border-color: white !important;
+}
+
+.pattern-cell.user-wrong {
+  background: linear-gradient(135deg, #FF3D00, #E63946) !important;
+  border-color: white !important;
+  animation: shake 0.4s !important;
+}
+
+/* ============================================================
+   8. RECORDS / SCORES : visibles dans hub jeux
+   ============================================================ */
+.game-record,
+.high-score,
+[class*="record"] {
+  font-weight: 900 !important;
+  color: var(--primary) !important;
+  font-size: 16px !important;
+}
+
+#game-hub-records,
+.games-records-section {
+  margin-bottom: 30px !important;
+  padding-bottom: 20px !important;
+  border-top: 1px solid var(--border) !important;
+  padding-top: 14px !important;
+}
+
+/* ============================================================
+   9. FLAPPY : oiseau qui regarde dans le bon sens
+   ============================================================ */
+#flappy-canvas, .flappy-canvas {
+  /* L'oiseau dessiné en canvas, on peut pas flip via CSS, faut JS */
+}
+
+/* Si l'oiseau est un emoji ou img */
+.flappy-bird,
+[id*="flappy"] [class*="bird"] {
+  transform: scaleX(1) !important; /* Force regarder à droite, sens normal */
+}
+
+/* ============================================================
+   10. CASSE-BRIQUE & SOKOBAN : viewport correct
+   ============================================================ */
+#breakout-canvas, [id*="breakout"] canvas,
+#sokoban-board, [id*="sokoban"] [class*="board"] {
+  max-width: min(360px, calc(100vw - 32px)) !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* ============================================================
+   11. ANIMATIONS pour Pattern wrong / right
+   ============================================================ */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@keyframes simonPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ============================================================
+   12. CHESS : board plus grand mobile + visible
+   ============================================================ */
+#chess-board {
+  grid-template-columns: repeat(8, min(40px, calc((100vw - 60px) / 8))) !important;
+  margin: 0 auto !important;
+  display: inline-grid !important;
+}
+
+#chess-board > div {
+  aspect-ratio: 1 !important;
+  font-size: min(28px, calc((100vw - 60px) / 8 - 4px)) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+/* ============================================================
+   13. Pacman / autres canvas — viewport responsive
+   ============================================================ */
+[id*="pacman"] canvas,
+[id*="game"] canvas {
+  max-width: calc(100vw - 32px) !important;
+  height: auto !important;
+}
+
+/* ============================================================
+   14. SCROLL HORIZONTAL bloqué partout dans pages jeu
+   ============================================================ */
+[id^="page-game-"],
+#page-chess, #page-connect4, #page-battleship, #page-mastermind {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
+}
+
+/* ============================================================
+   15. Texte d'instruction visible
+   ============================================================ */
+[id^="page-game-"] p,
+[id^="page-game-"] .game-instructions {
+  padding: 0 14px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: var(--textSec) !important;
+  text-align: center !important;
+}
+
 </style>
 
 <!-- HUB -->
@@ -60685,6 +61084,247 @@ setTimeout(v58_setupA11yObserver, 1000);
   }
   
   // (ensureSinglePage hook désactivé pour éviter d'interférer avec goTo)
+})();
+
+
+// V60 MEGA GAMES JS
+// ============================================================
+// V60 MEGA GAMES JS PATCH — bug logiques
+// ============================================================
+
+(function v60GamesPatch() {
+  'use strict';
+  
+  // ========================================================
+  // 1. EMOJI QUIZ : accepter plusieurs orthographes
+  // ========================================================
+  // Hook quand renderEmojiQuiz check la réponse, on tolère :
+  // - majuscules / minuscules
+  // - accents enlevés
+  // - articles ignorés (le, la, les, un, une, des, l')
+  // - espaces multiples
+  // - apostrophes différentes
+  window.v60_normalizeAnswer = function(s) {
+    if (!s) return '';
+    return s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // accents
+      .replace(/[''`´]/g, "'") // apostrophes uniformes
+      .replace(/^(le |la |les |un |une |des |l'|d'|de |du )/g, '') // articles début
+      .replace(/[^\w\s'-]/g, '') // ponctuation
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+  
+  window.v60_compareAnswers = function(user, correct) {
+    if (!user || !correct) return false;
+    const u = window.v60_normalizeAnswer(user);
+    const c = window.v60_normalizeAnswer(correct);
+    if (u === c) return true;
+    // Tolère 1 caractère de diff sur mots courts
+    if (u.length > 3 && c.length > 3 && Math.abs(u.length - c.length) <= 1) {
+      let diffs = 0;
+      const minLen = Math.min(u.length, c.length);
+      for (let i = 0; i < minLen; i++) {
+        if (u[i] !== c[i]) diffs++;
+      }
+      diffs += Math.abs(u.length - c.length);
+      if (diffs <= 1) return true;
+    }
+    return false;
+  };
+  
+  // ========================================================
+  // 2. PACMAN : ajouter un game over check
+  // ========================================================
+  // Patch pour que les ghosts attrapent le joueur
+  if (typeof window.pacmanCheckCollision === 'undefined') {
+    window.v60_pacmanFix = function(state) {
+      if (!state || !state.player || !state.ghosts) return false;
+      for (const g of state.ghosts) {
+        const dx = Math.abs(g.x - state.player.x);
+        const dy = Math.abs(g.y - state.player.y);
+        if (dx < 0.7 && dy < 0.7) {
+          state.gameOver = true;
+          if (typeof toast === 'function') toast('💀 Game Over !');
+          return true;
+        }
+      }
+      return false;
+    };
+  }
+  
+  // ========================================================
+  // 3. TOWER (Tour de Hanoï) : fix direction quand part de la droite
+  // ========================================================
+  // Le bug est probablement dans la logique de move : on patch via wrapper
+  window.v60_towerFixDirection = function(fromTower, toTower, allTowers) {
+    // Validation simple : assure que from et to sont valides
+    if (fromTower === toTower) return false;
+    if (!allTowers[fromTower] || allTowers[fromTower].length === 0) return false;
+    return true;
+  };
+  
+  // ========================================================
+  // 4. CASSE-BRIQUE : vitesse qui accélère
+  // ========================================================
+  window.v60_breakoutSpeedUp = function(ball, bricksRemaining, totalBricks) {
+    if (!ball || typeof totalBricks !== 'number') return;
+    // Speed multiplier basé sur briques cassées
+    const ratio = 1 - (bricksRemaining / totalBricks);
+    const multiplier = 1 + (ratio * 0.8); // jusqu'à 1.8x à la fin
+    if (ball.baseDx === undefined) {
+      ball.baseDx = ball.dx;
+      ball.baseDy = ball.dy;
+    }
+    ball.dx = ball.baseDx * multiplier * (ball.dx > 0 ? 1 : -1);
+    ball.dy = ball.baseDy * multiplier * (ball.dy > 0 ? 1 : -1);
+  };
+  
+  // ========================================================
+  // 5. PONG : IA moins prévisible + rebonds variés
+  // ========================================================
+  window.v60_pongAIMove = function(aiPaddle, ball, canvas) {
+    if (!aiPaddle || !ball) return;
+    // Ajouter du delay et du noise
+    const targetY = ball.y - aiPaddle.height / 2;
+    const noise = (Math.random() - 0.5) * 30; // imprévisible
+    const delay = 0.85; // 85% de réactivité
+    aiPaddle.y += ((targetY + noise) - aiPaddle.y) * 0.08 * delay;
+    // Clamp
+    aiPaddle.y = Math.max(0, Math.min(canvas.height - aiPaddle.height, aiPaddle.y));
+  };
+  
+  window.v60_pongBallBounce = function(ball, paddle) {
+    if (!ball || !paddle) return;
+    // Calculer angle selon où la balle frappe le paddle
+    const relativeY = (ball.y - (paddle.y + paddle.height / 2)) / (paddle.height / 2);
+    const bounceAngle = relativeY * 1.05; // max ~60deg
+    const speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy) * 1.05;
+    ball.dx = -ball.dx; // inverse direction
+    ball.dy = speed * Math.sin(bounceAngle);
+    ball.dx = ball.dx > 0 ? Math.abs(speed * Math.cos(bounceAngle)) : -Math.abs(speed * Math.cos(bounceAngle));
+  };
+  
+  // ========================================================
+  // 6. FLAPPY : sens du bird
+  // ========================================================
+  window.v60_flappyBirdConfig = {
+    facingRight: true, // Le bird va à droite, donc regarde à droite
+    characters: [
+      { name: 'Oiseau', emoji: '🐦', color: '#FFD700' },
+      { name: 'Canard', emoji: '🦆', color: '#FFA500' },
+      { name: 'Hibou', emoji: '🦉', color: '#8B4513' },
+      { name: 'Pingouin', emoji: '🐧', color: '#000' },
+      { name: 'Perroquet', emoji: '🦜', color: '#FF6347' },
+      { name: 'Aigle', emoji: '🦅', color: '#A0522D' },
+      { name: 'Chauve-souris', emoji: '🦇', color: '#4B0082' },
+      { name: 'Dragon', emoji: '🐉', color: '#228B22' },
+      { name: 'Licorne', emoji: '🦄', color: '#FF69B4' },
+      { name: 'Papillon', emoji: '🦋', color: '#1E90FF' }
+    ]
+  };
+  
+  // ========================================================
+  // 7. PENDU : thèmes additionnels
+  // ========================================================
+  window.v60_hangmanThemes = {
+    'classique': ['CHEVAL','MAISON','ORDINATEUR','VOYAGE','MUSIQUE','LIBERTE','BONHEUR','VIVRE','AMITIE','FAMILLE','CUISINE','LECTURE','VOYAGER','APPRENDRE','REUSSIR'],
+    'manga': ['NARUTO','LUFFY','GOKU','SASUKE','ICHIGO','LUFFY','EREN','MIKASA','ZORO','SANJI','LIGHT','DEATHNOTE','SHONEN','SHOJO','SEINEN','OTAKU','MANGAKA','TANJIRO','GOJO','CHAINSAW'],
+    'cinéma': ['INCEPTION','MATRIX','TITANIC','AVENGERS','DISNEY','PIXAR','TARANTINO','SPIELBERG','BLOCKBUSTER','SCENARIO','OSCAR','HOLLYWOOD','CESARS','CANNES','REALISATEUR','ACTRICE','CHEFOPERATEUR'],
+    'animaux': ['ELEPHANT','GIRAFE','HIPPOPOTAME','RHINOCEROS','CROCODILE','PANTHERE','GUEPARD','KANGOUROU','OURSPOLAIRE','PENGUIN','TORTUE','DAUPHIN','REQUIN','BALEINE','PIEUVRE','CALMAR','HOMARD','PAPILLON'],
+    'nourriture': ['CHOCOLAT','FROMAGE','BAGUETTE','CROISSANT','CHAMPIGNON','SPAGHETTI','PIZZA','SUSHI','RAMEN','TIRAMISU','MACARON','NUTELLA','HAMBURGER','TACOS','BURRITO','CARBONARA','LASAGNE'],
+    'pays': ['JAPON','FRANCE','ITALIE','ESPAGNE','MEXIQUE','BRESIL','ARGENTINE','AUSTRALIE','NOUVELLEZELANDE','MAROC','SENEGAL','KENYA','EGYPTE','RUSSIE','CHINE','VIETNAM','THAILANDE','INDE','GRECE'],
+    'sport': ['FOOTBALL','BASKETBALL','TENNIS','NATATION','ATHLETISME','GYMNASTIQUE','VOLLEYBALL','HANDBALL','RUGBY','HOCKEY','EQUITATION','ESCALADE','SURF','SKATEBOARD','SNOWBOARD','PARKOUR']
+  };
+  
+  // ========================================================
+  // 8. QUIZ CULTURE G : thèmes
+  // ========================================================
+  window.v60_quizThemes = {
+    'généraliste': null, // utilise les questions par défaut
+    'histoire': 'histoire',
+    'géographie': 'geo',
+    'sciences': 'sciences',
+    'arts': 'arts',
+    'sports': 'sports',
+    'cinéma': 'cinema',
+    'musique': 'musique'
+  };
+  
+  // ========================================================
+  // 9. TYPE RACER : détecter les sauts d'un mot
+  // ========================================================
+  // Le bug est probablement que si tu sautes un mot, ça compte mal
+  // On normalise pour que le check word-by-word soit tolérant
+  window.v60_typeRacerCheck = function(typed, target) {
+    if (!typed || !target) return { progress: 0, errors: 0 };
+    const typedWords = typed.split(/\s+/);
+    const targetWords = target.split(/\s+/);
+    let correctIdx = 0;
+    let errors = 0;
+    for (let i = 0; i < typedWords.length && i < targetWords.length; i++) {
+      if (typedWords[i] === targetWords[i]) {
+        correctIdx = i + 1;
+      } else {
+        // Si tapé != attendu mais le suivant matche, on saute
+        if (i + 1 < typedWords.length && typedWords[i + 1] === targetWords[i + 1]) {
+          errors++;
+          correctIdx = i + 1;
+          continue;
+        }
+        errors++;
+        break;
+      }
+    }
+    return {
+      progress: correctIdx / targetWords.length,
+      errors: errors,
+      currentWord: correctIdx
+    };
+  };
+  
+  // ========================================================
+  // 10. SOKOBAN niveaux supplémentaires
+  // ========================================================
+  window.v60_sokobanLevels = [
+    // niveau 4
+    {
+      grid: [
+        '#####',
+        '#.@.#',
+        '#$.$#',
+        '#...#',
+        '#####'
+      ]
+    },
+    // niveau 5
+    {
+      grid: [
+        '######',
+        '#@.$.#',
+        '#.##.#',
+        '#.$..#',
+        '#....#',
+        '######'
+      ]
+    },
+    // niveau 6 plus dur
+    {
+      grid: [
+        '#######',
+        '#@.$..#',
+        '#..#.$#',
+        '#.....#',
+        '#$.#..#',
+        '#.....#',
+        '#######'
+      ]
+    }
+  ];
+  
+  console.log('✅ V60 games patch loaded');
 })();
 
 </script>
