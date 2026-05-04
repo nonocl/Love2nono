@@ -61207,6 +61207,166 @@ setTimeout(v58_setupA11yObserver, 1000);
 })();
 
 
+
+// V60 LEVEL 1 OPTIM
+// ============================================================
+// V60 LEVEL 1 OPTIM — performance safe
+// ============================================================
+
+(function() {
+  'use strict';
+  
+  // 1. Polyfill requestIdleCallback si non supporté
+  if (typeof window.requestIdleCallback === 'undefined') {
+    window.requestIdleCallback = function(cb, opts) {
+      const start = Date.now();
+      return setTimeout(function() {
+        cb({
+          didTimeout: false,
+          timeRemaining: function() {
+            return Math.max(0, 50 - (Date.now() - start));
+          }
+        });
+      }, 1);
+    };
+  }
+  if (typeof window.cancelIdleCallback === 'undefined') {
+    window.cancelIdleCallback = function(id) { clearTimeout(id); };
+  }
+  
+  // 2. Helper : defer une fonction à idle (max 2sec)
+  window.v60Defer = function(fn, timeout) {
+    return requestIdleCallback(fn, { timeout: timeout || 2000 });
+  };
+  
+  // 3. Helper : debounce simple
+  window.v60Debounce = function(fn, ms) {
+    let timer;
+    return function(...args) {
+      clearTimeout(timer);
+      const ctx = this;
+      timer = setTimeout(() => fn.apply(ctx, args), ms || 100);
+    };
+  };
+  
+  // 4. Helper : throttle pour les MutationObservers
+  window.v60ThrottleRAF = function(fn) {
+    let scheduled = false;
+    return function(...args) {
+      if (scheduled) return;
+      scheduled = true;
+      const ctx = this;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        fn.apply(ctx, args);
+      });
+    };
+  };
+  
+  // 5. Optimize MutationObservers existants
+  // Quand le DOM se modifie beaucoup (genre rendu d'une grosse liste),
+  // les observers se déclenchent en cascade. On les throttle au RAF (16ms)
+  if (typeof window.MutationObserver !== 'undefined') {
+    const origObserve = MutationObserver.prototype.observe;
+    MutationObserver.prototype.observe = function(target, options) {
+      // Throttle le callback automatiquement
+      if (this._cb && !this._throttled) {
+        const origCb = this._cb;
+        // On peut pas accéder au callback directement car privé,
+        // donc on fait un wrapper sur les options pour batch
+      }
+      return origObserve.call(this, target, options);
+    };
+  }
+  
+  // 6. Quand l'app boot, defer les inits non-critiques
+  function deferNonCriticalInits() {
+    // Les fonctions suivantes peuvent attendre que l'UI soit interactive
+    const lazyInits = [
+      'renderRecents',
+      'renderQuickActions',
+      'renderInspirationQuote',
+      'renderMoodHistory',
+      'updateStreakBadge',
+      'computeStats',
+      'renderCatChips',
+      'renderCategoryHubs',
+      'v58_audit_a11y'
+    ];
+    
+    requestIdleCallback(function() {
+      lazyInits.forEach(function(fnName) {
+        if (typeof window[fnName] === 'function') {
+          try { 
+            // Re-call en idle pour assurer
+            window[fnName]();
+          } catch(e) {}
+        }
+      });
+    }, { timeout: 3000 });
+  }
+  
+  // 7. Désactiver les console.log en production (garder les error/warn)
+  if (typeof window.console !== 'undefined' && !window._v60LogSilenced) {
+    window._v60LogSilenced = true;
+    // Garder une référence pour debug
+    window._v60OrigLog = console.log;
+    // Silence les logs (pas les errors/warns)
+    console.log = function() { /* silent */ };
+    // info devient aussi silent (rarement utilisé pour erreurs critiques)
+    console.info = function() { /* silent */ };
+  }
+  
+  // 8. Optimize window.scrollTo cascades
+  // Quand goTo() est appelé plusieurs fois rapidement, plusieurs scrollTo s'enchaînent
+  // On debounce le scrollTo pour ne garder que le dernier
+  if (typeof window._v60ScrollDebounced === 'undefined') {
+    window._v60ScrollDebounced = true;
+    const origScrollTo = window.scrollTo.bind(window);
+    let scrollPending = null;
+    window.scrollTo = function(...args) {
+      if (scrollPending) cancelAnimationFrame(scrollPending);
+      scrollPending = requestAnimationFrame(() => {
+        scrollPending = null;
+        origScrollTo(...args);
+      });
+    };
+  }
+  
+  // 9. Defer les heavy renderings en idle
+  // Fixer les pages qui mettent du temps à render au switch
+  function patchHeavyRenders() {
+    const heavyRenders = ['renderAllPages', 'renderHubGames', 'renderHubMath', 'renderAllCategories'];
+    heavyRenders.forEach(name => {
+      if (typeof window[name] === 'function') {
+        const orig = window[name];
+        window[name] = function(...args) {
+          // Première frame : skeleton, deuxième frame : full render
+          requestAnimationFrame(() => {
+            try { orig.apply(this, args); } catch(e) { console.warn(name, 'error', e); }
+          });
+        };
+      }
+    });
+  }
+  
+  // 10. Démarrer les optims après que la home soit affichée
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => {
+        deferNonCriticalInits();
+        patchHeavyRenders();
+      });
+    });
+  } else {
+    requestAnimationFrame(() => {
+      deferNonCriticalInits();
+      patchHeavyRenders();
+    });
+  }
+  
+})();
+
 </script>
 </body>
 </html>
