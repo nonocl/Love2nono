@@ -8810,6 +8810,179 @@ body.v56-active [id^="page-game-"] .section:last-child {
   text-align: center !important;
 }
 
+
+
+/* V60 FIX GAP PRECISE (must be last) */
+/* ============================================================
+   V60 FIX VIDE — précis cette fois
+   ============================================================ */
+
+/* Le v56-home-content qui contient SEULEMENT le titre "Récemment utilisés" 
+   doit être collé à la liste qui suit */
+body.v56-active .v56-home-content {
+  padding-bottom: 0 !important;
+}
+
+/* Le DERNIER home-content (avec mood card) garde son padding-bottom pour pas être coupé par la nav */
+body.v56-active .v56-home-content:last-of-type {
+  padding-bottom: 120px !important;
+}
+
+/* Section title compact */
+body.v56-active .v56-section-title {
+  margin: 12px 0 6px !important;
+  padding: 0 !important;
+}
+
+/* Recent list pas de margin */
+body.v56-active .v56-recent-list {
+  margin: 0 !important;
+  padding: 4px 16px 8px !important;
+}
+
+/* Cat scroll pareil */
+body.v56-active .v56-cat-scroll {
+  margin: 0 !important;
+  padding: 4px 16px 8px !important;
+}
+
+/* Le home-content qui suit immédiatement la liste/scroll doit pas avoir padding-top */
+body.v56-active .v56-recent-list + .v56-home-content,
+body.v56-active .v56-cat-scroll + .v56-home-content {
+  padding-top: 0 !important;
+}
+
+/* Recent cards taille fixe */
+body.v56-active .v56-recent-card {
+  flex: 0 0 auto !important;
+  width: 88px !important;
+  min-height: 78px !important;
+  padding: 10px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Cat cards taille fixe */
+body.v56-active .v56-cat-card {
+  flex: 0 0 auto !important;
+  width: 120px !important;
+  height: 130px !important;
+}
+
+/* Mood card spacing minimal */
+body.v56-active .v56-mood-card {
+  margin-top: 12px !important;
+  padding: 16px !important;
+}
+
+/* Bottom nav z-index assuré */
+body.v56-active .v56-bottom-nav {
+  z-index: 100 !important;
+  bottom: max(14px, env(safe-area-inset-bottom)) !important;
+}
+
+/* Tile cells qui ont bordure/fond bizarre en bas → reset */
+.home-tile,
+.v56-quick-card {
+  outline: none !important;
+}
+
+/* Empêcher overflow horizontal partout */
+html, body, .page {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+
+
+/* V60 FIX GAP FINAL (absolute priority) */
+/* ============================================================
+   V60 FIX FINAL — virer les margin négatifs des scrolls
+   qui créent le vide visible
+   ============================================================ */
+
+/* Reset COMPLET des scrolls horizontaux */
+.v56-cat-scroll,
+body.v56-active .v56-cat-scroll {
+  margin: 0 !important;
+  padding: 6px 16px 12px !important;
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  scrollbar-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  align-items: flex-start !important;
+}
+
+.v56-recent-list,
+body.v56-active .v56-recent-list {
+  margin: 0 !important;
+  padding: 6px 16px 12px !important;
+  display: flex !important;
+  gap: 10px !important;
+  overflow-x: auto !important;
+  scroll-snap-type: x mandatory !important;
+  scrollbar-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  align-items: flex-start !important;
+}
+
+/* Cards strictes */
+.v56-cat-card,
+body.v56-active .v56-cat-card {
+  flex: 0 0 auto !important;
+  width: 130px !important;
+  height: 150px !important;
+  margin: 0 !important;
+}
+
+.v56-recent-card,
+body.v56-active .v56-recent-card {
+  flex: 0 0 auto !important;
+  width: 88px !important;
+  min-height: 78px !important;
+  height: auto !important;
+  margin: 0 !important;
+}
+
+/* Home-content : NO padding bottom sauf le dernier */
+body.v56-active .v56-home-content {
+  padding-bottom: 0 !important;
+  padding-top: 8px !important;
+  margin: 0 !important;
+}
+
+body.v56-active .v56-home-content:last-of-type {
+  padding-bottom: 110px !important;
+}
+
+/* Le 1er v56-home-content a un padding-top normal */
+body.v56-active .v56-home-content:first-of-type {
+  padding-top: 14px !important;
+}
+
+/* home-content après scroll : padding-top: 0 */
+body.v56-active .v56-cat-scroll + .v56-home-content,
+body.v56-active .v56-recent-list + .v56-home-content {
+  padding-top: 0 !important;
+}
+
+/* Section title compact */
+body.v56-active .v56-section-title {
+  margin: 12px 0 6px !important;
+  padding: 0 !important;
+}
+
+/* Remove flex/grid wraps */
+body.v56-active #page-home {
+  display: block !important;
+}
+
 </style>
 
 <!-- HUB -->
