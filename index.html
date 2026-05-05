@@ -14388,14 +14388,16 @@ function applyTheme() {
   } catch (e) { console.error('[applyTheme] err:', e); }
 }
 
+// V68 : re-entry protection contre les boucles potentielles
+let _v68SetThemeBusy = false;
 function setTheme(name) {
+  if (_v68SetThemeBusy) { console.warn('[setTheme] re-entry bloqué pour', name); return; }
+  _v68SetThemeBusy = true;
+  console.log('[setTheme] start', name);
+  const t0 = performance.now();
   try {
     state.themeName = name;
     localStorage.setItem('nw_theme', name);
-    // Defer le re-paint pour que le clic se sente snappy
-    requestAnimationFrame(() => {
-      try { applyTheme(); } catch (e) { console.error('[setTheme applyTheme] err:', e); }
-    });
     // V67 : juste toggle la classe .selected au lieu de re-render toute la grille
     if (state.page === 'settings') {
       const grid = document.getElementById('theme-grid');
@@ -14405,9 +14407,21 @@ function setTheme(name) {
         });
       }
     }
+    // Defer le re-paint pour que le clic se sente snappy + libère le main thread
+    setTimeout(() => {
+      const t1 = performance.now();
+      try { applyTheme(); } catch (e) { console.error('[setTheme applyTheme] err:', e); }
+      const t2 = performance.now();
+      if (t2 - t1 > 100) console.warn('[setTheme] applyTheme slow:', (t2-t1).toFixed(0)+'ms');
+    }, 0);
   } catch (e) {
     console.error('[setTheme] err:', e);
     if (typeof toast === 'function') toast('❌ Erreur thème — voir console (F12)');
+  } finally {
+    const t3 = performance.now();
+    console.log('[setTheme] sync done in', (t3-t0).toFixed(0)+'ms');
+    // Libère le lock après un tick pour bloquer les ré-entrées synchrones
+    setTimeout(() => { _v68SetThemeBusy = false; }, 100);
   }
 }
 
@@ -14933,7 +14947,11 @@ function goTo(page) {
   if (page === 'luckwheel') drawLuckWheel();
   if (page === 'colorconv') updateColorConv();
   if (page === 'convert') setupConv();
-  if (page === 'settings') { renderThemeGrid(); applyWallpaper(); }
+  if (page === 'settings') {
+    renderThemeGrid(); applyWallpaper();
+    // V68 : déclencher l'indicateur de combo quand on entre dans settings (compense l'observer supprimé)
+    setTimeout(() => { try { if (typeof v57_renderComboIndicator === 'function') v57_renderComboIndicator(); } catch (e) {} }, 200);
+  }
   if (page === 'custom-theme') renderCustomThemeEditor();
   if (page === 'palette') renderSavedPalettes();
   if (page === 'watch') renderWatch();
@@ -60940,13 +60958,18 @@ function v57_showAllCombos() {
 function v57_init() {
   v57_syncThemeAttr();
   v57_checkAndAnnounceCombo();
-  // Inject quand le bloc vibe-picker apparaît
-  const obs = new MutationObserver(() => {
+  // V68 BUGFIX : MutationObserver supprimé.
+  // L'ancien code écoutait toutes les mutations DOM du body et appelait
+  // v57_renderComboIndicator() — qui MODIFIE le DOM (innerHTML, appendChild)
+  // → boucle infinie qui freezait la page Paramètres.
+  // Les hooks sur setTheme et v56_applyVibe appellent déjà v57_renderComboIndicator
+  // au bon moment, donc l'observer est redondant et nuisible.
+  // On déclenche juste un render initial différé pour le cas où le bloc existe déjà :
+  setTimeout(() => {
     if (document.getElementById('v56-vibe-picker-block')) {
-      v57_renderComboIndicator();
+      try { v57_renderComboIndicator(); } catch (e) { console.error('[v57 init render] err:', e); }
     }
-  });
-  obs.observe(document.body, { childList: true, subtree: true });
+  }, 500);
 }
 
 if (document.readyState === 'loading') {

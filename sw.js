@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v68-themeperf';
+const CACHE = 'love2nono-v69-freezefix';
 const ASSETS = [
   './',
   './index.html',
