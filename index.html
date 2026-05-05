@@ -82,7 +82,7 @@ img { display: block; -webkit-user-select: none; user-select: none; -webkit-user
 .icon-btn:active { transform: scale(0.92); }
 
 /* ===== Pages ===== */
-.page { display: none; min-height: 100vh; padding-bottom: 80px; }
+.page { display: none; min-height: 100vh; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 .page.active { display: block; animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from {opacity: 0; transform: translateY(8px);} to {opacity:1; transform:none;} }
 
@@ -5219,7 +5219,7 @@ mark.fuzzy-match {
       <div><div style="font-size:11px; color:var(--textSec);">SCORE</div><div id="g2048-score" style="font-size:22px; font-weight:800;">0</div></div>
       <div><div style="font-size:11px; color:var(--textSec);">RECORD</div><div id="g2048-best" style="font-size:22px; font-weight:800; color:var(--primary);">0</div></div>
     </div>
-    <div id="g2048-board" style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; max-width:340px; margin:0 auto; aspect-ratio:1; padding:6px; background:var(--surfaceAlt); border-radius:10px; touch-action:none;"></div>
+    <div id="g2048-board" style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; width:100%; max-width:min(340px, calc(100vw - 80px)); margin:0 auto; aspect-ratio:1; padding:6px; background:var(--surfaceAlt); border-radius:10px; touch-action:none; box-sizing:border-box; overflow:hidden;"></div>
     <p style="margin-top:12px; font-size:11px; color:var(--textSec);">Glisse pour bouger les tuiles. Combine les mêmes pour atteindre 2048 !</p>
   </div>
 </div>
@@ -6320,8 +6320,10 @@ body.vibe-brut h1, body.vibe-brut h2, body.vibe-brut h3 {
 body.v56-active .bottom-nav { display: none !important; }
 body.v56-active .fab-quick { bottom: 88px !important; }
 
-/* Padding bottom des pages pour éviter overlap */
-body.v56-active .page { padding-bottom: 90px; }
+/* V69 : padding bottom pour éviter overlap avec nav fixe + safe-area iOS
+   (la home v56 gère son propre padding via .v56-home-content:last-of-type) */
+body.v56-active .page { padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important; }
+body.v56-active #page-home { padding-bottom: 0 !important; }
 
 /* ============================================================
    V56 NEW HOME DASHBOARD
@@ -26636,17 +26638,21 @@ function is2048Over() {
 const TILE_COLORS = { 0:'#cdc1b4',2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e' };
 function render2048() {
   const board = document.getElementById('g2048-board');
+  if (!board) return;
   board.innerHTML = '';
   for (let r=0; r<4; r++) for (let c=0; c<4; c++) {
     const v = _g2048.board[r][c];
     const cell = document.createElement('div');
     const color = TILE_COLORS[v] || '#3c3a32';
     const textCol = v <= 4 ? '#776e65' : 'white';
-    cell.style.cssText = `background:${color}; color:${textCol}; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:${v >= 1000 ? '18px' : '24px'}; border-radius:6px;`;
+    // V71 : font-size adaptatif (clamp) pour pas déborder sur petits écrans
+    const fs = v >= 1000 ? 'clamp(11px, 4vw, 18px)' : v >= 100 ? 'clamp(13px, 5vw, 22px)' : 'clamp(15px, 6vw, 26px)';
+    cell.style.cssText = `background:${color}; color:${textCol}; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:${fs}; border-radius:6px; min-width:0; min-height:0; overflow:hidden;`;
     cell.textContent = v || '';
     board.appendChild(cell);
   }
-  document.getElementById('g2048-score').textContent = _g2048.score;
+  const sc = document.getElementById('g2048-score');
+  if (sc) sc.textContent = _g2048.score;
 }
 
 // ============================================================
@@ -42140,7 +42146,8 @@ function patternRender() {
   const grid = document.getElementById('pattern-grid');
   let html = '';
   for (let i = 0; i < 16; i++) {
-    html += `<div id="pat-cell-${i}" onclick="patternClick(${i})" style="background:var(--surface); border-radius:8px; cursor:pointer; aspect-ratio:1; transition:all 0.2s;"></div>`;
+    // V70 : utilise surfaceAlt + bordure pour rester visible sur tous les thèmes (notamment Nono pattern sombre)
+    html += `<div id="pat-cell-${i}" onclick="patternClick(${i})" style="background:var(--surfaceAlt); border:2px solid var(--border); border-radius:8px; cursor:pointer; aspect-ratio:1; transition:all 0.2s; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04);"></div>`;
   }
   grid.innerHTML = html;
 }
@@ -42162,7 +42169,7 @@ async function patternNextLevel() {
     cell.style.background = 'var(--primary)';
     cell.style.transform = 'scale(0.95)';
     await new Promise(r => setTimeout(r, 500));
-    cell.style.background = 'var(--surface)';
+    cell.style.background = 'var(--surfaceAlt)';
     cell.style.transform = 'scale(1)';
     await new Promise(r => setTimeout(r, 200));
   }
@@ -42174,7 +42181,7 @@ function patternClick(i) {
   _pat.userSeq.push(i);
   const cell = document.getElementById('pat-cell-' + i);
   cell.style.background = 'var(--accent)';
-  setTimeout(() => cell.style.background = 'var(--surface)', 200);
+  setTimeout(() => cell.style.background = 'var(--surfaceAlt)', 200);
   
   // Check progress
   const idx = _pat.userSeq.length - 1;
@@ -57001,8 +57008,12 @@ function cwReveal() {
 }
 
 // === 6. 2048 ===
+// V70 BUGFIX : la fonction render2048 qui suit était une duplication V54 qui ÉCRASAIT
+// la vraie render2048() du jeu (ligne 26639) — celle-ci cherchait un #g2048-content
+// qui n'existe pas dans le HTML, du coup le board restait vide. Renommée en _v54_render2048_unused
+// pour que la vraie fonction (qui marche bien) ne soit plus écrasée.
 let V54__g2048 = null;
-function render2048() {
+function _v54_render2048_unused() {
   let html = `<div style="background:linear-gradient(135deg,#FFD166,#FF8C42); color:white; padding:14px; border-radius:14px; text-align:center;">
     <div style="font-size:36px;">🟧</div><div style="font-size:16px; font-weight:800;">2048</div>
     <div style="font-size:11px; opacity:0.9;">Swipe pour fusionner les tuiles</div>
@@ -57020,8 +57031,8 @@ function render2048() {
     <button class="btn alt" onclick="g2048Move('D')" style="padding:18px;">⬇️</button>
     <div></div>
   </div>`;
-  document.getElementById('g2048-content').innerHTML = html;
-  g2048Start();
+  const target = document.getElementById('g2048-content');
+  if (target) { target.innerHTML = html; g2048Start(); }
 }
 function g2048Start() {
   V54__g2048 = { grid: Array(4).fill(0).map(() => Array(4).fill(0)), score: 0 };

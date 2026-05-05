@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v69-freezefix';
+const CACHE = 'love2nono-v71-pat2048';
 const ASSETS = [
   './',
   './index.html',
