@@ -9387,6 +9387,14 @@ body.v56-active #fab-quick { bottom: 94px !important; z-index: 90 !important; }
   </div>
 
   <div class="section">
+    <h3 style="font-size:15px; font-weight:700; margin-bottom:12px;">📱 Installation</h3>
+    <button class="btn primary full" onclick="v66TriggerInstall()" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+      <span style="font-size:20px;">📱</span><span>Installer l'app sur l'écran d'accueil</span>
+    </button>
+    <p style="font-size:11px; color:var(--textSec); margin-top:6px; text-align:center;">Fonctionne sur Android (prompt direct) et iOS (guide pas-à-pas)</p>
+  </div>
+
+  <div class="section">
     <h3 style="font-size:15px; font-weight:700; margin-bottom:12px;">🎨 Thèmes</h3>
     <div class="theme-grid" id="theme-grid"></div>
     <button class="btn alt full" style="margin-top:12px;" onclick="goTo('custom-theme')">🎨 Créer un thème custom</button>
@@ -14328,19 +14336,22 @@ const player = {
 // THEME ENGINE
 // ============================================================
 function applyTheme() {
-  const t = state.themeName === 'custom' && state.customTheme ? state.customTheme : THEMES[state.themeName] || THEMES.nono;
+  try {
+  const fallback = THEMES.nono || {};
+  const t = state.themeName === 'custom' && state.customTheme ? state.customTheme : THEMES[state.themeName] || fallback;
   const root = document.documentElement;
-  root.style.setProperty('--bg', t.bg);
-  root.style.setProperty('--surface', t.surface);
-  root.style.setProperty('--surfaceAlt', t.surfaceAlt);
-  root.style.setProperty('--primary', t.primary);
-  root.style.setProperty('--accent', t.accent);
-  root.style.setProperty('--text', t.text);
-  root.style.setProperty('--textSec', t.textSec);
-  root.style.setProperty('--border', t.border);
-  root.style.setProperty('--shadow', t.shadow);
-  root.style.setProperty('--danger', t.danger);
-  root.style.setProperty('--success', t.success);
+  const get = (k) => t[k] || fallback[k] || '';
+  root.style.setProperty('--bg', get('bg'));
+  root.style.setProperty('--surface', get('surface'));
+  root.style.setProperty('--surfaceAlt', get('surfaceAlt'));
+  root.style.setProperty('--primary', get('primary'));
+  root.style.setProperty('--accent', get('accent'));
+  root.style.setProperty('--text', get('text'));
+  root.style.setProperty('--textSec', get('textSec'));
+  root.style.setProperty('--border', get('border'));
+  root.style.setProperty('--shadow', get('shadow'));
+  root.style.setProperty('--danger', get('danger'));
+  root.style.setProperty('--success', get('success'));
   // Apply gradient as body background-image if present
   if (t.gradient) {
     document.body.style.backgroundImage = t.gradient;
@@ -14372,14 +14383,21 @@ function applyTheme() {
   } else {
     if (patternEl) patternEl.remove();
   }
-  document.getElementById('theme-meta').setAttribute('content', t.bg);
+  const meta = document.getElementById('theme-meta');
+  if (meta) meta.setAttribute('content', t.bg || '#FFF0F5');
+  } catch (e) { console.error('[applyTheme] err:', e); }
 }
 
 function setTheme(name) {
-  state.themeName = name;
-  localStorage.setItem('nw_theme', name);
-  applyTheme();
-  if (state.page === 'settings') renderThemeGrid();
+  try {
+    state.themeName = name;
+    localStorage.setItem('nw_theme', name);
+    applyTheme();
+    if (state.page === 'settings') renderThemeGrid();
+  } catch (e) {
+    console.error('[setTheme] err:', e);
+    toast('❌ Erreur thème — voir console (F12)');
+  }
 }
 
 function resetTheme() {
@@ -59979,6 +59997,78 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ============================================================
+// V66 — INSTALL PWA (capture beforeinstallprompt + bouton manuel)
+// ============================================================
+window._v66InstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window._v66InstallPrompt = e;
+  console.log('[PWA] Install prompt prêt');
+  // Mettre à jour le bouton install s'il est affiché
+  const btn = document.getElementById('v66-install-btn');
+  if (btn) btn.style.display = '';
+});
+window.addEventListener('appinstalled', () => {
+  console.log('[PWA] Installée !');
+  window._v66InstallPrompt = null;
+  const btn = document.getElementById('v66-install-btn');
+  if (btn) btn.style.display = 'none';
+  if (typeof toast === 'function') toast('🎉 App installée !');
+});
+function v66TriggerInstall() {
+  // iOS : pas de prompt natif, afficher un guide
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (isStandalone) { if (typeof toast==='function') toast('✅ App déjà installée'); return; }
+  if (isIOS) {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(8px);';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    modal.innerHTML = `<div style="background:var(--surface); border-radius:20px; padding:24px; max-width:340px; width:100%; text-align:center;">
+      <div style="font-size:48px;">📱</div>
+      <h3 style="margin:14px 0 8px;">Installer sur iPhone</h3>
+      <ol style="text-align:left; padding-left:24px; line-height:1.8; font-size:14px;">
+        <li>Ouvre cette page dans <strong>Safari</strong> (pas Chrome)</li>
+        <li>Tape l'icône <strong>Partager</strong> ⬆️ en bas</li>
+        <li>Choisis <strong>« Sur l'écran d'accueil »</strong></li>
+        <li>Tape <strong>« Ajouter »</strong></li>
+      </ol>
+      <button onclick="this.parentElement.parentElement.remove()" style="background:var(--primary); color:white; border:none; padding:12px 24px; border-radius:10px; font-weight:700; margin-top:14px; cursor:pointer;">Compris ✓</button>
+    </div>`;
+    document.body.appendChild(modal);
+    return;
+  }
+  if (window._v66InstallPrompt) {
+    window._v66InstallPrompt.prompt();
+    window._v66InstallPrompt.userChoice.then((res) => {
+      if (res.outcome === 'accepted') console.log('[PWA] Accepté');
+      window._v66InstallPrompt = null;
+      const btn = document.getElementById('v66-install-btn');
+      if (btn) btn.style.display = 'none';
+    });
+  } else {
+    // Pas de prompt dispo → guide générique
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(8px);';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    modal.innerHTML = `<div style="background:var(--surface); border-radius:20px; padding:24px; max-width:340px; width:100%; text-align:center;">
+      <div style="font-size:48px;">📱</div>
+      <h3 style="margin:14px 0 8px;">Installer l'app</h3>
+      <p style="font-size:14px; line-height:1.6; margin:14px 0;">Le navigateur ne propose pas le prompt automatique pour le moment. Possibles raisons :</p>
+      <ul style="text-align:left; padding-left:24px; line-height:1.7; font-size:13px;">
+        <li>App déjà installée (vérifie ton écran d'accueil)</li>
+        <li>Site servi en HTTP au lieu de HTTPS</li>
+        <li>Chrome attend que tu visites plus souvent</li>
+        <li>Sur Android Chrome : menu (⋮) → <strong>« Installer l'application »</strong></li>
+        <li>Sur iOS Safari : Partager ⬆️ → <strong>« Sur l'écran d'accueil »</strong></li>
+      </ul>
+      <button onclick="this.parentElement.parentElement.remove()" style="background:var(--primary); color:white; border:none; padding:12px 24px; border-radius:10px; font-weight:700; margin-top:14px; cursor:pointer;">Compris ✓</button>
+    </div>`;
+    document.body.appendChild(modal);
+  }
+}
+
 // Reset complet du cache + reload (en cas de bug iOS)
 async function resetAppCache() {
   if (!confirm('⚠️ Vider tout le cache de l\'app et recharger ?\n\nTes données (notes, devoirs, etc.) ne seront PAS perdues.')) return;
@@ -60714,11 +60804,12 @@ function v57_syncThemeAttr() {
   if (typeof window.setTheme === 'function') {
     const orig = window.setTheme;
     window.setTheme = function() {
-      const r = orig.apply(this, arguments);
+      let r;
+      try { r = orig.apply(this, arguments); } catch (e) { console.error('[v57 setTheme orig] err:', e); }
       setTimeout(() => {
-        v57_syncThemeAttr();
-        v57_checkAndAnnounceCombo();
-        v57_renderComboIndicator();
+        try { v57_syncThemeAttr(); } catch (e) { console.error('[v57 syncThemeAttr] err:', e); }
+        try { v57_checkAndAnnounceCombo(); } catch (e) { console.error('[v57 checkCombo] err:', e); }
+        try { v57_renderComboIndicator(); } catch (e) { console.error('[v57 renderIndicator] err:', e); }
       }, 50);
       return r;
     };

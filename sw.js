@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v65-allpages';
+const CACHE = 'love2nono-v67-installpwa';
 const ASSETS = [
   './',
   './index.html',
