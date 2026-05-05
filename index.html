@@ -14392,11 +14392,22 @@ function setTheme(name) {
   try {
     state.themeName = name;
     localStorage.setItem('nw_theme', name);
-    applyTheme();
-    if (state.page === 'settings') renderThemeGrid();
+    // Defer le re-paint pour que le clic se sente snappy
+    requestAnimationFrame(() => {
+      try { applyTheme(); } catch (e) { console.error('[setTheme applyTheme] err:', e); }
+    });
+    // V67 : juste toggle la classe .selected au lieu de re-render toute la grille
+    if (state.page === 'settings') {
+      const grid = document.getElementById('theme-grid');
+      if (grid) {
+        grid.querySelectorAll('.theme-card').forEach(c => {
+          c.classList.toggle('selected', c.dataset.themeKey === name);
+        });
+      }
+    }
   } catch (e) {
     console.error('[setTheme] err:', e);
-    toast('❌ Erreur thème — voir console (F12)');
+    if (typeof toast === 'function') toast('❌ Erreur thème — voir console (F12)');
   }
 }
 
@@ -14411,13 +14422,16 @@ function resetTheme() {
 
 function renderThemeGrid() {
   const el = document.getElementById('theme-grid');
+  if (!el) return;
   el.innerHTML = '';
   const order = ['light','dark','nono','nonowall','girly','softgirl','cottagecore','darkacademia','cream','sage','cloud','peach','butterfly','cat','rosegarden','moonlight','goldenhour','y2k','vaporwave','forestwitch','oceandream','midnight','amethyst','sunset','pinkdream','oceanic','twilight','aurora','fire','galaxy'];
+  const frag = document.createDocumentFragment();
   for (const k of order) {
     const t = THEMES[k];
     if (!t) continue;
     const card = document.createElement('button');
     card.className = 'theme-card' + (state.themeName === k ? ' selected' : '');
+    card.dataset.themeKey = k;
     // If gradient theme, show gradient as background; otherwise the surface color
     if (t.gradient) {
       card.style.background = t.gradient;
@@ -14436,8 +14450,9 @@ function renderThemeGrid() {
       <div class="name">${t.name}</div>
     `;
     card.onclick = () => setTheme(k);
-    el.appendChild(card);
+    frag.appendChild(card);
   }
+  el.appendChild(frag);
   // Custom card
   if (state.customTheme) {
     const card = document.createElement('button');
