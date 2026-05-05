@@ -14874,12 +14874,15 @@ function goTo(page) {
   targetEl.classList.add('active');
   state.page = page;
   window.scrollTo(0, 0);
-  // Cache le FAB sur le dashboard d'accueil (actions rapides déjà dedans)
+  // V63 — l'éclair reste visible partout (donne accès direct à Thèmes / Todo / Note rapide)
   const fab = document.getElementById('fab-quick');
-  if (fab) fab.style.display = (page === 'home') ? 'none' : '';
+  if (fab) fab.style.display = '';
   // Hook nav
   if (typeof pushRecent === 'function') pushRecent(page);
   if (typeof updateBottomNav === 'function') updateBottomNav(page);
+  // V63 — Wrapper try/catch : si une fonction render manque (ReferenceError) ou plante,
+  // afficher un placeholder propre au lieu d'un écran blanc
+  try {
   if (page === 'recent' && typeof renderRecents === 'function') renderRecents();
   if (page === 'gallery') renderGallery();
   if (page === 'categories') renderCategories();
@@ -15456,6 +15459,21 @@ function goTo(page) {
   if (page === 'unitconv') renderUnitConv();
   if (page === 'countrypicker') renderCountryPicker();
   if (page === 'flagquiz') renderFlagQuiz();
+  } catch (e) {
+    // V63 — render manquante ou cassée : afficher un placeholder au lieu d'un écran blanc
+    console.error('[goTo] render error for "' + page + '":', e);
+    const _el = document.getElementById('page-' + page);
+    if (_el && !_el.querySelector('.wip-placeholder')) {
+      const _ph = document.createElement('div');
+      _ph.className = 'wip-placeholder';
+      _ph.style.cssText = 'padding:60px 24px; text-align:center; color:var(--textSec);';
+      _ph.innerHTML = '<div style="font-size:64px;">🚧</div>' +
+        '<h3 style="margin:18px 0 8px; font-size:18px;">Bientôt disponible</h3>' +
+        '<p style="font-size:13px; max-width:300px; margin:0 auto 20px;">Cette section est en cours de construction ✨</p>' +
+        '<button class="btn alt" onclick="goBack()">← Retour</button>';
+      _el.appendChild(_ph);
+    }
+  }
 }
 
 function toast(msg, dur=2200) {
@@ -61884,6 +61902,2203 @@ setTimeout(v58_setupA11yObserver, 1000);
   
   console.error('[V62] Debug catcher loaded. Type window.v62ShowErrors() in console to see errors');
 })();
+
+// ============================================================
+// V64 — IMPLÉMENTATIONS DES PAGES MANQUANTES (Batch 1)
+// ============================================================
+function _v64Pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function _v64Set(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; return el; }
+function _v64Btn(label, onclick, primary) {
+  return `<button class="btn ${primary?'primary':'alt'} full" style="margin-top:12px;" onclick="${onclick}">${label}</button>`;
+}
+function _v64Card(content) {
+  return `<div style="background:var(--surface); padding:18px; border-radius:14px; margin:12px 16px;">${content}</div>`;
+}
+
+// === UUID ===
+function renderUUID() {
+  function gen(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16);});}
+  const u = gen();
+  _v64Set('uuid-content', _v64Card(
+    `<div style="font-size:11px; color:var(--textSec);">UUID v4 généré</div>
+    <div style="font-family:ui-monospace,monospace; font-size:15px; font-weight:700; word-break:break-all; margin:8px 0; padding:10px; background:var(--surfaceAlt); border-radius:8px;">${u}</div>
+    ${_v64Btn('🔄 Nouveau', 'renderUUID()', true)}
+    ${_v64Btn('📋 Copier', `navigator.clipboard.writeText('${u}').then(()=>toast('Copié !'))`)}`
+  ));
+}
+
+// === JWT decoder ===
+function renderJwt() {
+  _v64Set('jwt-content', _v64Card(
+    `<span class="label">Token JWT</span>
+    <textarea class="input" id="jwt-in" rows="4" placeholder="eyJhbGc..." oninput="_jwtDecode()"></textarea>
+    <div id="jwt-out" style="margin-top:14px;"></div>`
+  ));
+}
+function _jwtDecode() {
+  const v = document.getElementById('jwt-in').value.trim();
+  const out = document.getElementById('jwt-out');
+  if (!v) { out.innerHTML = ''; return; }
+  try {
+    const parts = v.split('.');
+    if (parts.length < 2) throw 'format';
+    const dec = (s) => JSON.parse(atob(s.replace(/-/g,'+').replace(/_/g,'/')));
+    const h = dec(parts[0]), p = dec(parts[1]);
+    out.innerHTML = `<div style="background:var(--surfaceAlt); padding:10px; border-radius:8px; margin-bottom:8px;"><div style="font-size:11px; color:var(--textSec);">HEADER</div><pre style="white-space:pre-wrap; font-size:12px; margin:4px 0 0;">${escapeHtml(JSON.stringify(h,null,2))}</pre></div>
+      <div style="background:var(--surfaceAlt); padding:10px; border-radius:8px;"><div style="font-size:11px; color:var(--textSec);">PAYLOAD</div><pre style="white-space:pre-wrap; font-size:12px; margin:4px 0 0;">${escapeHtml(JSON.stringify(p,null,2))}</pre></div>`;
+  } catch { out.innerHTML = `<p style="color:var(--danger); font-size:12px;">❌ JWT invalide</p>`; }
+}
+
+// === URL encoder ===
+function renderUrlEnc() {
+  _v64Set('urlenc-content', _v64Card(
+    `<span class="label">Texte / URL</span>
+    <textarea class="input" id="urlenc-in" rows="3" oninput="_urlencDo()"></textarea>
+    <div style="display:flex; gap:6px; margin-top:8px;">
+      <button class="btn alt" style="flex:1;" onclick="_urlencDo('enc')">Encoder</button>
+      <button class="btn alt" style="flex:1;" onclick="_urlencDo('dec')">Décoder</button>
+    </div>
+    <div id="urlenc-out" style="margin-top:14px; padding:10px; background:var(--surfaceAlt); border-radius:8px; font-family:ui-monospace,monospace; font-size:13px; word-break:break-all; min-height:40px;"></div>`
+  ));
+}
+function _urlencDo(mode) {
+  const v = document.getElementById('urlenc-in').value;
+  const out = document.getElementById('urlenc-out');
+  try {
+    out.textContent = mode === 'dec' ? decodeURIComponent(v) : encodeURIComponent(v);
+  } catch { out.textContent = '❌ Erreur'; }
+}
+
+// === HTML entities ===
+function renderHtmlEnt() {
+  _v64Set('htmlent-content', _v64Card(
+    `<span class="label">Texte</span>
+    <textarea class="input" id="htmlent-in" rows="3" oninput="_htmlentDo()"></textarea>
+    <div style="display:flex; gap:6px; margin-top:8px;">
+      <button class="btn alt" style="flex:1;" onclick="_htmlentDo('enc')">Encoder</button>
+      <button class="btn alt" style="flex:1;" onclick="_htmlentDo('dec')">Décoder</button>
+    </div>
+    <div id="htmlent-out" style="margin-top:14px; padding:10px; background:var(--surfaceAlt); border-radius:8px; font-family:ui-monospace,monospace; font-size:13px; word-break:break-all; min-height:40px; white-space:pre-wrap;"></div>`
+  ));
+}
+function _htmlentDo(mode) {
+  const v = document.getElementById('htmlent-in').value;
+  const out = document.getElementById('htmlent-out');
+  if (mode === 'dec') {
+    const t = document.createElement('textarea'); t.innerHTML = v; out.textContent = t.value;
+  } else {
+    out.textContent = v.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+}
+
+// === CSS units converter ===
+function renderCssUnits() {
+  _v64Set('cssunits-content', _v64Card(
+    `<span class="label">Valeur (px)</span>
+    <input type="number" class="input" id="css-px" value="16" oninput="_cssCv()">
+    <span class="label">Base font-size (px)</span>
+    <input type="number" class="input" id="css-base" value="16" oninput="_cssCv()">
+    <div id="css-out" style="margin-top:14px; padding:10px; background:var(--surfaceAlt); border-radius:8px; font-family:ui-monospace,monospace; font-size:14px;"></div>`
+  ));
+  _cssCv();
+}
+function _cssCv() {
+  const px = parseFloat(document.getElementById('css-px').value) || 0;
+  const base = parseFloat(document.getElementById('css-base').value) || 16;
+  document.getElementById('css-out').innerHTML = `
+    <div>${px} px</div>
+    <div>= ${(px/base).toFixed(4)} rem</div>
+    <div>= ${(px/base).toFixed(4)} em</div>
+    <div>= ${(px*0.75).toFixed(2)} pt</div>
+    <div>= ${(px/96*2.54).toFixed(3)} cm</div>`;
+}
+
+// === Lorem Ipsum ===
+function renderLoremIpsum() {
+  _v64Set('loremV55-content', _v64Card(
+    `<span class="label">Nombre de paragraphes</span>
+    <input type="number" class="input" id="lorem-n" min="1" max="20" value="3">
+    <div style="display:flex; gap:6px; margin-top:10px;">
+      <button class="btn primary" style="flex:1;" onclick="_loremGen()">✨ Générer</button>
+      <button class="btn alt" onclick="navigator.clipboard.writeText(document.getElementById('lorem-out').innerText).then(()=>toast('Copié !'))">📋</button>
+    </div>
+    <div id="lorem-out" style="margin-top:14px; padding:14px; background:var(--surfaceAlt); border-radius:8px; font-size:13px; line-height:1.6; min-height:60px;"></div>`
+  ));
+}
+function _loremGen() {
+  const W = ['lorem','ipsum','dolor','sit','amet','consectetur','adipiscing','elit','sed','do','eiusmod','tempor','incididunt','ut','labore','et','dolore','magna','aliqua','enim','minim','veniam','quis','nostrud','exercitation','ullamco','laboris','nisi','aliquip','ex','ea','commodo','consequat','duis','aute','irure','reprehenderit','voluptate','velit','esse','cillum','fugiat','nulla','pariatur','excepteur','sint','occaecat','cupidatat','non','proident','sunt','culpa','qui','officia','deserunt','mollit','anim','id','est','laborum'];
+  const n = Math.max(1, Math.min(20, parseInt(document.getElementById('lorem-n').value)||3));
+  let html = '';
+  for (let p=0; p<n; p++) {
+    const sentences = 3+Math.floor(Math.random()*3);
+    let para = '';
+    for (let s=0; s<sentences; s++) {
+      const wlen = 5+Math.floor(Math.random()*12);
+      const words = [];
+      for (let w=0; w<wlen; w++) words.push(_v64Pick(W));
+      para += (words[0][0].toUpperCase()+words[0].slice(1)) + ' ' + words.slice(1).join(' ') + '. ';
+    }
+    html += `<p style="margin:0 0 12px;">${para}</p>`;
+  }
+  document.getElementById('lorem-out').innerHTML = html;
+}
+
+// === Random color ===
+function renderRandColor() {
+  const h = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0');
+  const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+  _v64Set('randcolor-content', _v64Card(
+    `<div style="height:140px; border-radius:14px; background:${h}; margin-bottom:14px;"></div>
+    <div style="font-family:ui-monospace,monospace; font-size:18px; font-weight:700; text-align:center;">${h}</div>
+    <div style="text-align:center; color:var(--textSec); font-size:13px; margin-top:4px;">rgb(${r}, ${g}, ${b})</div>
+    ${_v64Btn('🎲 Nouvelle couleur', 'renderRandColor()', true)}
+    ${_v64Btn('📋 Copier hex', `navigator.clipboard.writeText('${h}').then(()=>toast('Copié !'))`)}`
+  ));
+}
+
+// === Word count ===
+function renderWordCount() {
+  _v64Set('wordcountV58-content', _v64Card(
+    `<textarea class="input" id="wcv-in" rows="8" placeholder="Colle ton texte ici..." oninput="_wcvUpd()"></textarea>
+    <div id="wcv-out" style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>`
+  ));
+  _wcvUpd();
+}
+function _wcvUpd() {
+  const t = document.getElementById('wcv-in').value;
+  const words = t.trim() ? t.trim().split(/\s+/).length : 0;
+  const chars = t.length;
+  const charsNoSp = t.replace(/\s/g,'').length;
+  const lines = t ? t.split('\n').length : 0;
+  const sent = t.trim() ? (t.match(/[.!?]+/g) || []).length || 1 : 0;
+  const reading = Math.max(1, Math.ceil(words/200));
+  document.getElementById('wcv-out').innerHTML = [
+    [words,'mots'],[chars,'caractères'],[charsNoSp,'sans espaces'],[lines,'lignes'],[sent,'phrases'],[reading+' min','lecture']
+  ].map(([v,l])=>`<div style="background:var(--surfaceAlt); padding:10px; border-radius:10px; text-align:center;"><div style="font-size:20px; font-weight:800; color:var(--primary);">${v}</div><div style="font-size:11px; color:var(--textSec);">${l}</div></div>`).join('');
+}
+
+// === Fortune cookie ===
+const _v64Fortunes = ['Une belle surprise t\'attend cette semaine ✨','Tu es exactement là où tu dois être 💖','Quelque chose de magique va se produire 🌟','Fais confiance au timing de ta vie 🌸','Ta créativité va t\'apporter du bonheur 🎨','Une nouvelle opportunité approche 🚪','Le meilleur reste à venir 💫','Suis ton intuition aujourd\'hui 🔮','Tu mérites tout ce que tu désires 👑','Un changement positif arrive 🌱','Quelqu\'un pense à toi en ce moment 💭','Ta gentillesse va te revenir 🌈','La patience apporte de grandes récompenses 🌷','Aujourd\'hui est un nouveau départ 🌅','Ton sourire éclaire le monde ☀️'];
+function renderFortune() {
+  const f = _v64Pick(_v64Fortunes);
+  _v64Set('fortune-content', _v64Card(
+    `<div style="text-align:center; font-size:64px;">🥠</div>
+    <p style="text-align:center; font-style:italic; font-size:17px; line-height:1.5; margin:14px 0;">« ${f} »</p>
+    ${_v64Btn('🥠 Casser un nouveau cookie', 'renderFortune()', true)}`
+  ));
+}
+
+// === Cocktails ===
+const _v64Cocktails = [
+  {n:'Mojito', i:['6 cl rhum blanc','1 cuillère sucre','½ citron vert','feuilles de menthe','eau gazeuse','glace pilée']},
+  {n:'Margarita', i:['5 cl tequila','2 cl triple sec','2 cl jus de citron vert','sel sur le bord du verre']},
+  {n:'Piña Colada', i:['5 cl rhum','9 cl jus d\'ananas','3 cl crème de coco','glace pilée']},
+  {n:'Cosmopolitan', i:['4 cl vodka','1.5 cl triple sec','1.5 cl jus de citron vert','3 cl jus de cranberry']},
+  {n:'Spritz', i:['9 cl Prosecco','6 cl Aperol','3 cl eau gazeuse','tranche d\'orange','glaçons']},
+  {n:'Daïquiri', i:['6 cl rhum blanc','2 cl jus citron vert','1.5 cl sirop de sucre']},
+  {n:'Sex on the Beach', i:['4 cl vodka','2 cl liqueur pêche','4 cl jus orange','4 cl jus cranberry']},
+  {n:'Negroni', i:['3 cl gin','3 cl Campari','3 cl vermouth rouge','tranche d\'orange']},
+  {n:'Old Fashioned', i:['6 cl bourbon','1 sucre','2 traits angostura','écorce d\'orange']},
+  {n:'Mai Tai', i:['4 cl rhum ambré','2 cl rhum brun','1.5 cl curaçao orange','1.5 cl orgeat','3 cl jus citron vert']},
+];
+function renderCocktail() {
+  const c = _v64Pick(_v64Cocktails);
+  _v64Set('cocktail-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">🍸</div>
+    <h2 style="text-align:center; margin:8px 0;">${c.n}</h2>
+    <ul style="margin:14px 0; padding-left:20px; font-size:14px; line-height:1.8;">${c.i.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>
+    ${_v64Btn('🎲 Autre cocktail', 'renderCocktail()', true)}`
+  ));
+}
+
+// === Haïku ===
+const _v64Haikus = [
+  ['Pluie sur le toit','Le chat s\'endort doucement','L\'âme se repose'],
+  ['Cerisier en fleur','Pétales dans le vent doux','Printemps éphémère'],
+  ['Lune dans l\'étang','Reflet d\'une autre planète','Silence profond'],
+  ['Première neige','Empreintes du petit oiseau','Hiver commence'],
+  ['Café du matin','Vapeur qui monte au plafond','Pensée du jour'],
+  ['Vague sur le sable','Efface les pas d\'hier','Liberté nouvelle'],
+  ['Étoile filante','Un vœu glisse sur le ciel','Promesse au cosmos'],
+];
+function renderHaiku() {
+  const h = _v64Pick(_v64Haikus);
+  _v64Set('haiku-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">🌸</div>
+    <p style="text-align:center; font-style:italic; font-size:16px; line-height:1.9; margin:18px 0; white-space:pre-line;">${h.join('\n')}</p>
+    ${_v64Btn('🌸 Autre haïku', 'renderHaiku()', true)}`
+  ));
+}
+
+// === Daily prompt ===
+const _v64Prompts = ['Décris ta journée parfaite','Quelle est une habitude que tu aimerais prendre ?','Si tu pouvais voyager n\'importe où demain, où irais-tu ?','Qu\'est-ce qui te rend reconnaissant aujourd\'hui ?','Décris ton enfance en 3 mots','Quel est ton plus grand rêve ?','Une chose que tu as apprise cette semaine','Si tu pouvais parler à ton toi de 10 ans plus jeune, que dirais-tu ?','Décris l\'odeur de ton enfance','Un moment où tu t\'es senti·e fier·ère de toi','Qu\'est-ce qui te fait vraiment rire ?','Une peur que tu aimerais surmonter'];
+function renderDailyPrompt() {
+  const seed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
+  const p = _v64Prompts[seed % _v64Prompts.length];
+  _v64Set('dailyprompt-content', _v64Card(
+    `<div style="font-size:11px; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px;">✍️ Prompt du jour</div>
+    <p style="font-size:18px; font-weight:600; line-height:1.5; margin:14px 0;">${p}</p>
+    <textarea class="input" rows="6" placeholder="Ta réponse..."></textarea>
+    ${_v64Btn('🎲 Autre prompt', `(()=>{const p=_v64Pick(_v64Prompts); document.querySelector('#dailyprompt-content p').textContent=p;})()`)}`
+  ));
+}
+
+// === Name generator ===
+const _v64Names = {
+  fr_f: ['Léa','Emma','Chloé','Camille','Sarah','Manon','Inès','Jade','Louise','Alice','Mia','Rose','Lina','Eva','Anna','Lou'],
+  fr_m: ['Lucas','Hugo','Léo','Liam','Adam','Noah','Jules','Arthur','Louis','Raphaël','Tom','Nathan','Maël','Théo','Sacha'],
+  en_f: ['Olivia','Emma','Ava','Charlotte','Sophia','Amelia','Isabella','Mia','Evelyn','Harper','Luna','Aria','Willow'],
+  en_m: ['Liam','Noah','Oliver','Elijah','James','William','Benjamin','Lucas','Henry','Theodore','Jack','Levi'],
+  jp: ['Yuki','Sakura','Hana','Akira','Haru','Ren','Sora','Aiko','Kenji','Mio','Kai','Riku']
+};
+function v58_renderNameGen() {
+  _v64Set('namegenV58-content', _v64Card(
+    `<span class="label">Style</span>
+    <select class="input" id="ngn-style">
+      <option value="fr_f">Français · F</option>
+      <option value="fr_m">Français · M</option>
+      <option value="en_f">English · F</option>
+      <option value="en_m">English · M</option>
+      <option value="jp">Japonais</option>
+    </select>
+    ${_v64Btn('🎲 Générer', '_ngnGo()', true)}
+    <div id="ngn-out" style="margin-top:18px; text-align:center; font-size:36px; font-weight:900; min-height:50px;"></div>`
+  ));
+}
+function _ngnGo() {
+  const s = document.getElementById('ngn-style').value;
+  document.getElementById('ngn-out').textContent = _v64Pick(_v64Names[s]);
+}
+
+// === Ship name ===
+function v58_renderShipName() {
+  _v64Set('shipnameV58-content', _v64Card(
+    `<span class="label">Prénom 1</span>
+    <input class="input" id="sn1" placeholder="Léa">
+    <span class="label">Prénom 2</span>
+    <input class="input" id="sn2" placeholder="Hugo">
+    ${_v64Btn('💕 Calculer le ship name', '_snCalc()', true)}
+    <div id="sn-out" style="margin-top:18px; text-align:center; font-size:32px; font-weight:900; color:var(--primary); min-height:50px;"></div>`
+  ));
+}
+function _snCalc() {
+  const a = (document.getElementById('sn1').value||'').trim();
+  const b = (document.getElementById('sn2').value||'').trim();
+  if (!a || !b) { toast('Remplis les deux'); return; }
+  const half1 = a.slice(0, Math.ceil(a.length/2));
+  const half2 = b.slice(Math.floor(b.length/2));
+  document.getElementById('sn-out').textContent = (half1 + half2).replace(/^./, c=>c.toUpperCase());
+}
+
+// === Vibe check ===
+const _v64Vibes = ['🌸 Soft girl energy','✨ Main character vibes','🌙 Mysterious moonchild','☀️ Sunshine sweetie','🖤 Dark academia mood','🎮 Chaotic gamer','👑 Royal aura','🌊 Ocean dream','🔥 Fierce queen','🌿 Cottagecore witch','💎 Y2K crystal','🎀 Coquette babygirl','⚡ Electric wildcard','🍓 Strawberry summer','🌺 Tropical paradise'];
+function renderVibeCheck() {
+  const v = _v64Pick(_v64Vibes);
+  _v64Set('vibecheck-content', _v64Card(
+    `<div style="text-align:center; font-size:11px; color:var(--textSec);">VIBE DU MOMENT</div>
+    <div style="text-align:center; font-size:32px; font-weight:900; margin:18px 0; line-height:1.3;">${v}</div>
+    ${_v64Btn('🔄 Re-check', 'renderVibeCheck()', true)}`
+  ));
+}
+
+// === Acte de gentillesse ===
+const _v64Kindness = ['Souris à 3 personnes aujourd\'hui','Envoie un message gentil à un·e ami·e','Laisse une bonne note à quelqu\'un','Tiens la porte pour quelqu\'un','Compliment sincère à un·e inconnu·e','Aide quelqu\'un à porter ses sacs','Fais un don (même 1€)','Écoute vraiment, sans répondre','Ramasse un déchet par terre','Remercie quelqu\'un que tu prends pour acquis','Offre ton temps à un·e proche','Pardonne à quelqu\'un (toi-même compris)'];
+function v58_renderKindness() {
+  const k = _v64Pick(_v64Kindness);
+  _v64Set('kindnessV58-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">💚</div>
+    <p style="text-align:center; font-size:17px; font-weight:600; line-height:1.5; margin:14px 0;">${k}</p>
+    ${_v64Btn('🌱 Autre suggestion', 'v58_renderKindness()', true)}`
+  ));
+}
+
+// === Compliments internationaux ===
+const _v64ComplIntl = [
+  {l:'🇫🇷 FR', t:'Tu es incroyable !'},
+  {l:'🇬🇧 EN', t:'You\'re amazing!'},
+  {l:'🇪🇸 ES', t:'¡Eres increíble!'},
+  {l:'🇮🇹 IT', t:'Sei fantastico/a!'},
+  {l:'🇩🇪 DE', t:'Du bist großartig!'},
+  {l:'🇯🇵 JP', t:'あなたは素晴らしい！(Anata wa subarashī!)'},
+  {l:'🇰🇷 KR', t:'당신은 멋져요! (Dangsineun meotjyeoyo!)'},
+  {l:'🇷🇺 RU', t:'Ты потрясающий! (Ty potryasayushchiy!)'},
+  {l:'🇨🇳 CN', t:'你很棒！(Nǐ hěn bàng!)'},
+  {l:'🇵🇹 PT', t:'Você é incrível!'},
+];
+function renderComplIntl() {
+  _v64Set('complintl-content', _v64Card(
+    `<h3 style="text-align:center; margin:0 0 14px;">💖 Tu es génial·e !</h3>
+    ${_v64ComplIntl.map(c=>`<div style="background:var(--surfaceAlt); padding:10px 14px; border-radius:10px; margin-bottom:6px; display:flex; gap:10px;"><div style="font-size:14px;">${c.l}</div><div style="flex:1; font-size:14px;">${escapeHtml(c.t)}</div></div>`).join('')}`
+  ));
+}
+
+// === Roast / Compliment ===
+const _v64Compliments = ['Tu illumines la pièce 💡','Ton sourire est contagieux 😊','Tu es plus fort·e que tu crois 💪','Ton énergie est précieuse ✨','Tu mérites tout ce que tu rêves 💖','Ta présence fait du bien 🌸'];
+const _v64Roasts = ['T\'as une dégaine de tutoriel YouTube interrompu par une pub 😂','Ton style est si unique qu\'il a sa propre catégorie chez Vinted 🤡','Tu donnes l\'impression d\'avoir lu la moitié d\'un livre de dev perso 📖','T\'es le Wi-Fi public du bonheur : faible mais on s\'en contente 📶'];
+function renderRoastCompliment() {
+  _v64Set('roastcomp-content', _v64Card(
+    `<div style="display:flex; gap:6px; margin-bottom:14px;">
+      <button class="btn primary" style="flex:1;" onclick="_rcGo('comp')">💖 Compliment</button>
+      <button class="btn alt" style="flex:1;" onclick="_rcGo('roast')">🔥 Roast</button>
+    </div>
+    <div id="rc-out" style="text-align:center; font-size:18px; line-height:1.5; min-height:60px; padding:14px; background:var(--surfaceAlt); border-radius:10px;"></div>`
+  ));
+}
+function _rcGo(t) {
+  document.getElementById('rc-out').textContent = _v64Pick(t==='comp' ? _v64Compliments : _v64Roasts);
+}
+
+// === Affirmation generator ===
+const _v64Affirms = ['Je suis digne d\'amour et de bonheur','Je crée la vie que je désire','Mon corps est un sanctuaire','Je choisis la paix dans le présent','Je suis exactement où je dois être','J\'attire des opportunités positives','Je suis fier·e de qui je deviens','Mes émotions sont valides','Je mérite du repos et de la douceur','Mon intuition me guide bien'];
+function renderAffirmGen() {
+  const a = _v64Pick(_v64Affirms);
+  _v64Set('affirmgen-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">💖</div>
+    <p style="text-align:center; font-size:18px; font-weight:600; font-style:italic; line-height:1.5; margin:18px 0;">« ${a} »</p>
+    ${_v64Btn('✨ Autre affirmation', 'renderAffirmGen()', true)}`
+  ));
+}
+
+// === Word of the day ===
+const _v64WordsOfDay = [
+  {w:'Ineffable', d:'Qui ne peut être exprimé par des mots, tellement c\'est beau ou intense'},
+  {w:'Sérendipité', d:'Le fait de découvrir quelque chose par hasard avec bonheur'},
+  {w:'Hygge', d:'(danois) Sentiment de confort cosy et de bien-être chez soi'},
+  {w:'Saudade', d:'(portugais) Mélancolie douce mêlée de nostalgie'},
+  {w:'Komorebi', d:'(japonais) La lumière du soleil filtrant à travers les feuilles'},
+  {w:'Wabi-sabi', d:'(japonais) La beauté de l\'imparfait et de l\'éphémère'},
+  {w:'Mamihlapinatapai', d:'(yagan) Regard partagé entre deux personnes désirant la même chose'},
+  {w:'Tsundoku', d:'(japonais) Acheter des livres et les laisser s\'empiler sans les lire'},
+];
+function renderWordOfDay() {
+  const seed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,''));
+  const w = _v64WordsOfDay[seed % _v64WordsOfDay.length];
+  _v64Set('wordday-content', _v64Card(
+    `<div style="font-size:11px; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px;">📖 Mot du jour</div>
+    <h2 style="margin:14px 0 8px; font-size:28px; color:var(--primary);">${w.w}</h2>
+    <p style="font-size:14px; line-height:1.6; margin:0;">${w.d}</p>`
+  ));
+}
+
+// === Lucky numbers ===
+function renderLuckyNum() {
+  const nums = [];
+  while (nums.length < 6) { const n = 1+Math.floor(Math.random()*49); if (!nums.includes(n)) nums.push(n); }
+  nums.sort((a,b)=>a-b);
+  _v64Set('luckynum-content', _v64Card(
+    `<div style="text-align:center; font-size:11px; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px;">🍀 Tes numéros chance</div>
+    <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin:18px 0;">
+    ${nums.map(n=>`<div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--accent)); color:white; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px;">${n}</div>`).join('')}
+    </div>
+    ${_v64Btn('🎲 Re-tirer', 'renderLuckyNum()', true)}`
+  ));
+}
+
+// === Story dice ===
+const _v64StoryDice = ['🐉','🌙','🗝️','⚔️','🏰','🌹','📜','💎','🦋','🔮','⛰️','🌊','🔥','❄️','👑','🎭','🪄','🦊','🐺','🌟','💀','🗡️','🛡️','🏹'];
+function renderStoryDice() {
+  const dice = []; while (dice.length<9) dice.push(_v64Pick(_v64StoryDice));
+  _v64Set('storydice-content', _v64Card(
+    `<div style="text-align:center; font-size:11px; color:var(--textSec); text-transform:uppercase; letter-spacing:1.5px;">🎲 Inspire ton histoire</div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:18px 0;">
+    ${dice.map(d=>`<div style="aspect-ratio:1; background:var(--surfaceAlt); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:36px;">${d}</div>`).join('')}
+    </div>
+    ${_v64Btn('🎲 Re-lancer', 'renderStoryDice()', true)}`
+  ));
+}
+
+// === Random recipe ===
+const _v64Recipes = [
+  {n:'🍝 Pasta carbonara', t:'15 min', i:['200g pâtes','100g lardons','2 jaunes d\'œufs','50g pecorino','poivre']},
+  {n:'🥗 Bowl healthy', t:'20 min', i:['quinoa','avocat','tomates cerises','feta','vinaigrette citron']},
+  {n:'🍕 Pizza maison', t:'45 min', i:['pâte pizza','tomate','mozzarella','basilic','huile olive']},
+  {n:'🥞 Pancakes', t:'15 min', i:['200g farine','2 œufs','30cl lait','sucre vanillé','beurre']},
+  {n:'🍜 Ramen express', t:'10 min', i:['nouilles','bouillon','œuf mollet','algues nori','oignons verts']},
+  {n:'🌮 Tacos', t:'20 min', i:['tortillas','poulet','poivrons','crème','coriandre','citron vert']},
+  {n:'🍪 Cookies', t:'25 min', i:['250g farine','125g beurre','1 œuf','100g sucre','pépites chocolat']},
+];
+function renderRandomRecipe() {
+  const r = _v64Pick(_v64Recipes);
+  _v64Set('randrecipe-content', _v64Card(
+    `<h2 style="margin:0 0 8px;">${r.n}</h2>
+    <div style="font-size:12px; color:var(--textSec);">⏱ ${r.t}</div>
+    <ul style="margin:14px 0; padding-left:20px; line-height:1.8;">${r.i.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>
+    ${_v64Btn('🍽️ Autre recette', 'renderRandomRecipe()', true)}`
+  ));
+}
+
+// === Random picks (tirage) ===
+function renderRandomPicks() {
+  _v64Set('randompicks-content', _v64Card(
+    `<span class="label">Liste (1 par ligne)</span>
+    <textarea class="input" id="rp-in" rows="6" placeholder="Pizza\nSushi\nBurger\n..."></textarea>
+    <span class="label" style="margin-top:10px;">Combien tirer ?</span>
+    <input class="input" type="number" id="rp-n" value="1" min="1">
+    ${_v64Btn('🎲 Tirer', '_rpGo()', true)}
+    <div id="rp-out" style="margin-top:18px; min-height:50px;"></div>`
+  ));
+}
+function _rpGo() {
+  const list = document.getElementById('rp-in').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const n = Math.max(1, Math.min(list.length, parseInt(document.getElementById('rp-n').value)||1));
+  if (!list.length) { toast('Ajoute des éléments'); return; }
+  const pool = [...list]; const picks = [];
+  for (let i=0; i<n; i++) picks.push(pool.splice(Math.floor(Math.random()*pool.length), 1)[0]);
+  document.getElementById('rp-out').innerHTML = picks.map(p=>`<div style="background:var(--primary); color:white; padding:12px; border-radius:10px; margin-bottom:6px; font-weight:700; text-align:center;">✨ ${escapeHtml(p)}</div>`).join('');
+}
+
+// === Pros / Cons ===
+function renderProsCons() {
+  const data = JSON.parse(localStorage.getItem('nw_proscons') || '{"q":"","p":[],"c":[]}');
+  _v64Set('proscons-content', _v64Card(
+    `<span class="label">Décision à prendre</span>
+    <input class="input" id="pc-q" value="${escapeHtml(data.q)}" placeholder="Ex: Changer de job ?" oninput="_pcSave()">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;">
+      <div><h4 style="color:var(--success); margin:0 0 6px;">✅ Pour</h4>
+        <textarea class="input" id="pc-p" rows="6" oninput="_pcSave()" placeholder="1 par ligne">${escapeHtml((data.p||[]).join('\n'))}</textarea></div>
+      <div><h4 style="color:var(--danger); margin:0 0 6px;">❌ Contre</h4>
+        <textarea class="input" id="pc-c" rows="6" oninput="_pcSave()" placeholder="1 par ligne">${escapeHtml((data.c||[]).join('\n'))}</textarea></div>
+    </div>
+    <div id="pc-score" style="text-align:center; font-size:13px; color:var(--textSec); margin-top:10px;"></div>`
+  ));
+  _pcSave();
+}
+function _pcSave() {
+  const q = document.getElementById('pc-q').value;
+  const p = document.getElementById('pc-p').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const c = document.getElementById('pc-c').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  localStorage.setItem('nw_proscons', JSON.stringify({q,p,c}));
+  document.getElementById('pc-score').textContent = `Score : ${p.length} pour · ${c.length} contre · ${p.length>c.length?'✅ pencher pour OUI':p.length<c.length?'❌ pencher pour NON':'⚖️ équilibré'}`;
+}
+
+// === RPS Pro (rock paper scissors lizard spock) ===
+const _v64RPSPro = ['🪨','📄','✂️','🦎','🖖'];
+const _v64RPSNames = ['Pierre','Papier','Ciseaux','Lézard','Spock'];
+const _v64RPSWin = {0:[2,3],1:[0,4],2:[1,3],3:[1,4],4:[0,2]};
+function renderRPSPro() {
+  _v64Set('rpspro-content', _v64Card(
+    `<div style="text-align:center; font-size:11px; color:var(--textSec); text-transform:uppercase;">Choisis ton coup</div>
+    <div style="display:flex; gap:6px; justify-content:center; margin:14px 0;">
+    ${_v64RPSPro.map((e,i)=>`<button class="btn alt" style="font-size:28px; padding:10px;" onclick="_rpsGo(${i})">${e}</button>`).join('')}
+    </div>
+    <div id="rps-out" style="text-align:center; font-size:14px; min-height:80px;"></div>`
+  ));
+}
+function _rpsGo(p) {
+  const ai = Math.floor(Math.random()*5);
+  let res = 'Égalité 🤝';
+  if (p === ai) res = 'Égalité 🤝';
+  else if (_v64RPSWin[p].includes(ai)) res = 'Tu gagnes ! 🎉';
+  else res = 'IA gagne 😈';
+  document.getElementById('rps-out').innerHTML = `<div style="font-size:48px;">${_v64RPSPro[p]} vs ${_v64RPSPro[ai]}</div><div style="margin-top:10px; font-weight:700;">${_v64RPSNames[p]} contre ${_v64RPSNames[ai]}</div><div style="margin-top:6px; font-size:18px;">${res}</div>`;
+}
+
+// === Boredom buster ===
+const _v64BoredomActs = ['📚 Lire 10 pages d\'un livre','🚶 Marcher 15 min dehors','🎨 Dessiner ce que tu vois','📞 Appeler un·e ami·e','🧹 Ranger 1 tiroir','🎵 Découvrir un nouvel artiste','📝 Écrire 1 souvenir d\'enfance','💆 Faire 5 min d\'étirements','🌱 Apprendre 5 mots dans une langue','🎬 Regarder un court-métrage','🍳 Cuisiner quelque chose de nouveau','🧘 5 min de méditation','📷 Prendre 10 photos esthétiques','🔍 Faire un puzzle','💌 Écrire une lettre que tu n\'enverras jamais'];
+function renderBoredom() {
+  _v64Set('boredom-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">😴</div>
+    <p id="bor-out" style="text-align:center; font-size:18px; line-height:1.5; margin:18px 0; min-height:60px;">${_v64Pick(_v64BoredomActs)}</p>
+    ${_v64Btn('🎲 Autre idée', `document.getElementById('bor-out').textContent=_v64Pick(_v64BoredomActs)`, true)}`
+  ));
+}
+
+// === Energy tracker ===
+function renderEnergyTracker() {
+  const all = JSON.parse(localStorage.getItem('nw_energy') || '[]');
+  const today = new Date().toISOString().slice(0,10);
+  _v64Set('energy-content', _v64Card(
+    `<h3 style="margin:0 0 10px;">⚡ Niveau d'énergie</h3>
+    <div style="display:flex; gap:6px; justify-content:space-between;">
+    ${[1,2,3,4,5].map(n=>`<button class="btn alt" style="flex:1; font-size:18px;" onclick="_energySave(${n})">${'⚡'.repeat(n)}</button>`).join('')}
+    </div>
+    <h4 style="margin:18px 0 8px;">📊 Cette semaine</h4>
+    <div>${all.slice(-7).map(e=>`<div style="display:flex; justify-content:space-between; padding:6px 10px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:4px;"><span style="font-size:12px;">${e.date}</span><span>${'⚡'.repeat(e.lvl)}</span></div>`).join('') || '<p style="color:var(--textSec); font-size:13px; text-align:center;">Aucun log encore</p>'}</div>`
+  ));
+}
+function _energySave(lvl) {
+  const today = new Date().toISOString().slice(0,10);
+  let all = JSON.parse(localStorage.getItem('nw_energy') || '[]');
+  all = all.filter(e => e.date !== today);
+  all.push({ date: today, lvl, t: Date.now() });
+  localStorage.setItem('nw_energy', JSON.stringify(all));
+  toast('⚡ Sauvé');
+  renderEnergyTracker();
+}
+
+// === Tarot draw (1 carte) ===
+const _v64Tarot = [
+  {n:'Le Mat',m:'🃏',s:'Nouveau départ, aventure'},{n:'Le Magicien',m:'🧙',s:'Manifestation, créativité'},
+  {n:'L\'Impératrice',m:'👑',s:'Abondance, féminité'},{n:'L\'Empereur',m:'⚔️',s:'Stabilité, autorité'},
+  {n:'L\'Hermite',m:'🕯️',s:'Introspection, sagesse'},{n:'La Roue',m:'☸️',s:'Cycles, changement'},
+  {n:'La Force',m:'🦁',s:'Courage, patience'},{n:'L\'Étoile',m:'⭐',s:'Espoir, inspiration'},
+  {n:'Le Soleil',m:'☀️',s:'Joie, succès'},{n:'La Lune',m:'🌙',s:'Intuition, mystère'},
+  {n:'Le Monde',m:'🌍',s:'Accomplissement, complétude'},{n:'Le Pendu',m:'🙃',s:'Perspective, lâcher-prise'},
+];
+function v58_renderTarot() {
+  const c = _v64Pick(_v64Tarot);
+  _v64Set('tarotV58-content', _v64Card(
+    `<div style="text-align:center; font-size:64px;">${c.m}</div>
+    <h2 style="text-align:center; margin:8px 0;">${c.n}</h2>
+    <p style="text-align:center; color:var(--textSec); font-size:14px;">${c.s}</p>
+    ${_v64Btn('🔮 Autre carte', 'v58_renderTarot()', true)}`
+  ));
+}
+
+// === Numérologie (chemin de vie) ===
+function renderNumerologie() {
+  _v64Set('numerologie-content', _v64Card(
+    `<span class="label">Date de naissance</span>
+    <input class="input" type="date" id="num-d">
+    ${_v64Btn('🔢 Calculer', '_numCalc()', true)}
+    <div id="num-out" style="margin-top:18px;"></div>`
+  ));
+}
+function _numCalc() {
+  const v = document.getElementById('num-d').value;
+  if (!v) { toast('Choisis une date'); return; }
+  let n = v.replace(/-/g,'').split('').reduce((s,c)=>s+parseInt(c),0);
+  while (n > 9 && ![11,22,33].includes(n)) n = String(n).split('').reduce((s,c)=>s+parseInt(c),0);
+  const meanings = {1:'Leader, indépendance',2:'Diplomatie, harmonie',3:'Créativité, expression',4:'Stabilité, travail',5:'Liberté, aventure',6:'Famille, responsabilité',7:'Spiritualité, analyse',8:'Pouvoir, succès',9:'Compassion, sagesse',11:'Maître intuitif',22:'Maître bâtisseur',33:'Maître guérisseur'};
+  document.getElementById('num-out').innerHTML = `<div style="text-align:center;"><div style="font-size:56px; font-weight:900; color:var(--primary);">${n}</div><div style="font-size:14px; color:var(--textSec); margin-top:6px;">${meanings[n]||''}</div></div>`;
+}
+
+// === Sleep calc (durée de sommeil) ===
+function renderSleepCalc() {
+  _v64Set('sleepcalc-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">Un cycle de sommeil dure ~90 min. Pour bien se réveiller, vise un nombre entier de cycles (idéalement 5-6).</p>
+    <span class="label">Heure de réveil souhaitée</span>
+    <input class="input" type="time" id="slp-w" value="07:00" oninput="_slpCalc()">
+    <div id="slp-out" style="margin-top:18px;"></div>`
+  ));
+  _slpCalc();
+}
+function _slpCalc() {
+  const v = document.getElementById('slp-w').value;
+  if (!v) return;
+  const [h,m] = v.split(':').map(Number);
+  const wake = new Date(); wake.setHours(h, m, 0, 0);
+  const cycles = [3,4,5,6,7];
+  const out = cycles.map(c => {
+    const t = new Date(wake.getTime() - (c*90 + 15)*60000); // +15min pour s'endormir
+    return `<div style="display:flex; justify-content:space-between; padding:10px; background:var(--surfaceAlt); border-radius:10px; margin-bottom:6px;"><span><strong>${t.toTimeString().slice(0,5)}</strong> · ${c} cycles</span><span style="color:${c>=5?'var(--success)':'var(--textSec)'};">${c>=5?'✅ Optimal':'⚠️ Court'}</span></div>`;
+  }).join('');
+  document.getElementById('slp-out').innerHTML = out;
+}
+
+// === Age calculator V58 ===
+function v58_renderAgeCalc() {
+  _v64Set('agecalcV58-content', _v64Card(
+    `<span class="label">Date de naissance</span>
+    <input class="input" type="date" id="acv-d" oninput="_acvCalc()">
+    <div id="acv-out" style="margin-top:18px;"></div>`
+  ));
+}
+function _acvCalc() {
+  const v = document.getElementById('acv-d').value;
+  if (!v) return;
+  const bd = new Date(v), now = new Date();
+  const ms = now - bd;
+  const y = now.getFullYear()-bd.getFullYear() - ((now.getMonth()<bd.getMonth() || (now.getMonth()===bd.getMonth()&&now.getDate()<bd.getDate()))?1:0);
+  const days = Math.floor(ms/86400000);
+  const hours = Math.floor(ms/3600000);
+  const mins = Math.floor(ms/60000);
+  document.getElementById('acv-out').innerHTML = [
+    [y, 'années'],[Math.floor(days/30.44),'mois'],[Math.floor(days/7), 'semaines'],[days, 'jours'],[hours.toLocaleString('fr-FR'), 'heures'],[mins.toLocaleString('fr-FR'), 'minutes']
+  ].map(([v,l])=>`<div style="display:flex; justify-content:space-between; padding:10px; background:var(--surfaceAlt); border-radius:10px; margin-bottom:6px;"><span style="color:var(--textSec);">${l}</span><strong>${v}</strong></div>`).join('');
+}
+
+// === Counter V58 ===
+function v58_renderCounter() {
+  let v = parseInt(localStorage.getItem('nw_v58counter')||'0');
+  _v64Set('counterV58-content', _v64Card(
+    `<div style="text-align:center;"><div style="font-size:80px; font-weight:900; color:var(--primary);" id="ctv-v">${v}</div></div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px;">
+      <button class="btn alt" onclick="_ctvAdd(-1)">−1</button>
+      <button class="btn primary" onclick="_ctvAdd(1)">+1</button>
+      <button class="btn alt" onclick="_ctvAdd('reset')">↺</button>
+    </div>`
+  ));
+}
+function _ctvAdd(d) {
+  let v = d === 'reset' ? 0 : (parseInt(localStorage.getItem('nw_v58counter')||'0') + d);
+  localStorage.setItem('nw_v58counter', v);
+  document.getElementById('ctv-v').textContent = v;
+}
+
+// === Stopwatch V58 ===
+let _v58swState = { running:false, start:0, elapsed:0, laps:[], int:null };
+function v58_renderStopwatch() {
+  _v64Set('stopwatchV58-content', _v64Card(
+    `<div id="swv-disp" style="text-align:center; font-size:48px; font-weight:900; font-family:ui-monospace,monospace; padding:20px;">00:00.00</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="btn primary" id="swv-toggle" onclick="_swvToggle()">▶ Start</button>
+      <button class="btn alt" onclick="_swvLap()">⏱ Lap</button>
+    </div>
+    <button class="btn ghost full" style="margin-top:8px;" onclick="_swvReset()">↺ Reset</button>
+    <div id="swv-laps" style="margin-top:14px;"></div>`
+  ));
+  _swvUpd();
+}
+function _swvUpd() {
+  const t = _v58swState.elapsed + (_v58swState.running ? Date.now()-_v58swState.start : 0);
+  const m = Math.floor(t/60000), s = Math.floor((t%60000)/1000), cs = Math.floor((t%1000)/10);
+  const el = document.getElementById('swv-disp');
+  if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`;
+}
+function _swvToggle() {
+  if (_v58swState.running) { _v58swState.elapsed += Date.now()-_v58swState.start; _v58swState.running=false; clearInterval(_v58swState.int); document.getElementById('swv-toggle').textContent='▶ Start'; }
+  else { _v58swState.start = Date.now(); _v58swState.running = true; _v58swState.int = setInterval(_swvUpd, 16); document.getElementById('swv-toggle').textContent='⏸ Pause'; }
+}
+function _swvLap() {
+  if (!_v58swState.running && !_v58swState.elapsed) return;
+  const t = _v58swState.elapsed + (_v58swState.running ? Date.now()-_v58swState.start : 0);
+  const m = Math.floor(t/60000), s = Math.floor((t%60000)/1000), cs = Math.floor((t%1000)/10);
+  _v58swState.laps.unshift(`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(cs).padStart(2,'0')}`);
+  document.getElementById('swv-laps').innerHTML = _v58swState.laps.slice(0,10).map((l,i)=>`<div style="display:flex; justify-content:space-between; padding:6px 10px; background:var(--surfaceAlt); border-radius:6px; margin-bottom:4px;"><span>Lap ${_v58swState.laps.length-i}</span><span style="font-family:ui-monospace,monospace;">${l}</span></div>`).join('');
+}
+function _swvReset() {
+  _v58swState.running=false; _v58swState.elapsed=0; _v58swState.laps=[]; clearInterval(_v58swState.int);
+  document.getElementById('swv-toggle').textContent='▶ Start';
+  document.getElementById('swv-laps').innerHTML = '';
+  _swvUpd();
+}
+
+// === Shoe size converter ===
+function renderShoeSize() {
+  _v64Set('shoesize-content', _v64Card(
+    `<span class="label">Pointure FR/EU</span>
+    <input class="input" type="number" id="shz-eu" value="40" oninput="_shzCalc()">
+    <div id="shz-out" style="margin-top:18px;"></div>`
+  ));
+  _shzCalc();
+}
+function _shzCalc() {
+  const eu = parseFloat(document.getElementById('shz-eu').value)||0;
+  const us_m = (eu - 33).toFixed(1), us_w = (eu - 31).toFixed(1), uk = (eu - 33.5).toFixed(1), cm = (eu * 0.66 + 1.4).toFixed(1);
+  document.getElementById('shz-out').innerHTML = [
+    ['EU/FR', eu], ['US Homme', us_m], ['US Femme', us_w], ['UK', uk], ['CM (longueur pied)', cm]
+  ].map(([l,v])=>`<div style="display:flex; justify-content:space-between; padding:10px; background:var(--surfaceAlt); border-radius:10px; margin-bottom:6px;"><span style="color:var(--textSec);">${l}</span><strong>${v}</strong></div>`).join('');
+}
+
+// === Color converter V55 ===
+function renderColorConv() {
+  _v64Set('colorconvV55-content', _v64Card(
+    `<span class="label">Couleur</span>
+    <input class="input" type="color" id="ccv-in" value="#ff6fa3" oninput="_ccvCalc()" style="height:50px;">
+    <div id="ccv-out" style="margin-top:18px;"></div>`
+  ));
+  _ccvCalc();
+}
+function _ccvCalc() {
+  const h = document.getElementById('ccv-in').value;
+  const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+  // RGB → HSL
+  const R=r/255, G=g/255, B=b/255;
+  const max=Math.max(R,G,B), min=Math.min(R,G,B);
+  let H=0,S=0; const L=(max+min)/2;
+  if (max!==min){const d=max-min; S=L>0.5?d/(2-max-min):d/(max+min);
+    if(max===R) H=(G-B)/d+(G<B?6:0); else if(max===G) H=(B-R)/d+2; else H=(R-G)/d+4; H*=60;}
+  document.getElementById('ccv-out').innerHTML = [
+    ['HEX', h.toUpperCase()],['RGB', `rgb(${r}, ${g}, ${b})`],['HSL', `hsl(${Math.round(H)}, ${Math.round(S*100)}%, ${Math.round(L*100)}%)`],['CMYK', (()=>{const k=1-Math.max(R,G,B); return k>=1?'0%, 0%, 0%, 100%':`${Math.round((1-R-k)/(1-k)*100)}%, ${Math.round((1-G-k)/(1-k)*100)}%, ${Math.round((1-B-k)/(1-k)*100)}%, ${Math.round(k*100)}%`;})()]
+  ].map(([l,v])=>`<div style="display:flex; justify-content:space-between; padding:10px; background:var(--surfaceAlt); border-radius:10px; margin-bottom:6px;"><span style="color:var(--textSec);">${l}</span><strong style="font-family:ui-monospace,monospace; font-size:13px;">${v}</strong></div>`).join('');
+}
+
+// === Cuisine units (FR/US conversion) ===
+function renderCuisineUnits() {
+  const data = [
+    ['1 cuillère à café','5 ml','1 tsp'],['1 cuillère à soupe','15 ml','1 tbsp'],['1 tasse','240 ml','1 cup'],
+    ['1 verre','200 ml','—'],['1 livre (lb)','450 g','1 lb'],['1 once','28 g','1 oz'],
+    ['1 lb beurre','454 g','2 cups'],['1 cup farine','125 g','—'],['1 cup sucre','200 g','—'],
+    ['1 cup riz','190 g','—'],['1 °F vs °C','(°F-32)×5/9','—']
+  ];
+  _v64Set('cuisineunits-content', _v64Card(
+    data.map(([fr,m,en])=>`<div style="display:grid; grid-template-columns:1fr auto 1fr; gap:10px; padding:10px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:6px; font-size:13px; align-items:center;"><span>${escapeHtml(fr)}</span><span style="color:var(--primary); font-weight:700;">→</span><span style="text-align:right; font-weight:600;">${escapeHtml(m)}</span></div>`).join('')
+  ));
+}
+
+// === Units conv (longueur, poids, etc.) ===
+function renderUnitsConv() {
+  _v64Set('unitsconv-content', _v64Card(
+    `<span class="label">Catégorie</span>
+    <select class="input" id="uc-cat" onchange="_ucBuild()">
+      <option value="len">📏 Longueur</option><option value="mass">⚖️ Masse</option>
+      <option value="vol">🥤 Volume</option><option value="temp">🌡️ Température</option>
+    </select>
+    <div id="uc-body" style="margin-top:14px;"></div>`
+  ));
+  _ucBuild();
+}
+const _v64UnitsTbl = {
+  len: { m:1, km:1000, cm:0.01, mm:0.001, mi:1609.34, yd:0.9144, ft:0.3048, in:0.0254 },
+  mass: { kg:1, g:0.001, mg:0.000001, t:1000, lb:0.4536, oz:0.02835 },
+  vol: { L:1, mL:0.001, gal:3.785, qt:0.946, pt:0.473, cup:0.24 },
+};
+function _ucBuild() {
+  const cat = document.getElementById('uc-cat').value;
+  const body = document.getElementById('uc-body');
+  if (cat === 'temp') {
+    body.innerHTML = `<input class="input" type="number" id="uc-v" value="20" oninput="_ucCalcTemp()">
+    <div id="uc-out" style="margin-top:14px;"></div>`;
+    _ucCalcTemp();
+  } else {
+    const u = Object.keys(_v64UnitsTbl[cat]);
+    body.innerHTML = `<input class="input" type="number" id="uc-v" value="1" oninput="_ucCalc()">
+    <select class="input" id="uc-from" onchange="_ucCalc()">${u.map(x=>`<option>${x}</option>`).join('')}</select>
+    <div id="uc-out" style="margin-top:14px;"></div>`;
+    _ucCalc();
+  }
+}
+function _ucCalc() {
+  const cat = document.getElementById('uc-cat').value;
+  const v = parseFloat(document.getElementById('uc-v').value)||0;
+  const from = document.getElementById('uc-from').value;
+  const tbl = _v64UnitsTbl[cat];
+  const base = v * tbl[from];
+  document.getElementById('uc-out').innerHTML = Object.entries(tbl).filter(([k])=>k!==from).map(([k,m])=>`<div style="display:flex; justify-content:space-between; padding:8px 10px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:4px;"><span style="color:var(--textSec);">${k}</span><strong>${(base/m).toFixed(4)}</strong></div>`).join('');
+}
+function _ucCalcTemp() {
+  const c = parseFloat(document.getElementById('uc-v').value)||0;
+  const f = c*9/5+32, k = c+273.15;
+  document.getElementById('uc-out').innerHTML = [['°C',c],['°F',f.toFixed(2)],['K',k.toFixed(2)]].map(([l,v])=>`<div style="display:flex; justify-content:space-between; padding:8px 10px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:4px;"><span style="color:var(--textSec);">${l}</span><strong>${v}</strong></div>`).join('');
+}
+
+// === Pw strength ===
+function renderPwStrength() {
+  _v64Set('pwstrength-content', _v64Card(
+    `<span class="label">Mot de passe</span>
+    <input class="input" type="text" id="pws-in" oninput="_pwsCalc()" placeholder="Tape un mot de passe">
+    <div id="pws-out" style="margin-top:14px;"></div>`
+  ));
+  _pwsCalc();
+}
+function _pwsCalc() {
+  const v = document.getElementById('pws-in').value;
+  let score = 0; const checks = [];
+  if (v.length >= 8) { score++; checks.push('✅ ≥ 8 caractères'); } else checks.push('❌ < 8 caractères');
+  if (/[a-z]/.test(v)) { score++; checks.push('✅ minuscules'); } else checks.push('❌ minuscules');
+  if (/[A-Z]/.test(v)) { score++; checks.push('✅ majuscules'); } else checks.push('❌ majuscules');
+  if (/[0-9]/.test(v)) { score++; checks.push('✅ chiffres'); } else checks.push('❌ chiffres');
+  if (/[^a-zA-Z0-9]/.test(v)) { score++; checks.push('✅ caractères spéciaux'); } else checks.push('❌ caractères spéciaux');
+  if (v.length >= 12) score++;
+  const labels = ['🔴 Très faible','🟠 Faible','🟡 Moyen','🟢 Bon','💚 Fort','💎 Excellent'];
+  document.getElementById('pws-out').innerHTML = `
+    <div style="font-size:24px; font-weight:800; text-align:center; margin-bottom:14px;">${labels[Math.min(5, score)]}</div>
+    <div style="background:var(--surfaceAlt); height:10px; border-radius:5px; overflow:hidden; margin-bottom:14px;"><div style="height:100%; width:${score/6*100}%; background:linear-gradient(90deg, var(--danger), var(--success));"></div></div>
+    ${checks.map(c=>`<div style="font-size:13px; padding:4px 0;">${c}</div>`).join('')}`;
+}
+
+// === Morse ===
+const _v64Morse = {a:'.-',b:'-...',c:'-.-.',d:'-..',e:'.',f:'..-.',g:'--.',h:'....',i:'..',j:'.---',k:'-.-',l:'.-..',m:'--',n:'-.',o:'---',p:'.--.',q:'--.-',r:'.-.',s:'...',t:'-',u:'..-',v:'...-',w:'.--',x:'-..-',y:'-.--',z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'};
+const _v64MorseInv = Object.fromEntries(Object.entries(_v64Morse).map(([k,v])=>[v,k]));
+function renderMorse() {
+  _v64Set('morseV58-content', _v64Card(
+    `<span class="label">Texte ↔ Morse</span>
+    <textarea class="input" id="ms-a" rows="3" placeholder="Texte" oninput="_msEnc()"></textarea>
+    <div style="text-align:center; padding:8px; color:var(--primary); font-weight:700;">↕</div>
+    <textarea class="input" id="ms-b" rows="3" placeholder=".... .. -- --- .-. ..." oninput="_msDec()"></textarea>`
+  ));
+}
+function _msEnc() {
+  const v = document.getElementById('ms-a').value.toLowerCase();
+  document.getElementById('ms-b').value = v.split('').map(c=>c===' '?'/':_v64Morse[c]||'').filter(Boolean).join(' ');
+}
+function _msDec() {
+  const v = document.getElementById('ms-b').value;
+  document.getElementById('ms-a').value = v.split(' ').map(c=>c==='/'?' ':_v64MorseInv[c]||'').join('').toUpperCase();
+}
+
+// ============================================================
+// V64 — Batch 2 : trackers & créa
+// ============================================================
+
+// === Water reminder ===
+function renderWaterReminder() {
+  const today = new Date().toISOString().slice(0,10);
+  const data = JSON.parse(localStorage.getItem('nw_waterv58') || '{}');
+  const cur = data[today] || 0;
+  const goal = parseInt(localStorage.getItem('nw_waterv58_goal') || '8');
+  _v64Set('waterV58-content', _v64Card(
+    `<div style="text-align:center;"><div style="font-size:48px;">💧</div>
+    <div style="font-size:32px; font-weight:900; color:#5DADE2;">${cur} / ${goal}</div>
+    <div style="font-size:12px; color:var(--textSec);">verres aujourd'hui</div></div>
+    <div style="background:var(--surfaceAlt); height:14px; border-radius:7px; overflow:hidden; margin:14px 0;"><div style="height:100%; width:${Math.min(100, cur/goal*100)}%; background:linear-gradient(90deg, #5DADE2, #06FFA5);"></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="btn primary" onclick="_waterAdd(1)">+ 1 verre</button>
+      <button class="btn alt" onclick="_waterAdd(-1)">− 1 verre</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; margin-top:14px;">
+      <span style="flex:1; font-size:13px;">Objectif :</span>
+      <input class="input" type="number" id="wat-goal" value="${goal}" min="1" max="20" style="width:80px;" onchange="localStorage.setItem('nw_waterv58_goal', this.value); renderWaterReminder()">
+    </div>`
+  ));
+}
+function _waterAdd(d) {
+  const today = new Date().toISOString().slice(0,10);
+  const data = JSON.parse(localStorage.getItem('nw_waterv58') || '{}');
+  data[today] = Math.max(0, (data[today]||0) + d);
+  localStorage.setItem('nw_waterv58', JSON.stringify(data));
+  renderWaterReminder();
+}
+
+// === Breath 4-7-8 ===
+let _v64BreathState = { running:false, phase:0, count:0, total:0, int:null };
+function renderBreath() {
+  _v64Set('breath-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">Inspire 4s · Retiens 7s · Expire 8s</p>
+    <div id="brth-circle" style="width:200px; height:200px; border-radius:50%; background:radial-gradient(circle, var(--primary), var(--accent)); margin:24px auto; display:flex; align-items:center; justify-content:center; color:white; font-size:24px; font-weight:900; transition:transform 1s; transform:scale(0.6);">Prêt</div>
+    <div id="brth-count" style="text-align:center; font-size:13px; color:var(--textSec); min-height:18px;"></div>
+    <button class="btn primary full" id="brth-toggle" style="margin-top:14px;" onclick="_brthToggle()">▶ Démarrer</button>`
+  ));
+}
+function _brthToggle() {
+  if (_v64BreathState.running) { _brthStop(); return; }
+  _v64BreathState.running = true; _v64BreathState.phase = 0; _v64BreathState.count = 4; _v64BreathState.total = 0;
+  document.getElementById('brth-toggle').textContent = '⏹ Arrêter';
+  _brthTick();
+  _v64BreathState.int = setInterval(_brthTick, 1000);
+}
+function _brthStop() {
+  clearInterval(_v64BreathState.int); _v64BreathState.running = false;
+  const c = document.getElementById('brth-circle'); if (c) { c.style.transform='scale(0.6)'; c.textContent='Prêt'; }
+  const t = document.getElementById('brth-toggle'); if (t) t.textContent = '▶ Démarrer';
+  const cn = document.getElementById('brth-count'); if (cn) cn.textContent = '';
+}
+function _brthTick() {
+  const phases = [{n:'Inspire 🌬️', d:4, sc:1.2}, {n:'Retiens ⏸️', d:7, sc:1.2}, {n:'Expire 💨', d:8, sc:0.6}];
+  const p = phases[_v64BreathState.phase];
+  const c = document.getElementById('brth-circle');
+  if (!c) { _brthStop(); return; }
+  c.style.transform = `scale(${p.sc})`;
+  c.textContent = p.n;
+  document.getElementById('brth-count').textContent = `${_v64BreathState.count}s · cycle ${_v64BreathState.total+1}`;
+  _v64BreathState.count--;
+  if (_v64BreathState.count < 0) {
+    _v64BreathState.phase = (_v64BreathState.phase + 1) % 3;
+    if (_v64BreathState.phase === 0) _v64BreathState.total++;
+    _v64BreathState.count = phases[_v64BreathState.phase].d;
+  }
+}
+
+// === Meditation V55 ===
+let _v64MedState = { running:false, dur:300, left:0, int:null };
+function renderMeditation() {
+  _v64Set('meditationV55-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">Choisis une durée, ferme les yeux, respire.</p>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:14px 0;">
+    ${[3,5,10,15,20,30].map(m=>`<button class="btn alt" onclick="_medSet(${m*60})" style="padding:10px 4px;">${m} min</button>`).join('')}
+    </div>
+    <div id="med-disp" style="text-align:center; font-size:64px; font-weight:900; font-family:ui-monospace,monospace; padding:20px;">05:00</div>
+    <button class="btn primary full" id="med-toggle" onclick="_medToggle()">▶ Commencer</button>`
+  ));
+  _medSet(300);
+}
+function _medSet(s) {
+  if (_v64MedState.running) return;
+  _v64MedState.dur = s; _v64MedState.left = s;
+  _medUpd();
+}
+function _medUpd() {
+  const t = _v64MedState.left;
+  const m = Math.floor(t/60), sec = t%60;
+  const el = document.getElementById('med-disp');
+  if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function _medToggle() {
+  if (_v64MedState.running) { clearInterval(_v64MedState.int); _v64MedState.running=false; document.getElementById('med-toggle').textContent='▶ Reprendre'; return; }
+  _v64MedState.running = true; document.getElementById('med-toggle').textContent='⏸ Pause';
+  _v64MedState.int = setInterval(()=>{
+    _v64MedState.left--; _medUpd();
+    if (_v64MedState.left <= 0) { clearInterval(_v64MedState.int); _v64MedState.running=false; toast('🧘 Bravo, séance terminée !'); document.getElementById('med-toggle').textContent='▶ Recommencer'; _v64MedState.left = _v64MedState.dur; _medUpd(); }
+  }, 1000);
+}
+
+// === Gratitude V55 (3 trucs par jour) ===
+function v55_renderGratitude() {
+  const today = new Date().toISOString().slice(0,10);
+  const all = JSON.parse(localStorage.getItem('nw_gratV55') || '{}');
+  const cur = all[today] || ['','',''];
+  _v64Set('gratitudeV55-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">3 choses qui t'ont rendu·e reconnaissant·e aujourd'hui</p>
+    ${[0,1,2].map(i=>`<input class="input" id="grt-${i}" value="${escapeHtml(cur[i])}" placeholder="${i+1}. ..." style="margin-bottom:6px;" oninput="_grtSave()">`).join('')}
+    <h4 style="margin:18px 0 6px;">📅 Historique</h4>
+    <div>${Object.entries(all).filter(([d])=>d!==today).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,15).map(([d,v])=>`<div style="background:var(--surfaceAlt); padding:10px; border-radius:8px; margin-bottom:6px;"><div style="font-size:11px; color:var(--primary); font-weight:700;">${new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</div>${v.filter(Boolean).map(t=>`<div style="font-size:13px; padding-left:10px;">💚 ${escapeHtml(t)}</div>`).join('')}</div>`).join('') || '<p style="font-size:12px; color:var(--textSec); text-align:center;">Pas encore d historique</p>'}</div>`
+  ));
+}
+function _grtSave() {
+  const today = new Date().toISOString().slice(0,10);
+  const all = JSON.parse(localStorage.getItem('nw_gratV55') || '{}');
+  all[today] = [0,1,2].map(i=>document.getElementById('grt-'+i).value.trim());
+  if (!all[today].some(Boolean)) delete all[today];
+  localStorage.setItem('nw_gratV55', JSON.stringify(all));
+}
+
+// === Mood tracker V55 ===
+const _v64Moods = ['😄','😊','😐','😔','😢','😡','🥰','😴','🤩','😰'];
+function v55_renderMoodTracker() {
+  const today = new Date().toISOString().slice(0,10);
+  const all = JSON.parse(localStorage.getItem('nw_moodV55') || '{}');
+  _v64Set('moodV55-content', _v64Card(
+    `<h3 style="margin:0 0 10px;">Comment te sens-tu ?</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center;">
+    ${_v64Moods.map(m=>`<button class="btn ${all[today]===m?'primary':'alt'}" style="font-size:24px; padding:10px;" onclick="_mvSave('${m}')">${m}</button>`).join('')}
+    </div>
+    <h4 style="margin:18px 0 6px;">📅 Cette semaine</h4>
+    <div>${Object.entries(all).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7).map(([d,v])=>`<div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:4px;"><span style="font-size:12px;">${new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})}</span><span style="font-size:22px;">${v}</span></div>`).join('') || '<p style="font-size:12px; color:var(--textSec); text-align:center;">Aucun log</p>'}</div>`
+  ));
+}
+function _mvSave(m) {
+  const today = new Date().toISOString().slice(0,10);
+  const all = JSON.parse(localStorage.getItem('nw_moodV55') || '{}');
+  all[today] = m;
+  localStorage.setItem('nw_moodV55', JSON.stringify(all));
+  toast('🎯 Mood sauvé');
+  v55_renderMoodTracker();
+}
+
+// === Habit tracker V55 ===
+function renderHabitTracker() {
+  const habits = JSON.parse(localStorage.getItem('nw_habitsV55') || '[]');
+  const logs = JSON.parse(localStorage.getItem('nw_habitsV55_logs') || '{}');
+  const today = new Date().toISOString().slice(0,10);
+  _v64Set('habitsV55-content', _v64Card(
+    `<button class="btn primary full" onclick="_htAdd()">+ Nouvelle habitude</button>
+    <div style="margin-top:14px;">${habits.length ? habits.map((h,i)=>{
+      const k = h+'_'+today; const done = logs[k];
+      return `<div style="display:flex; align-items:center; gap:10px; padding:12px; background:var(--surfaceAlt); border-radius:10px; margin-bottom:6px;"><span style="flex:1;">${escapeHtml(h)}</span><button class="btn ${done?'primary':'alt'}" style="padding:6px 14px;" onclick="_htToggle('${h.replace(/'/g,"\\'")}')">${done?'✅':'⬜'}</button><button class="btn ghost" style="padding:6px 8px;" onclick="_htDel(${i})">🗑</button></div>`;
+    }).join('') : '<p style="font-size:13px; color:var(--textSec); text-align:center;">Aucune habitude</p>'}</div>`
+  ));
+}
+function _htAdd() {
+  const n = prompt('Nouvelle habitude ?');
+  if (!n?.trim()) return;
+  const habits = JSON.parse(localStorage.getItem('nw_habitsV55') || '[]');
+  habits.push(n.trim());
+  localStorage.setItem('nw_habitsV55', JSON.stringify(habits));
+  renderHabitTracker();
+}
+function _htToggle(h) {
+  const today = new Date().toISOString().slice(0,10);
+  const logs = JSON.parse(localStorage.getItem('nw_habitsV55_logs') || '{}');
+  const k = h+'_'+today;
+  if (logs[k]) delete logs[k]; else logs[k] = 1;
+  localStorage.setItem('nw_habitsV55_logs', JSON.stringify(logs));
+  renderHabitTracker();
+}
+function _htDel(i) {
+  if (!confirm('Supprimer ?')) return;
+  const habits = JSON.parse(localStorage.getItem('nw_habitsV55') || '[]');
+  habits.splice(i,1);
+  localStorage.setItem('nw_habitsV55', JSON.stringify(habits));
+  renderHabitTracker();
+}
+
+// === Dreams journal ===
+function renderDreams() {
+  const all = JSON.parse(localStorage.getItem('nw_dreams') || '[]');
+  _v64Set('dreams-content', _v64Card(
+    `<button class="btn primary full" onclick="_drNew()">+ Nouveau rêve</button>
+    <div style="margin-top:14px;">${all.length ? all.map((d,i)=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:6px;"><div style="font-size:11px; color:var(--primary); font-weight:700;">${new Date(d.t).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}</div><div style="font-weight:700; margin:4px 0;">${escapeHtml(d.title)}</div><div style="font-size:13px; color:var(--textSec); white-space:pre-wrap;">${escapeHtml(d.text)}</div><button class="btn ghost" style="padding:4px 10px; font-size:11px; margin-top:6px;" onclick="_drDel(${i})">🗑 Supprimer</button></div>`).join('') : '<p style="font-size:13px; color:var(--textSec); text-align:center;">Note ton premier rêve 🌙</p>'}</div>`
+  ));
+}
+function _drNew() {
+  const title = prompt('Titre du rêve ?');
+  if (!title?.trim()) return;
+  const text = prompt('Description ?') || '';
+  const all = JSON.parse(localStorage.getItem('nw_dreams') || '[]');
+  all.unshift({ title:title.trim(), text:text.trim(), t:Date.now() });
+  localStorage.setItem('nw_dreams', JSON.stringify(all));
+  renderDreams();
+}
+function _drDel(i) {
+  if (!confirm('Supprimer ?')) return;
+  const all = JSON.parse(localStorage.getItem('nw_dreams') || '[]');
+  all.splice(i,1);
+  localStorage.setItem('nw_dreams', JSON.stringify(all));
+  renderDreams();
+}
+
+// === Cycle tracker V55 ===
+function v55_renderCycle() {
+  const data = JSON.parse(localStorage.getItem('nw_cycleV55') || '{}');
+  const last = data.last || '';
+  const len = data.len || 28;
+  let info = '';
+  if (last) {
+    const d = new Date(last); const days = Math.floor((Date.now() - d) / 86400000);
+    const inCycle = days % len;
+    const next = new Date(d.getTime() + Math.ceil((days+1)/len)*len*86400000);
+    info = `<div style="text-align:center; padding:14px; background:var(--surfaceAlt); border-radius:10px; margin-top:14px;">
+      <div style="font-size:11px; color:var(--textSec);">JOUR DU CYCLE</div>
+      <div style="font-size:36px; font-weight:900; color:var(--primary);">${inCycle+1}/${len}</div>
+      <div style="font-size:13px; margin-top:6px;">Prochaines règles ~ <strong>${next.toLocaleDateString('fr-FR')}</strong></div>
+    </div>`;
+  }
+  _v64Set('cycleV55-content', _v64Card(
+    `<span class="label">1er jour des dernières règles</span>
+    <input class="input" type="date" id="cyc-last" value="${last}" oninput="_cycSave()">
+    <span class="label">Durée du cycle</span>
+    <input class="input" type="number" id="cyc-len" value="${len}" min="20" max="40" oninput="_cycSave()">
+    ${info}`
+  ));
+}
+function _cycSave() {
+  const last = document.getElementById('cyc-last').value;
+  const len = parseInt(document.getElementById('cyc-len').value)||28;
+  localStorage.setItem('nw_cycleV55', JSON.stringify({last, len}));
+  v55_renderCycle();
+}
+
+// === Vision board ===
+function renderVisionBoard() {
+  const all = JSON.parse(localStorage.getItem('nw_vision') || '[]');
+  _v64Set('vision-content', _v64Card(
+    `<button class="btn primary full" onclick="_vbNew()">+ Ajouter un objectif</button>
+    <div style="margin-top:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    ${all.map((v,i)=>`<div style="background:linear-gradient(135deg, var(--primary), var(--accent)); color:white; padding:14px; border-radius:14px; aspect-ratio:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; cursor:pointer;" onclick="_vbDel(${i})"><div style="font-size:36px;">${v.emoji}</div><div style="font-weight:700; margin-top:6px; font-size:13px;">${escapeHtml(v.txt)}</div></div>`).join('')}
+    </div>${!all.length?'<p style="font-size:13px; color:var(--textSec); text-align:center; margin-top:14px;">Visualise tes rêves ✨</p>':''}`
+  ));
+}
+function _vbNew() {
+  const txt = prompt('Ton objectif / rêve ?');
+  if (!txt?.trim()) return;
+  const emoji = prompt('Un emoji ?', '✨') || '✨';
+  const all = JSON.parse(localStorage.getItem('nw_vision') || '[]');
+  all.push({ txt:txt.trim(), emoji });
+  localStorage.setItem('nw_vision', JSON.stringify(all));
+  renderVisionBoard();
+}
+function _vbDel(i) {
+  if (!confirm('Supprimer ?')) return;
+  const all = JSON.parse(localStorage.getItem('nw_vision') || '[]');
+  all.splice(i,1);
+  localStorage.setItem('nw_vision', JSON.stringify(all));
+  renderVisionBoard();
+}
+
+// === Moodboard V55 ===
+function renderMoodboard() {
+  const all = JSON.parse(localStorage.getItem('nw_moodboardV55') || '[]');
+  _v64Set('moodboardV55-content', _v64Card(
+    `<button class="btn primary full" onclick="_mbNew()">+ Ajouter inspiration</button>
+    <div style="margin-top:14px; columns:2; column-gap:8px;">
+    ${all.map((m,i)=>`<div style="background:${m.bg||'var(--surfaceAlt)'}; padding:14px; border-radius:10px; break-inside:avoid; margin-bottom:8px; cursor:pointer; color:${m.color||'inherit'};" onclick="_mbDel(${i})"><div style="font-size:28px;">${m.emoji||'✨'}</div><div style="font-size:13px; margin-top:4px;">${escapeHtml(m.txt)}</div></div>`).join('')}
+    </div>${!all.length?'<p style="font-size:13px; color:var(--textSec); text-align:center; margin-top:14px;">Ton moodboard est vide</p>':''}`
+  ));
+}
+function _mbNew() {
+  const txt = prompt('Ton inspiration ?');
+  if (!txt?.trim()) return;
+  const emoji = prompt('Un emoji ?', '✨') || '✨';
+  const colors = [['#FFE4EC','#5D2840'],['#E8DFF4','#2E1F48'],['#D0E0C5','#2E3D26'],['#FFE5B4','#3D2817'],['#BDE0FE','#1A0E2E']];
+  const c = colors[Math.floor(Math.random()*colors.length)];
+  const all = JSON.parse(localStorage.getItem('nw_moodboardV55') || '[]');
+  all.push({ txt:txt.trim(), emoji, bg:c[0], color:c[1] });
+  localStorage.setItem('nw_moodboardV55', JSON.stringify(all));
+  renderMoodboard();
+}
+function _mbDel(i) {
+  if (!confirm('Supprimer ?')) return;
+  const all = JSON.parse(localStorage.getItem('nw_moodboardV55') || '[]');
+  all.splice(i,1);
+  localStorage.setItem('nw_moodboardV55', JSON.stringify(all));
+  renderMoodboard();
+}
+
+// === Palette V55 (5 couleurs random) ===
+function renderPalette() {
+  const colors = []; for (let i=0; i<5; i++) colors.push('#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'));
+  _v64Set('paletteV55-content', _v64Card(
+    `<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:14px;">
+    ${colors.map(c=>`<div style="aspect-ratio:1; background:${c}; border-radius:10px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px; cursor:pointer;" onclick="navigator.clipboard.writeText('${c}').then(()=>toast('${c} copié !'))"><span style="font-size:9px; font-family:ui-monospace,monospace; background:rgba(0,0,0,0.5); color:white; padding:2px 4px; border-radius:3px;">${c}</span></div>`).join('')}
+    </div>
+    ${_v64Btn('🎨 Nouvelle palette', 'renderPalette()', true)}`
+  ));
+}
+
+// === Sticker pack ===
+const _v64Stickers = ['✨','🌸','💖','🌙','⭐','🔥','⚡','💀','🎀','🍓','🌺','🦋','🐰','🐱','🎮','🎨','🌊','☁️','🍑','🌷','👑','💎','🖤','🤍','🌈','🐾','🍒','🌻','🍯','🎧','🌿','🍃','🌹','🦄','🐻','🐼','🦊','🌟','🎵','🎶'];
+function renderStickerPack() {
+  _v64Set('sticker-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">Tap pour copier dans le presse-papier</p>
+    <div style="display:grid; grid-template-columns:repeat(8,1fr); gap:4px; margin-top:14px;">
+    ${_v64Stickers.map(s=>`<button style="background:var(--surfaceAlt); border:none; aspect-ratio:1; border-radius:8px; font-size:24px; cursor:pointer;" onclick="navigator.clipboard.writeText('${s}').then(()=>toast('${s} copié !'))">${s}</button>`).join('')}
+    </div>`
+  ));
+}
+
+// === Logo gen (initiales colorées) ===
+function renderLogoGen() {
+  _v64Set('logo-content', _v64Card(
+    `<span class="label">Ton nom / mot</span>
+    <input class="input" id="lg-in" value="NN" oninput="_lgGo()" maxlength="3">
+    <div style="display:flex; gap:6px; margin-top:10px;">
+      <button class="btn alt" style="flex:1;" onclick="_lgGo()">🎨 Nouvelle palette</button>
+      <button class="btn primary" style="flex:1;" onclick="_lgDl()">📥 Télécharger</button>
+    </div>
+    <div id="lg-preview" style="margin-top:18px; display:flex; justify-content:center;"></div>`
+  ));
+  _lgGo();
+}
+function _lgGo() {
+  const t = (document.getElementById('lg-in').value||'').toUpperCase().slice(0,3);
+  const palettes = [['#FF6FA3','#FFB6D9'],['#5DADE2','#7AA8FF'],['#FFD166','#FF8C42'],['#7BC47F','#5DD68F'],['#A78BFA','#C77DFF'],['#FF6B6B','#FF8C42']];
+  const p = palettes[Math.floor(Math.random()*palettes.length)];
+  document.getElementById('lg-preview').innerHTML = `<div id="lg-canvas" style="width:200px; height:200px; border-radius:30px; background:linear-gradient(135deg, ${p[0]}, ${p[1]}); color:white; display:flex; align-items:center; justify-content:center; font-size:72px; font-weight:900; box-shadow:0 12px 30px ${p[0]}50;">${escapeHtml(t)}</div>`;
+}
+function _lgDl() {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const ctx = c.getContext('2d');
+  const t = (document.getElementById('lg-in').value||'').toUpperCase().slice(0,3);
+  const div = document.getElementById('lg-canvas');
+  if (!div) return;
+  const bg = div.style.background;
+  const m = bg.match(/#[0-9a-f]{6}/gi); const p = m && m.length>=2 ? [m[0], m[1]] : ['#FF6FA3','#FFB6D9'];
+  const grad = ctx.createLinearGradient(0,0,512,512); grad.addColorStop(0,p[0]); grad.addColorStop(1,p[1]);
+  ctx.fillStyle = grad;
+  ctx.beginPath(); const r=64;
+  ctx.moveTo(r,0); ctx.lineTo(512-r,0); ctx.arcTo(512,0,512,r,r); ctx.lineTo(512,512-r); ctx.arcTo(512,512,512-r,512,r); ctx.lineTo(r,512); ctx.arcTo(0,512,0,512-r,r); ctx.lineTo(0,r); ctx.arcTo(0,0,r,0,r); ctx.fill();
+  ctx.fillStyle = 'white'; ctx.font = 'bold 200px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(t, 256, 270);
+  c.toBlob(b=>{const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='logo.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),100);});
+}
+
+// === Avatar maker ===
+const _v64AvatarParts = {
+  bg: ['#FFB6D9','#FFD166','#A78BFA','#7BC47F','#5DADE2','#FF8C42','#FFAFCC','#06FFA5'],
+  face: ['😀','😎','🥰','😊','🤩','😋','🤗','🥳','😸','🦊','🐱','🐰','🐼','🐻','🦁','🐯']
+};
+function renderAvatarMaker() {
+  _v64Set('avatar-content', _v64Card(
+    `<div id="av-preview" style="width:200px; height:200px; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:120px;"></div>
+    <span class="label">Visage</span>
+    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">${_v64AvatarParts.face.map(f=>`<button style="background:var(--surfaceAlt); border:none; padding:8px 10px; border-radius:8px; font-size:22px; cursor:pointer;" onclick="_avSet('face','${f}')">${f}</button>`).join('')}</div>
+    <span class="label">Fond</span>
+    <div style="display:flex; flex-wrap:wrap; gap:4px;">${_v64AvatarParts.bg.map(b=>`<button style="background:${b}; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer;" onclick="_avSet('bg','${b}')"></button>`).join('')}</div>
+    ${_v64Btn('🎲 Random', '_avRandom()', true)}`
+  ));
+  _avRender();
+}
+let _v64AvState = { bg:'#FFB6D9', face:'😀' };
+function _avSet(k,v){ _v64AvState[k]=v; _avRender(); }
+function _avRandom(){ _v64AvState.bg=_v64Pick(_v64AvatarParts.bg); _v64AvState.face=_v64Pick(_v64AvatarParts.face); _avRender(); }
+function _avRender(){ const p=document.getElementById('av-preview'); if(!p) return; p.style.background=_v64AvState.bg; p.textContent=_v64AvState.face; }
+
+// === Bio match V2 (compat % entre bios) ===
+function renderBioMatchV2() {
+  _v64Set('biomatch-content', _v64Card(
+    `<span class="label">Bio 1</span>
+    <textarea class="input" id="bm-1" rows="3" placeholder="Centres d'intérêt, vibes..."></textarea>
+    <span class="label">Bio 2</span>
+    <textarea class="input" id="bm-2" rows="3"></textarea>
+    ${_v64Btn('💞 Calculer la compat', '_bmGo()', true)}
+    <div id="bm-out" style="margin-top:18px; text-align:center;"></div>`
+  ));
+}
+function _bmGo() {
+  const a = (document.getElementById('bm-1').value||'').toLowerCase().split(/\W+/).filter(w=>w.length>2);
+  const b = (document.getElementById('bm-2').value||'').toLowerCase().split(/\W+/).filter(w=>w.length>2);
+  if (!a.length || !b.length) { toast('Remplis les deux'); return; }
+  const setA = new Set(a), setB = new Set(b);
+  const common = [...setA].filter(w=>setB.has(w)).length;
+  const total = new Set([...setA, ...setB]).size;
+  const pct = Math.round(common/total*100);
+  const lvl = pct>=70?'💖 Soulmates':pct>=50?'💕 Très bonne match':pct>=30?'💛 Pas mal':'🤔 Faible';
+  document.getElementById('bm-out').innerHTML = `<div style="font-size:64px; font-weight:900; color:var(--primary);">${pct}%</div><div style="font-size:18px; font-weight:700;">${lvl}</div><div style="font-size:13px; color:var(--textSec); margin-top:6px;">${common} mots en commun sur ${total}</div>`;
+}
+
+// === Astro compat V58 ===
+const _v64Astro = ['♈ Bélier','♉ Taureau','♊ Gémeaux','♋ Cancer','♌ Lion','♍ Vierge','♎ Balance','♏ Scorpion','♐ Sagittaire','♑ Capricorne','♒ Verseau','♓ Poissons'];
+function v58_renderAstroCompat() {
+  _v64Set('astrocompatV58-content', _v64Card(
+    `<span class="label">Signe 1</span>
+    <select class="input" id="ac-1">${_v64Astro.map((s,i)=>`<option value="${i}">${s}</option>`).join('')}</select>
+    <span class="label">Signe 2</span>
+    <select class="input" id="ac-2">${_v64Astro.map((s,i)=>`<option value="${i}">${s}</option>`).join('')}</select>
+    ${_v64Btn('💞 Voir la compat', '_acGo()', true)}
+    <div id="ac-out" style="margin-top:18px; text-align:center;"></div>`
+  ));
+}
+function _acGo() {
+  const a = parseInt(document.getElementById('ac-1').value);
+  const b = parseInt(document.getElementById('ac-2').value);
+  // Compat basée sur la distance (élément + modalité)
+  const elem = i => i % 4; // 0:feu 1:terre 2:air 3:eau (approximatif)
+  let pct = 50 + (4 - Math.abs(elem(a) - elem(b))) * 10;
+  if (a === b) pct = 75; // même signe : ok mais pas miroir parfait
+  pct = Math.min(98, Math.max(20, pct + Math.floor(Math.random()*15-7)));
+  const lvl = pct>=80?'💖 Magique':pct>=60?'💕 Très bon':pct>=40?'💛 OK':'⚠️ Compliqué';
+  document.getElementById('ac-out').innerHTML = `<div style="font-size:48px;">${_v64Astro[a].split(' ')[0]} 💞 ${_v64Astro[b].split(' ')[0]}</div><div style="font-size:48px; font-weight:900; color:var(--primary); margin-top:14px;">${pct}%</div><div style="font-size:18px; font-weight:700;">${lvl}</div>`;
+}
+
+// ============================================================
+// V64 — Batch 3 : quizzes & listes éducatives
+// ============================================================
+
+function _v64Quiz(containerId, data, title) {
+  const state = { i:0, score:0, answered:false };
+  function render() {
+    const q = data[state.i];
+    if (!q) {
+      _v64Set(containerId, _v64Card(
+        `<div style="text-align:center;"><div style="font-size:64px;">🏆</div>
+        <h2 style="margin:14px 0;">Score : ${state.score} / ${data.length}</h2>
+        <button class="btn primary full" onclick="(${render.toString()})()">↻ Recommencer</button></div>`
+      ));
+      state.i = 0; state.score = 0;
+      return;
+    }
+    const opts = [...q.opts]; for (let i=opts.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+    _v64Set(containerId, _v64Card(
+      `<div style="font-size:11px; color:var(--textSec);">Question ${state.i+1} / ${data.length}</div>
+      <h3 style="margin:8px 0 14px;">${escapeHtml(q.q)}</h3>
+      <div style="display:flex; flex-direction:column; gap:6px;" id="qz-opts">
+      ${opts.map(o=>`<button class="btn alt" data-ans="${escapeHtml(o)}" onclick="_v64QzAns(this, '${escapeHtml(q.a).replace(/'/g,"\\'")}')">${escapeHtml(o)}</button>`).join('')}
+      </div>
+      <div id="qz-fb" style="margin-top:10px; min-height:20px; text-align:center;"></div>
+      <div style="margin-top:10px; font-size:13px; text-align:center; color:var(--textSec);">Score : ${state.score}</div>`
+    ));
+  }
+  window._v64QzAns = function(btn, ans) {
+    if (state.answered) return;
+    state.answered = true;
+    const correct = btn.dataset.ans === ans;
+    if (correct) state.score++;
+    document.querySelectorAll('#qz-opts button').forEach(b => {
+      if (b.dataset.ans === ans) b.style.background = 'var(--success)', b.style.color = 'white';
+      else if (b === btn) b.style.background = 'var(--danger)', b.style.color = 'white';
+    });
+    document.getElementById('qz-fb').textContent = correct ? '✅ Bonne réponse !' : `❌ La réponse était : ${ans}`;
+    setTimeout(() => { state.i++; state.answered=false; render(); }, 1300);
+  };
+  render();
+}
+
+// === Flags quiz ===
+const _v64Flags = [
+  {q:'🇫🇷',a:'France',opts:['France','Italie','Russie','Pays-Bas']},
+  {q:'🇯🇵',a:'Japon',opts:['Japon','Bangladesh','Palaos','Indonésie']},
+  {q:'🇧🇷',a:'Brésil',opts:['Brésil','Argentine','Mexique','Colombie']},
+  {q:'🇮🇹',a:'Italie',opts:['Italie','Mexique','Irlande','Côte d\'Ivoire']},
+  {q:'🇪🇸',a:'Espagne',opts:['Espagne','Portugal','France','Pérou']},
+  {q:'🇨🇦',a:'Canada',opts:['Canada','USA','Pérou','Liban']},
+  {q:'🇦🇺',a:'Australie',opts:['Australie','Nouvelle-Zélande','UK','Tuvalu']},
+  {q:'🇩🇪',a:'Allemagne',opts:['Allemagne','Belgique','Tchad','Estonie']},
+  {q:'🇰🇷',a:'Corée du Sud',opts:['Corée du Sud','Mongolie','Japon','Thaïlande']},
+  {q:'🇮🇳',a:'Inde',opts:['Inde','Niger','Côte d\'Ivoire','Mexique']},
+];
+function renderFlagsQuiz() { _v64Quiz('flags-content', _v64Flags); }
+
+// === SAT vocab quiz ===
+const _v64SatVocab = [
+  {q:'Ephemeral',a:'Éphémère, qui dure peu',opts:['Éphémère, qui dure peu','Énorme, gigantesque','Très ancien','Mystérieux']},
+  {q:'Ubiquitous',a:'Omniprésent',opts:['Omniprésent','Très rare','Mystérieux','Inutile']},
+  {q:'Pragmatic',a:'Pragmatique, pratique',opts:['Pragmatique, pratique','Idéaliste','Confus','Émotionnel']},
+  {q:'Verbose',a:'Verbeux, bavard',opts:['Verbeux, bavard','Très bref','Silencieux','Énigmatique']},
+  {q:'Candid',a:'Franc, sincère',opts:['Franc, sincère','Mystérieux','Manipulateur','Caché']},
+  {q:'Lucid',a:'Clair, lucide',opts:['Clair, lucide','Confus','Sombre','Coloré']},
+  {q:'Tenacious',a:'Tenace',opts:['Tenace','Faible','Rapide','Joyeux']},
+  {q:'Benevolent',a:'Bienveillant',opts:['Bienveillant','Méchant','Indifférent','Triste']},
+];
+function renderSatVocab() { _v64Quiz('satvocab-content', _v64SatVocab); }
+
+// === Latin (vocabulaire) ===
+const _v64Latin = [
+  {q:'Carpe diem',a:'Cueille le jour',opts:['Cueille le jour','Vis comme un poisson','Les voyages forment','Un jour à la fois']},
+  {q:'Veni vidi vici',a:'Je suis venu, j\'ai vu, j\'ai vaincu',opts:['Je suis venu, j\'ai vu, j\'ai vaincu','La vérité est belle','Le pouvoir corrompt','Tout passe']},
+  {q:'Cogito ergo sum',a:'Je pense donc je suis',opts:['Je pense donc je suis','Je vis donc je rêve','Je mange donc je grandis','Je doute donc je sais']},
+  {q:'Memento mori',a:'Souviens-toi que tu mourras',opts:['Souviens-toi que tu mourras','Vis chaque instant','La mort est sœur du sommeil','La vie est courte']},
+  {q:'Alea jacta est',a:'Le sort en est jeté',opts:['Le sort en est jeté','Tout est perdu','Le ciel est tombé','La guerre est finie']},
+  {q:'Tempus fugit',a:'Le temps fuit',opts:['Le temps fuit','Le temps guérit','L\'argent c\'est l\'argent','Patience patience']},
+];
+function renderLatin() { _v64Quiz('latin-content', _v64Latin); }
+
+// === Philo quotes (auteur du quote) ===
+const _v64PhiloQuotes = [
+  {q:'« Je pense, donc je suis »',a:'Descartes',opts:['Descartes','Kant','Sartre','Platon']},
+  {q:'« L\'homme est un loup pour l\'homme »',a:'Hobbes',opts:['Hobbes','Rousseau','Locke','Marx']},
+  {q:'« L\'enfer, c\'est les autres »',a:'Sartre',opts:['Sartre','Camus','Beauvoir','Foucault']},
+  {q:'« Connais-toi toi-même »',a:'Socrate',opts:['Socrate','Aristote','Platon','Épicure']},
+  {q:'« Dieu est mort »',a:'Nietzsche',opts:['Nietzsche','Marx','Sartre','Heidegger']},
+  {q:'« On ne naît pas femme, on le devient »',a:'Beauvoir',opts:['Beauvoir','Sartre','Arendt','Wollstonecraft']},
+];
+function renderPhiloQuotes() { _v64Quiz('philoquotes-content', _v64PhiloQuotes); }
+
+// === Philo notions (liste) ===
+const _v64PhiloNotions = [
+  {n:'La conscience',d:'Connaissance immédiate qu\'a chaque humain de son existence et de ses actes'},
+  {n:'L\'inconscient',d:'Ensemble des processus psychiques qui échappent à la conscience'},
+  {n:'Le désir',d:'Tendance vers un objet imaginé ou réel, source de joie et de souffrance'},
+  {n:'L\'art',d:'Activité humaine de création d\'œuvres esthétiques, indépendantes de l\'utile'},
+  {n:'Le travail',d:'Activité humaine pour transformer la nature et produire des biens'},
+  {n:'Le langage',d:'Système de signes permettant la communication et la pensée'},
+  {n:'La vérité',d:'Adéquation entre l\'idée et la réalité, ou cohérence interne'},
+  {n:'La liberté',d:'Capacité de choisir ses actes sans contrainte externe ni interne'},
+  {n:'La justice',d:'Principe moral et juridique de respect du droit de chacun'},
+  {n:'Le bonheur',d:'État de satisfaction durable et complet'},
+  {n:'L\'État',d:'Institution politique organisant le pouvoir sur un territoire'},
+  {n:'La religion',d:'Ensemble de croyances et pratiques liant l\'humain au sacré'},
+];
+function renderPhiloNotions() {
+  _v64Set('philonotions-content', _v64Card(
+    _v64PhiloNotions.map(n=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:6px;"><div style="font-weight:700; color:var(--primary);">${escapeHtml(n.n)}</div><div style="font-size:13px; line-height:1.5; margin-top:4px;">${escapeHtml(n.d)}</div></div>`).join('')
+  ));
+}
+
+// === Conjugaison allemande ===
+const _v64ConjugDe = {
+  sein:{prés:['bin','bist','ist','sind','seid','sind'], prét:['war','warst','war','waren','wart','waren']},
+  haben:{prés:['habe','hast','hat','haben','habt','haben'], prét:['hatte','hattest','hatte','hatten','hattet','hatten']},
+  gehen:{prés:['gehe','gehst','geht','gehen','geht','gehen'], prét:['ging','gingst','ging','gingen','gingt','gingen']},
+  machen:{prés:['mache','machst','macht','machen','macht','machen'], prét:['machte','machtest','machte','machten','machtet','machten']},
+  sehen:{prés:['sehe','siehst','sieht','sehen','seht','sehen'], prét:['sah','sahst','sah','sahen','saht','sahen']},
+};
+function renderConjugDe() {
+  _v64Set('conjugde-content', _v64Card(
+    `<span class="label">Verbe</span>
+    <select class="input" id="cjd-v" onchange="_cjdGo()">${Object.keys(_v64ConjugDe).map(v=>`<option>${v}</option>`).join('')}</select>
+    <div id="cjd-out" style="margin-top:14px;"></div>`
+  ));
+  _cjdGo();
+}
+function _cjdGo() {
+  const v = document.getElementById('cjd-v').value;
+  const c = _v64ConjugDe[v];
+  const pron = ['ich','du','er/sie/es','wir','ihr','sie/Sie'];
+  document.getElementById('cjd-out').innerHTML = `
+    <h4 style="margin:0 0 6px;">Präsens</h4>${pron.map((p,i)=>`<div style="display:flex; padding:6px 10px; background:var(--surfaceAlt); border-radius:6px; margin-bottom:3px;"><span style="flex:1;">${p}</span><strong>${c.prés[i]}</strong></div>`).join('')}
+    <h4 style="margin:14px 0 6px;">Präteritum</h4>${pron.map((p,i)=>`<div style="display:flex; padding:6px 10px; background:var(--surfaceAlt); border-radius:6px; margin-bottom:3px;"><span style="flex:1;">${p}</span><strong>${c.prét[i]}</strong></div>`).join('')}`;
+}
+
+// === Conjugaison portugaise ===
+const _v64ConjugPt = {
+  ser:{prés:['sou','és','é','somos','sois','são'], prét:['fui','foste','foi','fomos','fostes','foram']},
+  ter:{prés:['tenho','tens','tem','temos','tendes','têm'], prét:['tive','tiveste','teve','tivemos','tivestes','tiveram']},
+  ir:{prés:['vou','vais','vai','vamos','ides','vão'], prét:['fui','foste','foi','fomos','fostes','foram']},
+  fazer:{prés:['faço','fazes','faz','fazemos','fazeis','fazem'], prét:['fiz','fizeste','fez','fizemos','fizestes','fizeram']},
+  estar:{prés:['estou','estás','está','estamos','estais','estão'], prét:['estive','estiveste','esteve','estivemos','estivestes','estiveram']},
+};
+function renderConjugPt() {
+  _v64Set('conjugpt-content', _v64Card(
+    `<span class="label">Verbo</span>
+    <select class="input" id="cjp-v" onchange="_cjpGo()">${Object.keys(_v64ConjugPt).map(v=>`<option>${v}</option>`).join('')}</select>
+    <div id="cjp-out" style="margin-top:14px;"></div>`
+  ));
+  _cjpGo();
+}
+function _cjpGo() {
+  const v = document.getElementById('cjp-v').value;
+  const c = _v64ConjugPt[v];
+  const pron = ['eu','tu','ele/ela','nós','vós','eles/elas'];
+  document.getElementById('cjp-out').innerHTML = `
+    <h4 style="margin:0 0 6px;">Presente</h4>${pron.map((p,i)=>`<div style="display:flex; padding:6px 10px; background:var(--surfaceAlt); border-radius:6px; margin-bottom:3px;"><span style="flex:1;">${p}</span><strong>${c.prés[i]}</strong></div>`).join('')}
+    <h4 style="margin:14px 0 6px;">Pretérito</h4>${pron.map((p,i)=>`<div style="display:flex; padding:6px 10px; background:var(--surfaceAlt); border-radius:6px; margin-bottom:3px;"><span style="flex:1;">${p}</span><strong>${c.prét[i]}</strong></div>`).join('')}`;
+}
+
+// === English irregular verbs quiz ===
+const _v64EnIrreg = [
+  {q:'go (past simple)',a:'went',opts:['went','goed','gone','goes']},
+  {q:'eat (past participle)',a:'eaten',opts:['eaten','ate','eated','eat']},
+  {q:'be (past simple, 1st sing.)',a:'was',opts:['was','were','been','am']},
+  {q:'do (past simple)',a:'did',opts:['did','done','doed','does']},
+  {q:'see (past participle)',a:'seen',opts:['seen','saw','seed','sawed']},
+  {q:'take (past simple)',a:'took',opts:['took','taked','taken','takes']},
+  {q:'write (past participle)',a:'written',opts:['written','wrote','writed','writed']},
+  {q:'sing (past simple)',a:'sang',opts:['sang','sung','singed','sings']},
+  {q:'drink (past participle)',a:'drunk',opts:['drunk','drank','drinked','drinking']},
+];
+function renderEnIrregQuiz() { _v64Quiz('enirreg-content', _v64EnIrreg); }
+
+// === Départements FR (liste + recherche) ===
+const _v64Depts = [
+  '01 Ain','02 Aisne','03 Allier','04 Alpes-de-Haute-Provence','05 Hautes-Alpes','06 Alpes-Maritimes','07 Ardèche','08 Ardennes','09 Ariège','10 Aube',
+  '11 Aude','12 Aveyron','13 Bouches-du-Rhône','14 Calvados','15 Cantal','16 Charente','17 Charente-Maritime','18 Cher','19 Corrèze','21 Côte-d\'Or',
+  '22 Côtes-d\'Armor','23 Creuse','24 Dordogne','25 Doubs','26 Drôme','27 Eure','28 Eure-et-Loir','29 Finistère','30 Gard','31 Haute-Garonne',
+  '32 Gers','33 Gironde','34 Hérault','35 Ille-et-Vilaine','36 Indre','37 Indre-et-Loire','38 Isère','39 Jura','40 Landes','41 Loir-et-Cher',
+  '42 Loire','43 Haute-Loire','44 Loire-Atlantique','45 Loiret','46 Lot','47 Lot-et-Garonne','48 Lozère','49 Maine-et-Loire','50 Manche','51 Marne',
+  '52 Haute-Marne','53 Mayenne','54 Meurthe-et-Moselle','55 Meuse','56 Morbihan','57 Moselle','58 Nièvre','59 Nord','60 Oise','61 Orne',
+  '62 Pas-de-Calais','63 Puy-de-Dôme','64 Pyrénées-Atlantiques','65 Hautes-Pyrénées','66 Pyrénées-Orientales','67 Bas-Rhin','68 Haut-Rhin','69 Rhône','70 Haute-Saône','71 Saône-et-Loire',
+  '72 Sarthe','73 Savoie','74 Haute-Savoie','75 Paris','76 Seine-Maritime','77 Seine-et-Marne','78 Yvelines','79 Deux-Sèvres','80 Somme','81 Tarn',
+  '82 Tarn-et-Garonne','83 Var','84 Vaucluse','85 Vendée','86 Vienne','87 Haute-Vienne','88 Vosges','89 Yonne','90 Territoire de Belfort','91 Essonne',
+  '92 Hauts-de-Seine','93 Seine-Saint-Denis','94 Val-de-Marne','95 Val-d\'Oise',
+];
+function renderDeptsFr() {
+  _v64Set('depts-content', _v64Card(
+    `<input class="input" id="dp-search" placeholder="🔍 Cherche un dpt..." oninput="_dpFilter()">
+    <div id="dp-list" style="margin-top:14px;"></div>`
+  ));
+  _dpFilter();
+}
+function _dpFilter() {
+  const q = (document.getElementById('dp-search').value||'').toLowerCase();
+  const filtered = _v64Depts.filter(d => d.toLowerCase().includes(q));
+  document.getElementById('dp-list').innerHTML = filtered.map(d=>`<div style="background:var(--surfaceAlt); padding:8px 12px; border-radius:8px; margin-bottom:4px; font-size:14px;">${escapeHtml(d)}</div>`).join('');
+}
+
+// === Capitales par continent ===
+const _v64Caps = [
+  {ctry:'France',cap:'Paris',cont:'Europe'},{ctry:'Allemagne',cap:'Berlin',cont:'Europe'},{ctry:'Italie',cap:'Rome',cont:'Europe'},{ctry:'Espagne',cap:'Madrid',cont:'Europe'},{ctry:'Royaume-Uni',cap:'Londres',cont:'Europe'},{ctry:'Portugal',cap:'Lisbonne',cont:'Europe'},
+  {ctry:'Japon',cap:'Tokyo',cont:'Asie'},{ctry:'Chine',cap:'Pékin',cont:'Asie'},{ctry:'Inde',cap:'New Delhi',cont:'Asie'},{ctry:'Thaïlande',cap:'Bangkok',cont:'Asie'},{ctry:'Vietnam',cap:'Hanoï',cont:'Asie'},
+  {ctry:'USA',cap:'Washington',cont:'Amérique'},{ctry:'Canada',cap:'Ottawa',cont:'Amérique'},{ctry:'Brésil',cap:'Brasília',cont:'Amérique'},{ctry:'Argentine',cap:'Buenos Aires',cont:'Amérique'},{ctry:'Mexique',cap:'Mexico',cont:'Amérique'},
+  {ctry:'Égypte',cap:'Le Caire',cont:'Afrique'},{ctry:'Maroc',cap:'Rabat',cont:'Afrique'},{ctry:'Sénégal',cap:'Dakar',cont:'Afrique'},{ctry:'Afrique du Sud',cap:'Pretoria',cont:'Afrique'},
+  {ctry:'Australie',cap:'Canberra',cont:'Océanie'},{ctry:'Nouvelle-Zélande',cap:'Wellington',cont:'Océanie'},
+];
+function renderCapsContinent() {
+  _v64Set('capscont-content', _v64Card(
+    ['Europe','Asie','Amérique','Afrique','Océanie'].map(c=>`<h4 style="margin:14px 0 6px; color:var(--primary);">🌍 ${c}</h4>${_v64Caps.filter(x=>x.cont===c).map(x=>`<div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:4px;"><span>${escapeHtml(x.ctry)}</span><strong>${escapeHtml(x.cap)}</strong></div>`).join('')}`).join('')
+  ));
+}
+
+// === Œuvres bac (français) ===
+const _v64Oeuvres = [
+  {t:'La Princesse de Clèves',a:'Mme de La Fayette',y:1678,g:'Roman classique'},
+  {t:'Candide',a:'Voltaire',y:1759,g:'Conte philosophique'},
+  {t:'Les Misérables',a:'Victor Hugo',y:1862,g:'Roman'},
+  {t:'Madame Bovary',a:'Gustave Flaubert',y:1857,g:'Roman réaliste'},
+  {t:'L\'Étranger',a:'Albert Camus',y:1942,g:'Roman'},
+  {t:'La Peste',a:'Albert Camus',y:1947,g:'Roman'},
+  {t:'Les Fleurs du mal',a:'Charles Baudelaire',y:1857,g:'Poésie'},
+  {t:'Cahier d\'un retour au pays natal',a:'Aimé Césaire',y:1939,g:'Poésie'},
+  {t:'Le Rouge et le Noir',a:'Stendhal',y:1830,g:'Roman'},
+  {t:'En attendant Godot',a:'Samuel Beckett',y:1953,g:'Théâtre'},
+  {t:'Phèdre',a:'Jean Racine',y:1677,g:'Tragédie'},
+  {t:'Le Misanthrope',a:'Molière',y:1666,g:'Comédie'},
+];
+function renderOeuvresBac() {
+  _v64Set('oeuvresbac-content', _v64Card(
+    _v64Oeuvres.map(o=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:6px;"><div style="font-weight:700;">${escapeHtml(o.t)}</div><div style="font-size:13px; color:var(--textSec);">${escapeHtml(o.a)} · ${o.y} · ${escapeHtml(o.g)}</div></div>`).join('')
+  ));
+}
+
+// === Mouvements artistiques ===
+const _v64ArtMov = [
+  {n:'Renaissance',y:'14e-17e s.',d:'Retour aux idéaux antiques, perspective, humanisme. Ex: De Vinci, Michel-Ange'},
+  {n:'Baroque',y:'17e-18e s.',d:'Mouvement, drama, contraste. Ex: Caravage, Bernin, Rubens'},
+  {n:'Romantisme',y:'18e-19e s.',d:'Émotion, nature sublime, individu. Ex: Delacroix, Géricault, Friedrich'},
+  {n:'Impressionnisme',y:'1860-1880',d:'Lumière fugitive, plein air, touches visibles. Ex: Monet, Renoir, Degas'},
+  {n:'Cubisme',y:'1907-1920',d:'Décomposition géométrique, multi-points de vue. Ex: Picasso, Braque'},
+  {n:'Surréalisme',y:'1924-1950',d:'Inconscient, rêve, automatisme. Ex: Dalí, Magritte, Breton'},
+  {n:'Pop Art',y:'1950-1970',d:'Culture populaire, consumérisme. Ex: Warhol, Lichtenstein'},
+  {n:'Street Art',y:'1980+',d:'Art urbain, espace public, contestation. Ex: Banksy, Basquiat, Keith Haring'},
+];
+function renderArtMov() {
+  _v64Set('artmov-content', _v64Card(
+    _v64ArtMov.map(m=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:6px;"><div style="font-weight:700; color:var(--primary);">${escapeHtml(m.n)}</div><div style="font-size:11px; color:var(--textSec);">${m.y}</div><div style="font-size:13px; line-height:1.5; margin-top:4px;">${escapeHtml(m.d)}</div></div>`).join('')
+  ));
+}
+
+// === Spices guide ===
+const _v64Spices = [
+  {n:'🌶️ Paprika',d:'Doux ou fumé. Va avec : poulet, riz, viandes, œufs'},
+  {n:'🟡 Curcuma',d:'Couleur jaune intense. Anti-inflammatoire. Va avec : curry, riz, lait d\'or'},
+  {n:'🟤 Cumin',d:'Note terreuse. Va avec : tajines, falafels, chili, légumes'},
+  {n:'⚫ Clou de girofle',d:'Très fort, à doser. Va avec : viandes mijotées, vin chaud, chai'},
+  {n:'🌰 Cannelle',d:'Sucrée et chaleureuse. Va avec : desserts, café, plats marocains'},
+  {n:'🌿 Basilic',d:'Frais, italien. Va avec : tomates, mozzarella, pesto'},
+  {n:'🌱 Coriandre',d:'Frais ou en graines. Va avec : guacamole, curry, tacos'},
+  {n:'🧂 Origan',d:'Méditerranéen. Va avec : pizzas, sauces tomate, grillades'},
+  {n:'🌶️ Piment d\'Espelette',d:'Doux et fruité. Va avec : poissons, omelettes, agneau'},
+  {n:'🟢 Aneth',d:'Frais, anisé. Va avec : saumon, concombre, yaourts'},
+];
+function renderSpices() {
+  _v64Set('spices-content', _v64Card(
+    _v64Spices.map(s=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:6px;"><div style="font-weight:700;">${s.n}</div><div style="font-size:13px; color:var(--textSec); margin-top:4px;">${escapeHtml(s.d)}</div></div>`).join('')
+  ));
+}
+
+// === Substituts cuisine ===
+const _v64Substituts = [
+  {f:'1 œuf',t:'1 cs graines de chia + 3 cs eau (pour pâtisserie)'},
+  {f:'1 œuf',t:'½ banane écrasée'},
+  {f:'250 ml lait',t:'250 ml lait végétal (avoine, amande, soja)'},
+  {f:'100 g beurre',t:'80 g huile végétale'},
+  {f:'100 g sucre blanc',t:'80 g sirop d\'érable'},
+  {f:'1 pot crème fraîche',t:'1 pot crème de coco ou yaourt grec'},
+  {f:'Vin blanc',t:'Bouillon + 1 cuillère vinaigre blanc'},
+  {f:'1 cs Maïzena',t:'2 cs farine'},
+  {f:'1 cs poudre à lever',t:'¼ cs bicarbonate + ½ cs vinaigre'},
+  {f:'Levure fraîche 20 g',t:'7 g levure sèche'},
+];
+function renderSubstituts() {
+  _v64Set('substituts-content', _v64Card(
+    _v64Substituts.map(s=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:6px;"><div style="display:flex; gap:8px; align-items:center;"><span style="font-weight:700; flex:1;">${escapeHtml(s.f)}</span><span style="color:var(--primary);">→</span><span style="flex:1; text-align:right;">${escapeHtml(s.t)}</span></div></div>`).join('')
+  ));
+}
+
+// === Never Have I Ever (NHIE) ===
+const _v64NHIE = ['Je n\'ai jamais voyagé seul·e','Je n\'ai jamais menti à mes parents','Je n\'ai jamais embrassé un·e inconnu·e','Je n\'ai jamais raté un examen','Je n\'ai jamais perdu mon téléphone','Je n\'ai jamais pleuré devant un film','Je n\'ai jamais pris l\'avion','Je n\'ai jamais conduit sans permis','Je n\'ai jamais fait du karaoké','Je n\'ai jamais avoué un crush','Je n\'ai jamais piqué un fard','Je n\'ai jamais eu une crise existentielle','Je n\'ai jamais dansé sous la pluie','Je n\'ai jamais cassé quelque chose de précieux'];
+function renderNHIE() {
+  _v64Set('nhieV55-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">🤐</div>
+    <p id="nh-out" style="text-align:center; font-size:18px; line-height:1.5; margin:18px 0; min-height:60px;">${_v64Pick(_v64NHIE)}</p>
+    ${_v64Btn('🎲 Suivante', `document.getElementById('nh-out').textContent=_v64Pick(_v64NHIE)`, true)}`
+  ));
+}
+
+// === Would You Rather (WYR) ===
+const _v64WYR = [
+  ['🏖️ Vivre à la plage','🏔️ Vivre en montagne'],
+  ['🐱 Avoir un chat parlant','🐶 Avoir un chien volant'],
+  ['📚 Tout savoir','💪 Tout pouvoir'],
+  ['⏪ Revenir 10 ans en arrière','⏩ Avancer 10 ans dans le futur'],
+  ['🌎 Pouvoir parler toutes les langues','🎵 Maîtriser tous les instruments'],
+  ['🦸 Avoir une superpuissance secrète','👀 Pouvoir lire dans les pensées'],
+  ['🍕 Manger pizza tous les jours','🍣 Manger sushi tous les jours'],
+  ['☀️ Été éternel','❄️ Hiver éternel'],
+];
+function renderWYR() {
+  const w = _v64Pick(_v64WYR);
+  _v64Set('wyrV55-content', _v64Card(
+    `<div style="text-align:center; font-size:13px; color:var(--textSec); text-transform:uppercase;">Tu préfèrerais...</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px;">
+      <div style="background:linear-gradient(135deg, var(--primary), var(--accent)); color:white; padding:24px; border-radius:14px; text-align:center; font-size:18px; font-weight:700;">${escapeHtml(w[0])}</div>
+      <div style="background:linear-gradient(135deg, #FFD166, #FF8C42); color:white; padding:24px; border-radius:14px; text-align:center; font-size:18px; font-weight:700;">${escapeHtml(w[1])}</div>
+    </div>
+    ${_v64Btn('🎲 Autre dilemme', 'renderWYR()', true)}`
+  ));
+}
+
+// === Truth or Dare (TOD) ===
+const _v64TODT = ['Quel est ton plus grand secret ?','Qui est ton crush actuel ?','Pire mensonge déjà raconté ?','Pire moment de gêne de ta vie ?','Combien d\'ex tu suis encore en stalk ?','Une chose que tu regrettes vraiment ?','La dernière personne qui t\'a fait pleurer ?','Ce que tu caches le mieux ?'];
+const _v64TODD = ['Envoie un emoji random à ton crush 📲','Fais 10 pompes 💪','Imite ton prof préféré 30s','Chante le refrain d\'une chanson','Appelle un·e ami·e et dis "je t\'aime"','Fais une danse improvisée 30s','Mange une cuillère de sauce piquante 🌶️','Poste une story random'];
+function renderTOD() {
+  _v64Set('todV55-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">🎲</div>
+    <div style="display:flex; gap:6px; margin:14px 0;">
+      <button class="btn primary" style="flex:1;" onclick="_todGo('t')">Vérité</button>
+      <button class="btn alt" style="flex:1;" onclick="_todGo('d')">Action</button>
+    </div>
+    <p id="tod-out" style="text-align:center; font-size:17px; line-height:1.5; padding:18px; background:var(--surfaceAlt); border-radius:10px; min-height:80px;">Choisis vérité ou action</p>`
+  ));
+}
+function _todGo(t) {
+  document.getElementById('tod-out').textContent = _v64Pick(t==='t' ? _v64TODT : _v64TODD);
+}
+
+// === Petit Bac ===
+const _v64PBLet = 'ABCDEFGHIJKLMNOPRSTV'; // évite Q W X Y Z
+const _v64PBCats = ['Pays','Prénom','Animal','Métier','Plat','Verbe'];
+function renderPetitBac() {
+  _v64Set('petitbac-content', _v64Card(
+    `<div id="pb-letter" style="text-align:center; font-size:96px; font-weight:900; color:var(--primary);">${_v64PBLet[Math.floor(Math.random()*_v64PBLet.length)]}</div>
+    ${_v64PBCats.map(c=>`<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><span style="width:80px; font-size:13px; color:var(--textSec);">${c}</span><input class="input" placeholder="Mot en cette lettre..." style="flex:1;"></div>`).join('')}
+    ${_v64Btn('🎲 Nouvelle lettre', `document.getElementById('pb-letter').textContent=_v64PBLet[Math.floor(Math.random()*_v64PBLet.length)]`, true)}`
+  ));
+}
+
+// === Emoji art (collection) ===
+const _v64EmojiArts = [
+  '(づ｡◕‿‿◕｡)づ',
+  '¯\\_(ツ)_/¯',
+  '(╯°□°)╯︵ ┻━┻',
+  '(っ◔◡◔)っ ♥',
+  'ʕ•ᴥ•ʔ',
+  '(◕‿◕)',
+  '(｡◕‿◕｡)',
+  '(✿◠‿◠)',
+  '(◔_◔)',
+  '(>_<)',
+  '(*≧ω≦*)',
+  '(´｡• ω •｡`)',
+  '✧･ﾟ: *✧･ﾟ:* ✿',
+  '☆*:.｡.o(≧▽≦)o.｡.:*☆',
+];
+function renderEmojiArt() {
+  _v64Set('emojiart-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">Tap pour copier</p>
+    ${_v64EmojiArts.map(e=>`<div style="background:var(--surfaceAlt); padding:14px; border-radius:10px; margin-bottom:6px; font-size:18px; text-align:center; cursor:pointer; font-family:monospace;" onclick="navigator.clipboard.writeText(this.textContent.trim()).then(()=>toast('Copié !'))">${e}</div>`).join('')}`
+  ));
+}
+
+// === Emoji cipher (texte ↔ emoji) ===
+function renderEmojiCipher() {
+  _v64Set('emojicipher-content', _v64Card(
+    `<p style="font-size:13px; color:var(--textSec);">Encode ton texte en emoji secret 🔐</p>
+    <textarea class="input" id="ec-in" rows="3" placeholder="Texte..." oninput="_ecGo()"></textarea>
+    <div style="margin-top:10px; padding:10px; background:var(--surfaceAlt); border-radius:8px; min-height:40px; word-break:break-all;" id="ec-out"></div>`
+  ));
+}
+function _ecGo() {
+  const map = {a:'🍎',b:'🐝',c:'🌊',d:'🐶',e:'🦅',f:'🐟',g:'🍇',h:'🏠',i:'🍦',j:'🤹',k:'🔑',l:'🦁',m:'🌙',n:'🌃',o:'🐙',p:'🍕',q:'👑',r:'🌹',s:'⭐',t:'🌳',u:'☂️',v:'🌋',w:'🍉',x:'❌',y:'🪀',z:'⚡',' ':'·'};
+  const v = document.getElementById('ec-in').value.toLowerCase();
+  document.getElementById('ec-out').textContent = v.split('').map(c=>map[c]||c).join(' ');
+}
+
+// === Playlist suggest ===
+const _v64Playlists = [
+  {n:'🌅 Morning',m:['Sunrise — Norah Jones','Here Comes The Sun — Beatles','Banana Pancakes — Jack Johnson','Coffee — Beabadoobee']},
+  {n:'💪 Workout',m:['Eye of the Tiger — Survivor','Stronger — Kanye','Lose Yourself — Eminem','Titanium — David Guetta']},
+  {n:'🌙 Sleep',m:['Weightless — Marconi Union','River Flows in You — Yiruma','Clair de lune — Debussy','Sleeping at Last']},
+  {n:'💖 Sad',m:['someone like you — Adele','When We Were Young — Adele','All I Want — Kodaline','Dancing on My Own — Robyn']},
+  {n:'🎉 Party',m:['Levitating — Dua Lipa','Don\'t Start Now — Dua Lipa','Blinding Lights — The Weeknd','Mr. Brightside — Killers']},
+];
+function renderPlaylistSuggest() {
+  _v64Set('playlist-content', _v64Card(
+    _v64Playlists.map(p=>`<div style="background:var(--surfaceAlt); padding:12px; border-radius:10px; margin-bottom:8px;"><h4 style="margin:0 0 8px;">${p.n}</h4>${p.m.map(s=>`<div style="font-size:13px; padding:4px 0; color:var(--textSec);">🎵 ${escapeHtml(s)}</div>`).join('')}</div>`).join('')
+  ));
+}
+
+// === Pomodoro history ===
+function renderPomodoroHist() {
+  const all = JSON.parse(localStorage.getItem('nw_pomohist') || '[]');
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount = all.filter(p => p.date === today).length;
+  const weekCount = all.filter(p => p.date >= new Date(Date.now()-7*86400000).toISOString().slice(0,10)).length;
+  _v64Set('pomohist-content', _v64Card(
+    `<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+      <div style="background:var(--surfaceAlt); padding:14px; border-radius:10px; text-align:center;"><div style="font-size:32px; font-weight:900; color:var(--primary);">${todayCount}</div><div style="font-size:11px; color:var(--textSec);">aujourd'hui</div></div>
+      <div style="background:var(--surfaceAlt); padding:14px; border-radius:10px; text-align:center;"><div style="font-size:32px; font-weight:900; color:var(--primary);">${weekCount}</div><div style="font-size:11px; color:var(--textSec);">cette semaine</div></div>
+    </div>
+    <h4 style="margin:14px 0 6px;">📋 Sessions récentes</h4>
+    ${all.slice(-15).reverse().map(p=>`<div style="display:flex; justify-content:space-between; padding:8px 12px; background:var(--surfaceAlt); border-radius:8px; margin-bottom:4px; font-size:13px;"><span>${p.date}</span><span>🍅 ${p.dur||25}min</span></div>`).join('') || '<p style="font-size:13px; color:var(--textSec); text-align:center;">Aucune session loguée</p>'}
+    <button class="btn alt full" onclick="if(confirm('Effacer historique ?')){localStorage.removeItem('nw_pomohist');renderPomodoroHist();}" style="margin-top:14px;">🗑 Effacer</button>`
+  ));
+}
+
+// === What to watch ===
+const _v64Watch = [
+  {t:'Stranger Things',g:'Sci-fi/Horror',y:'2016+',w:'Netflix'},
+  {t:'The Office',g:'Comédie',y:'2005-13',w:'Prime'},
+  {t:'Breaking Bad',g:'Drame',y:'2008-13',w:'Netflix'},
+  {t:'Avatar le dernier maître',g:'Animation',y:'2005-08',w:'Netflix'},
+  {t:'Arcane',g:'Animation',y:'2021+',w:'Netflix'},
+  {t:'Ted Lasso',g:'Comédie',y:'2020+',w:'Apple TV+'},
+  {t:'The Bear',g:'Drame',y:'2022+',w:'Disney+'},
+  {t:'Severance',g:'Sci-fi',y:'2022+',w:'Apple TV+'},
+  {t:'Heartstopper',g:'Romance',y:'2022+',w:'Netflix'},
+  {t:'Squid Game',g:'Thriller',y:'2021+',w:'Netflix'},
+];
+function renderWhatToWatch() {
+  const w = _v64Pick(_v64Watch);
+  _v64Set('whattowatch-content', _v64Card(
+    `<div style="text-align:center; font-size:48px;">📺</div>
+    <h2 style="text-align:center; margin:8px 0;">${w.t}</h2>
+    <div style="text-align:center; font-size:13px; color:var(--textSec);">${escapeHtml(w.g)} · ${w.y} · ${escapeHtml(w.w)}</div>
+    ${_v64Btn('🎲 Autre suggestion', 'renderWhatToWatch()', true)}`
+  ));
+}
+
+// === Tour de Hanoï V55 ===
+let _v64Hanoi = { towers: [[],[],[]], moves: 0, n: 4, sel: -1 };
+function v55_renderHanoi() {
+  _v64Hanoi.towers = [[4,3,2,1],[],[]]; _v64Hanoi.moves=0; _v64Hanoi.n=4; _v64Hanoi.sel=-1;
+  _hnRender();
+}
+function _hnRender() {
+  _v64Set('hanoi-content', _v64Card(
+    `<div style="text-align:center; font-size:13px;">Coups : <strong>${_v64Hanoi.moves}</strong> · Min: ${Math.pow(2,_v64Hanoi.n)-1}</div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:18px 0;">
+    ${_v64Hanoi.towers.map((t,i)=>`<div onclick="_hnTap(${i})" style="height:200px; background:var(--surfaceAlt); border-radius:10px; padding:8px; display:flex; flex-direction:column-reverse; align-items:center; gap:3px; cursor:pointer; ${_v64Hanoi.sel===i?'outline:3px solid var(--primary);':''}">
+      ${t.map(d=>`<div style="height:24px; width:${30+d*20}%; background:linear-gradient(90deg, var(--primary), var(--accent)); border-radius:6px; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:12px;">${d}</div>`).join('')}
+    </div>`).join('')}
+    </div>
+    <button class="btn alt full" onclick="v55_renderHanoi()">↻ Reset</button>`
+  ));
+}
+function _hnTap(i) {
+  if (_v64Hanoi.sel === -1) { if (_v64Hanoi.towers[i].length) _v64Hanoi.sel = i; _hnRender(); return; }
+  if (_v64Hanoi.sel === i) { _v64Hanoi.sel = -1; _hnRender(); return; }
+  const src = _v64Hanoi.towers[_v64Hanoi.sel], dst = _v64Hanoi.towers[i];
+  if (dst.length === 0 || src[src.length-1] < dst[dst.length-1]) {
+    dst.push(src.pop()); _v64Hanoi.moves++; _v64Hanoi.sel = -1;
+    _hnRender();
+    if (_v64Hanoi.towers[2].length === _v64Hanoi.n) toast('🏆 Bravo !');
+  } else { toast('❌ Disque trop grand'); _v64Hanoi.sel = -1; _hnRender(); }
+}
+
+// ============================================================
+// V64 — Batch 4 : jeux
+// ============================================================
+
+// === Démineur 8x8 ===
+let _v64Mines = null;
+function renderMinesweeper() {
+  const N = 8, M = 10;
+  const board = []; for (let i=0;i<N*N;i++) board.push({mine:false, open:false, flag:false, near:0});
+  const idxs = []; for (let i=0;i<N*N;i++) idxs.push(i);
+  for (let i=0; i<M; i++) { const j = Math.floor(Math.random()*idxs.length); board[idxs.splice(j,1)[0]].mine = true; }
+  for (let i=0; i<N*N; i++) {
+    if (board[i].mine) continue;
+    const r = Math.floor(i/N), c = i%N;
+    let n = 0;
+    for (let dr=-1; dr<=1; dr++) for (let dc=-1; dc<=1; dc++) {
+      if (dr===0 && dc===0) continue;
+      const nr=r+dr, nc=c+dc;
+      if (nr>=0 && nr<N && nc>=0 && nc<N && board[nr*N+nc].mine) n++;
+    }
+    board[i].near = n;
+  }
+  _v64Mines = { N, M, board, over:false, won:false };
+  _msRender();
+}
+function _msRender() {
+  const m = _v64Mines; if (!m) return;
+  const opened = m.board.filter(c=>c.open).length;
+  _v64Set('mines-content', _v64Card(
+    `<div style="text-align:center; font-size:13px; margin-bottom:10px;">💣 ${m.M} mines · Cases ouvertes: ${opened}/${m.N*m.N - m.M}</div>
+    <div style="display:grid; grid-template-columns:repeat(${m.N},1fr); gap:2px; max-width:340px; margin:0 auto;">
+    ${m.board.map((c,i)=>{
+      let bg='var(--surfaceAlt)', txt='', fs='14px';
+      if (c.flag) txt='🚩';
+      else if (c.open) {
+        bg = c.mine?'#FF4757':'var(--bg)';
+        if (c.mine) txt='💣';
+        else if (c.near) { txt=c.near; const colors=['','#5DADE2','#7BC47F','#FFD166','#FF8C42','#FF4757','#A78BFA','#000','#888']; }
+      }
+      return `<button onclick="_msTap(${i})" oncontextmenu="event.preventDefault(); _msFlag(${i})" style="aspect-ratio:1; background:${bg}; border:1px solid var(--border); border-radius:4px; font-weight:900; font-size:${fs}; cursor:pointer; padding:0;">${txt}</button>`;
+    }).join('')}
+    </div>
+    ${m.over?'<div style="text-align:center; margin-top:14px; font-size:18px; font-weight:700; color:var(--danger);">💥 Perdu !</div>':''}
+    ${m.won?'<div style="text-align:center; margin-top:14px; font-size:18px; font-weight:700; color:var(--success);">🎉 Bravo !</div>':''}
+    <p style="font-size:11px; color:var(--textSec); text-align:center; margin-top:10px;">Long-press / clic droit pour drapeau</p>
+    ${_v64Btn('↻ Nouvelle partie', 'renderMinesweeper()', true)}`
+  ));
+}
+function _msFlag(i) {
+  if (!_v64Mines || _v64Mines.over) return;
+  if (_v64Mines.board[i].open) return;
+  _v64Mines.board[i].flag = !_v64Mines.board[i].flag;
+  _msRender();
+}
+function _msTap(i) {
+  const m = _v64Mines; if (!m || m.over) return;
+  const c = m.board[i]; if (c.flag || c.open) return;
+  c.open = true;
+  if (c.mine) { m.over = true; m.board.forEach(x=>{if(x.mine) x.open=true;}); _msRender(); return; }
+  // Flood fill si 0
+  if (c.near === 0) {
+    const r = Math.floor(i/m.N), col = i%m.N;
+    for (let dr=-1; dr<=1; dr++) for (let dc=-1; dc<=1; dc++) {
+      if (dr===0 && dc===0) continue;
+      const nr=r+dr, nc=col+dc;
+      if (nr>=0 && nr<m.N && nc>=0 && nc<m.N && !m.board[nr*m.N+nc].open) _msTap(nr*m.N+nc);
+    }
+  }
+  if (m.board.filter(x=>x.open).length === m.N*m.N - m.M) m.won = true;
+  _msRender();
+}
+
+// === Mastermind ===
+let _v64MM = null;
+const _v64MMColors = ['🔴','🟠','🟡','🟢','🔵','🟣'];
+function v55_renderMastermind() {
+  const code = []; for (let i=0; i<4; i++) code.push(Math.floor(Math.random()*6));
+  _v64MM = { code, guesses:[], current:[0,0,0,0], maxTries:8, won:false };
+  _mmRender();
+}
+function _mmRender() {
+  const g = _v64MM;
+  _v64Set('mastermind-content', _v64Card(
+    `<p style="font-size:12px; color:var(--textSec); text-align:center;">Trouve le code en ${g.maxTries} essais</p>
+    <div style="margin:14px 0;">
+    ${g.guesses.map(gu=>`<div style="display:flex; align-items:center; gap:6px; justify-content:center; margin-bottom:4px;">${gu.guess.map(c=>`<span style="font-size:24px;">${_v64MMColors[c]}</span>`).join('')} <span style="margin-left:8px; font-size:14px;"><span style="color:var(--success);">●${gu.b}</span> <span style="color:#FFD166;">●${gu.w}</span></span></div>`).join('')}
+    </div>
+    ${!g.won && g.guesses.length < g.maxTries && !g.over ? `
+      <div style="display:flex; gap:6px; justify-content:center; margin-top:14px;">${g.current.map((c,i)=>`<button onclick="_mmCycle(${i})" style="background:var(--surfaceAlt); border:none; padding:10px; border-radius:8px; font-size:28px; cursor:pointer;">${_v64MMColors[c]}</button>`).join('')}</div>
+      <button class="btn primary full" style="margin-top:10px;" onclick="_mmGuess()">✓ Valider</button>
+    ` : ''}
+    ${g.won?`<div style="text-align:center; padding:14px; background:var(--success); color:white; border-radius:10px; margin-top:14px; font-weight:700;">🏆 Gagné en ${g.guesses.length} coups !</div>`:''}
+    ${g.over?`<div style="text-align:center; padding:14px; background:var(--danger); color:white; border-radius:10px; margin-top:14px; font-weight:700;">😞 Le code était ${g.code.map(c=>_v64MMColors[c]).join(' ')}</div>`:''}
+    ${_v64Btn('↻ Nouvelle partie', 'v55_renderMastermind()')}`
+  ));
+}
+function _mmCycle(i) { _v64MM.current[i] = (_v64MM.current[i]+1)%6; _mmRender(); }
+function _mmGuess() {
+  const g = _v64MM, guess = [..._v64MM.current];
+  let b=0, w=0;
+  const used = [false,false,false,false];
+  for (let i=0; i<4; i++) if (guess[i]===g.code[i]) { b++; used[i]=true; }
+  for (let i=0; i<4; i++) {
+    if (guess[i]===g.code[i]) continue;
+    for (let j=0; j<4; j++) if (!used[j] && guess[i]===g.code[j] && i!==j) { w++; used[j]=true; break; }
+  }
+  g.guesses.push({ guess, b, w });
+  if (b === 4) g.won = true;
+  if (g.guesses.length >= g.maxTries && !g.won) g.over = true;
+  _mmRender();
+}
+
+// === Wordle FR (mots 5 lettres) ===
+const _v64Words5 = ['CHATS','TABLE','BLEUE','SUCRE','LIVRE','CHIEN','CHANT','MAGIE','FLEUR','VERTE','PLAGE','ROUGE','SOLEIL'.slice(0,5)/*='SOLEIL' non valide*/,'PRINT','DANSE','SAGES','BRUME','TONNE','MERCI','SUITE'];
+let _v64WL = null;
+function v55_renderWordle() {
+  const w = _v64Pick(_v64Words5.filter(x => x.length === 5)).toUpperCase();
+  _v64WL = { word: w, guesses: [], cur: '', max: 6, over: false, won: false };
+  _wlRender();
+}
+function _wlRender() {
+  const g = _v64WL;
+  _v64Set('wordle-content', _v64Card(
+    `<p style="font-size:12px; color:var(--textSec); text-align:center;">Devine le mot en ${g.max} essais</p>
+    <div style="display:flex; flex-direction:column; gap:4px; align-items:center; margin:14px 0;">
+    ${[...Array(g.max)].map((_,row)=>{
+      const letters = row < g.guesses.length ? g.guesses[row].split('') : (row === g.guesses.length ? g.cur.padEnd(5,' ').split('') : '     '.split(''));
+      return `<div style="display:flex; gap:4px;">${letters.map((ch,i)=>{
+        let bg = 'var(--surfaceAlt)', col = 'var(--text)';
+        if (row < g.guesses.length) {
+          if (ch === g.word[i]) { bg = 'var(--success)'; col='white'; }
+          else if (g.word.includes(ch)) { bg = '#FFD166'; col='white'; }
+          else { bg = 'var(--surface)'; col='var(--textSec)'; }
+        }
+        return `<div style="width:48px; height:48px; background:${bg}; color:${col}; border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:22px;">${ch.trim()}</div>`;
+      }).join('')}</div>`;
+    }).join('')}
+    </div>
+    ${!g.over ? `
+      <input class="input" id="wl-in" maxlength="5" style="text-transform:uppercase; text-align:center; font-size:20px; letter-spacing:6px;" oninput="_v64WL.cur=this.value.toUpperCase().slice(0,5); _wlRender(); document.getElementById('wl-in')?.focus();">
+      <button class="btn primary full" style="margin-top:10px;" onclick="_wlGuess()">✓ Valider</button>
+    ` : ''}
+    ${g.won?`<div style="text-align:center; padding:14px; background:var(--success); color:white; border-radius:10px; margin-top:14px; font-weight:700;">🎉 Bravo !</div>`:''}
+    ${g.over && !g.won?`<div style="text-align:center; padding:14px; background:var(--danger); color:white; border-radius:10px; margin-top:14px; font-weight:700;">Le mot était : ${g.word}</div>`:''}
+    ${_v64Btn('↻ Nouveau mot', 'v55_renderWordle()')}`
+  ));
+  setTimeout(()=>{ const el=document.getElementById('wl-in'); if (el) { el.focus(); el.value = _v64WL.cur; }}, 50);
+}
+function _wlGuess() {
+  const g = _v64WL;
+  if (g.cur.length !== 5) { toast('5 lettres'); return; }
+  g.guesses.push(g.cur);
+  if (g.cur === g.word) { g.won = true; g.over = true; }
+  else if (g.guesses.length >= g.max) g.over = true;
+  g.cur = '';
+  _wlRender();
+}
+
+// === Puissance 4 ===
+let _v64C4 = null;
+function renderConnect4() {
+  _v64C4 = { board: Array(7*6).fill(0), turn: 1, over: false, win: 0 };
+  _c4Render();
+}
+function _c4Render() {
+  const g = _v64C4;
+  _v64Set('connect4-content', _v64Card(
+    `<div style="text-align:center; font-size:14px; margin-bottom:10px;">${g.over?(g.win?(g.win===1?'🔴 Gagne !':'🟡 Gagne !'):'⚖️ Match nul'):(g.turn===1?'🔴 À toi':'🟡 IA...')}</div>
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; background:#1F4287; padding:8px; border-radius:10px; max-width:340px; margin:0 auto;">
+    ${[...Array(6*7)].map((_,i)=>{const v=g.board[i]; const bg=v===1?'#FF4757':v===2?'#FFD166':'#1A0E2E'; return `<div onclick="_c4Drop(${i%7})" style="aspect-ratio:1; background:${bg}; border-radius:50%; cursor:${g.over||g.turn!==1?'default':'pointer'};"></div>`;}).join('')}
+    </div>
+    ${_v64Btn('↻ Nouvelle partie', 'renderConnect4()')}`
+  ));
+}
+function _c4Drop(col) {
+  const g = _v64C4; if (g.over || g.turn!==1) return;
+  for (let r=5; r>=0; r--) {
+    const i = r*7+col;
+    if (g.board[i] === 0) {
+      g.board[i] = 1;
+      if (_c4Check(g.board, 1)) { g.over=true; g.win=1; _c4Render(); return; }
+      if (g.board.every(x=>x)) { g.over=true; _c4Render(); return; }
+      g.turn = 2; _c4Render();
+      setTimeout(_c4AI, 600);
+      return;
+    }
+  }
+}
+function _c4AI() {
+  const g = _v64C4; if (g.over) return;
+  // IA simple : random
+  const valid = [];
+  for (let c=0; c<7; c++) if (g.board[c] === 0) valid.push(c);
+  if (!valid.length) return;
+  const col = _v64Pick(valid);
+  for (let r=5; r>=0; r--) {
+    const i = r*7+col;
+    if (g.board[i] === 0) { g.board[i] = 2; break; }
+  }
+  if (_c4Check(g.board, 2)) { g.over=true; g.win=2; }
+  else if (g.board.every(x=>x)) g.over=true;
+  else g.turn = 1;
+  _c4Render();
+}
+function _c4Check(b, p) {
+  for (let r=0; r<6; r++) for (let c=0; c<7; c++) {
+    if (c<=3 && b[r*7+c]===p && b[r*7+c+1]===p && b[r*7+c+2]===p && b[r*7+c+3]===p) return true;
+    if (r<=2 && b[r*7+c]===p && b[(r+1)*7+c]===p && b[(r+2)*7+c]===p && b[(r+3)*7+c]===p) return true;
+    if (r<=2 && c<=3 && b[r*7+c]===p && b[(r+1)*7+c+1]===p && b[(r+2)*7+c+2]===p && b[(r+3)*7+c+3]===p) return true;
+    if (r>=3 && c<=3 && b[r*7+c]===p && b[(r-1)*7+c+1]===p && b[(r-2)*7+c+2]===p && b[(r-3)*7+c+3]===p) return true;
+  }
+  return false;
+}
+
+// === Blackjack ===
+let _v64BJ = null;
+const _v64BJSuits = ['♠','♥','♦','♣'];
+function _bjDeck() { const d=[]; for (let s=0; s<4; s++) for (let v=1; v<=13; v++) d.push({s,v}); for (let i=d.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; } return d; }
+function _bjScore(hand) {
+  let s = 0, aces = 0;
+  for (const c of hand) { if (c.v === 1) { s += 11; aces++; } else if (c.v >= 10) s += 10; else s += c.v; }
+  while (s > 21 && aces) { s -= 10; aces--; }
+  return s;
+}
+function renderBlackjack() {
+  _v64BJ = { deck: _bjDeck(), player:[], dealer:[], over:false };
+  _v64BJ.player.push(_v64BJ.deck.pop()); _v64BJ.dealer.push(_v64BJ.deck.pop());
+  _v64BJ.player.push(_v64BJ.deck.pop()); _v64BJ.dealer.push(_v64BJ.deck.pop());
+  _bjRender();
+}
+function _bjCardHTML(c, hidden) {
+  if (hidden) return `<div style="display:inline-block; width:50px; height:70px; background:linear-gradient(135deg,var(--primary),var(--accent)); border-radius:6px; margin:2px;"></div>`;
+  const v = c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':c.v;
+  const red = c.s === '♥' || c.s === '♦';
+  return `<div style="display:inline-block; width:50px; height:70px; background:white; color:${red?'red':'black'}; border-radius:6px; margin:2px; padding:4px 6px; font-weight:900; font-size:14px; text-align:left;"><div>${v}</div><div style="text-align:center; font-size:24px;">${_v64BJSuits[c.s]}</div></div>`;
+}
+function _bjRender() {
+  const g = _v64BJ;
+  const ps = _bjScore(g.player), ds = g.over ? _bjScore(g.dealer) : '?';
+  let msg = '';
+  if (g.over) {
+    const dr = _bjScore(g.dealer);
+    if (ps > 21) msg = '💥 Bust !';
+    else if (dr > 21) msg = '🎉 Croupier bust, tu gagnes !';
+    else if (ps > dr) msg = '🎉 Tu gagnes !';
+    else if (ps < dr) msg = '😞 Croupier gagne';
+    else msg = '⚖️ Égalité';
+  }
+  _v64Set('blackjack-content', _v64Card(
+    `<div style="text-align:center;"><div style="font-size:11px; color:var(--textSec);">CROUPIER (${ds})</div><div>${g.dealer.map((c,i)=>_bjCardHTML(c, !g.over && i===1)).join('')}</div></div>
+    <div style="text-align:center; margin-top:18px;"><div style="font-size:11px; color:var(--textSec);">TOI (${ps})</div><div>${g.player.map(c=>_bjCardHTML(c)).join('')}</div></div>
+    ${g.over ? `<div style="text-align:center; padding:14px; background:var(--surfaceAlt); border-radius:10px; margin-top:14px; font-weight:700; font-size:18px;">${msg}</div>${_v64Btn('↻ Nouvelle main', 'renderBlackjack()', true)}` :
+      `<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:14px;"><button class="btn primary" onclick="_bjHit()">+ Carte</button><button class="btn alt" onclick="_bjStand()">✋ Rester</button></div>`}`
+  ));
+}
+function _bjHit() {
+  _v64BJ.player.push(_v64BJ.deck.pop());
+  if (_bjScore(_v64BJ.player) > 21) _v64BJ.over = true;
+  _bjRender();
+}
+function _bjStand() {
+  while (_bjScore(_v64BJ.dealer) < 17) _v64BJ.dealer.push(_v64BJ.deck.pop());
+  _v64BJ.over = true;
+  _bjRender();
+}
+
+// === Crazy 8 (8 américain) - solo simplifié vs IA ===
+let _v64C8 = null;
+function renderCrazy8() {
+  const deck = _bjDeck();
+  _v64C8 = { deck, hand:[], ai:[], top:null, over:false, msg:'' };
+  for (let i=0; i<7; i++) { _v64C8.hand.push(deck.pop()); _v64C8.ai.push(deck.pop()); }
+  _v64C8.top = deck.pop();
+  _c8Render();
+}
+function _c8Render() {
+  const g = _v64C8;
+  _v64Set('crazy8-content', _v64Card(
+    `<p style="font-size:12px; color:var(--textSec); text-align:center;">Pose une carte de même couleur ou même valeur. Le 8 = joker.</p>
+    <div style="text-align:center; margin:14px 0;"><div style="font-size:11px; color:var(--textSec);">CARTE EN JEU</div><div style="font-size:32px;">${g.top.v===1?'A':g.top.v===11?'J':g.top.v===12?'Q':g.top.v===13?'K':g.top.v} ${_v64BJSuits[g.top.s]}</div></div>
+    <div style="text-align:center; font-size:13px; margin:8px 0;">IA : ${g.ai.length} cartes ${g.over?(g.msg||''):''}</div>
+    ${!g.over ? `<div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:14px;">${g.hand.map((c,i)=>{
+      const playable = c.v===8 || c.s===g.top.s || c.v===g.top.v;
+      const v = c.v===1?'A':c.v===11?'J':c.v===12?'Q':c.v===13?'K':c.v;
+      return `<button onclick="${playable?`_c8Play(${i})`:''}" style="background:white; color:${c.s===1||c.s===2?'red':'black'}; padding:8px 6px; border:2px solid ${playable?'var(--primary)':'var(--border)'}; border-radius:6px; font-weight:900; cursor:${playable?'pointer':'default'}; opacity:${playable?1:0.5};">${v}${_v64BJSuits[c.s]}</button>`;
+    }).join('')}</div>
+    <button class="btn alt full" style="margin-top:10px;" onclick="_c8Draw()">🎴 Piocher</button>` : _v64Btn('↻ Nouvelle partie', 'renderCrazy8()', true)}`
+  ));
+}
+function _c8Play(i) {
+  const g = _v64C8;
+  const c = g.hand.splice(i,1)[0]; g.top = c;
+  if (g.hand.length === 0) { g.over=true; g.msg='🎉 Tu gagnes !'; _c8Render(); return; }
+  // IA tour
+  setTimeout(_c8AI, 500);
+  _c8Render();
+}
+function _c8Draw() {
+  const g = _v64C8;
+  if (!g.deck.length) { g.over=true; g.msg='⚖️ Pioche vide'; _c8Render(); return; }
+  g.hand.push(g.deck.pop());
+  setTimeout(_c8AI, 400);
+  _c8Render();
+}
+function _c8AI() {
+  const g = _v64C8; if (g.over) return;
+  const idx = g.ai.findIndex(c=>c.v===8 || c.s===g.top.s || c.v===g.top.v);
+  if (idx === -1) {
+    if (g.deck.length) g.ai.push(g.deck.pop());
+  } else {
+    const c = g.ai.splice(idx,1)[0]; g.top = c;
+  }
+  if (g.ai.length === 0) { g.over=true; g.msg='😞 IA gagne'; }
+  _c8Render();
+}
+
+// === Battleship (vs IA, simplifié 6×6, 1 bateau de 3) ===
+let _v64BS = null;
+function renderBattleship() {
+  const me = Array(36).fill(0), ai = Array(36).fill(0);
+  // Place 1 bateau de 3 cases random pour chacun
+  const place = (g) => { while(true) { const h=Math.random()<0.5; const r=Math.floor(Math.random()*(h?6:4)), c=Math.floor(Math.random()*(h?4:6)); const cells = []; for(let k=0;k<3;k++) cells.push((r+(h?0:k))*6+c+(h?k:0)); g[cells[0]]=g[cells[1]]=g[cells[2]]=1; return; } };
+  place(me); place(ai);
+  _v64BS = { me, ai, myShots:Array(36).fill(0), aiShots:Array(36).fill(0), turn:'me', over:false, msg:'' };
+  _bsRender();
+}
+function _bsRender() {
+  const g = _v64BS;
+  const myHits = g.aiShots.filter((s,i)=>s===2).length;
+  const aiHits = g.myShots.filter((s,i)=>s===2).length;
+  _v64Set('battleship-content', _v64Card(
+    `<h4 style="margin:0 0 6px;">⚓ Toucher l'IA (3 hits = win)</h4>
+    <div style="font-size:11px; color:var(--textSec);">Hits sur IA : ${aiHits}/3 · Hits sur toi : ${myHits}/3</div>
+    <h4 style="margin:14px 0 6px;">🎯 IA</h4>
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:2px; max-width:240px;">
+    ${g.myShots.map((s,i)=>{const bg=s===2?'#FF4757':s===1?'#5DADE2':'var(--surfaceAlt)'; const ch=s===2?'💥':s===1?'•':''; return `<button onclick="_bsShoot(${i})" style="aspect-ratio:1; background:${bg}; border:1px solid var(--border); border-radius:3px; cursor:${s||g.over?'default':'pointer'}; font-size:14px;">${ch}</button>`;}).join('')}
+    </div>
+    <h4 style="margin:14px 0 6px;">🚢 Tes eaux</h4>
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:2px; max-width:240px;">
+    ${g.me.map((v,i)=>{const s=g.aiShots[i]; const bg=s===2?'#FF4757':s===1?'#5DADE2':v?'#7BC47F':'var(--surfaceAlt)'; const ch=s===2?'💥':s===1?'•':v?'⚓':''; return `<div style="aspect-ratio:1; background:${bg}; border:1px solid var(--border); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:14px;">${ch}</div>`;}).join('')}
+    </div>
+    ${g.over?`<div style="text-align:center; padding:14px; background:var(--surfaceAlt); border-radius:10px; margin-top:14px; font-weight:700;">${g.msg}</div>`:''}
+    ${_v64Btn('↻ Rejouer', 'renderBattleship()')}`
+  ));
+}
+function _bsShoot(i) {
+  const g = _v64BS; if (g.over || g.myShots[i]) return;
+  g.myShots[i] = g.ai[i] ? 2 : 1;
+  if (g.myShots.filter(s=>s===2).length === 3) { g.over=true; g.msg='🎉 Coulé toute la flotte !'; _bsRender(); return; }
+  // IA tire au hasard
+  setTimeout(()=>{
+    const free = []; for (let k=0; k<36; k++) if (!g.aiShots[k]) free.push(k);
+    if (!free.length) return;
+    const x = _v64Pick(free);
+    g.aiShots[x] = g.me[x] ? 2 : 1;
+    if (g.aiShots.filter(s=>s===2).length === 3) { g.over=true; g.msg='😞 IA a coulé tes bateaux'; }
+    _bsRender();
+  }, 400);
+  _bsRender();
+}
+
+// === Mahjong simplifié (memory de paires) ===
+let _v64MJ = null;
+function renderMahjong() {
+  const tiles = ['🀀','🀁','🀂','🀃','🀄','🀅','🀆','🀇'];
+  const deck = [...tiles, ...tiles]; // 8 paires
+  for (let i=deck.length-1; i>0; i--) { const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+  _v64MJ = { tiles: deck.map(t=>({t, open:false, matched:false})), sel:[], moves:0 };
+  _mjRender();
+}
+function _mjRender() {
+  const g = _v64MJ;
+  const matched = g.tiles.filter(t=>t.matched).length;
+  _v64Set('mahjong-content', _v64Card(
+    `<div style="text-align:center; font-size:13px; margin-bottom:10px;">Trouve les 8 paires · Coups : ${g.moves} · Trouvées : ${matched/2}/8</div>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; max-width:300px; margin:0 auto;">
+    ${g.tiles.map((t,i)=>`<button onclick="_mjTap(${i})" style="aspect-ratio:1; background:${t.matched?'#7BC47F33':t.open?'var(--surfaceAlt)':'linear-gradient(135deg,var(--primary),var(--accent))'}; border:none; border-radius:8px; font-size:32px; cursor:${t.matched?'default':'pointer'}; color:${t.open||t.matched?'inherit':'transparent'};">${t.t}</button>`).join('')}
+    </div>
+    ${matched === g.tiles.length?'<div style="text-align:center; padding:14px; background:var(--success); color:white; border-radius:10px; margin-top:14px; font-weight:700;">🏆 Bravo !</div>':''}
+    ${_v64Btn('↻ Nouvelle partie', 'renderMahjong()')}`
+  ));
+}
+function _mjTap(i) {
+  const g = _v64MJ; const t = g.tiles[i];
+  if (t.matched || t.open || g.sel.length >= 2) return;
+  t.open = true; g.sel.push(i);
+  _mjRender();
+  if (g.sel.length === 2) {
+    g.moves++;
+    setTimeout(()=>{
+      const [a,b] = g.sel;
+      if (g.tiles[a].t === g.tiles[b].t) { g.tiles[a].matched = g.tiles[b].matched = true; }
+      else { g.tiles[a].open = g.tiles[b].open = false; }
+      g.sel = [];
+      _mjRender();
+    }, 700);
+  }
+}
+
+// === Yahtzee simplifié ===
+let _v64YZ = null;
+function renderYahtzee() {
+  _v64YZ = { dice:[1,1,1,1,1], hold:[false,false,false,false,false], rolls:0, score:{}, totalScore:0 };
+  _yzRoll();
+}
+function _yzRender() {
+  const g = _v64YZ;
+  const cats = [['1','Total des 1'],['2','Total des 2'],['3','Total des 3'],['4','Total des 4'],['5','Total des 5'],['6','Total des 6'],['brelan','Brelan'],['carre','Carré'],['full','Full'],['petite','Petite suite'],['grande','Grande suite'],['yz','Yahtzee'],['chance','Chance']];
+  _v64Set('yahtzee-content', _v64Card(
+    `<div style="text-align:center; font-size:13px;">Lancers restants : ${3-g.rolls} · Score : <strong>${g.totalScore}</strong></div>
+    <div style="display:flex; gap:6px; justify-content:center; margin:14px 0;">
+    ${g.dice.map((d,i)=>`<button onclick="_yzHold(${i})" style="background:${g.hold[i]?'var(--primary)':'var(--surfaceAlt)'}; color:${g.hold[i]?'white':'inherit'}; padding:14px; border:none; border-radius:10px; font-size:28px; cursor:pointer;">${'⚀⚁⚂⚃⚄⚅'[d-1]}</button>`).join('')}
+    </div>
+    ${g.rolls < 3 ? `<button class="btn primary full" onclick="_yzRoll()">🎲 Lancer (${3-g.rolls} restants)</button>` : ''}
+    <h4 style="margin:14px 0 6px;">Choisis une catégorie :</h4>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+    ${cats.map(([k,n])=>`<button class="btn alt" style="font-size:12px; padding:8px 4px; ${g.score[k]!==undefined?'opacity:0.5;':''}" onclick="${g.score[k]===undefined?`_yzScore('${k}')`:''}">${n}${g.score[k]!==undefined?': '+g.score[k]:''}</button>`).join('')}
+    </div>
+    ${Object.keys(g.score).length === cats.length ? `<div style="text-align:center; padding:14px; background:var(--success); color:white; border-radius:10px; margin-top:14px; font-weight:700;">🏆 Final : ${g.totalScore}</div>${_v64Btn('↻ Nouvelle partie', 'renderYahtzee()')}` : ''}`
+  ));
+}
+function _yzHold(i) {
+  const g = _v64YZ; if (g.rolls === 0 || g.rolls >= 3) return;
+  g.hold[i] = !g.hold[i]; _yzRender();
+}
+function _yzRoll() {
+  const g = _v64YZ; if (g.rolls >= 3) return;
+  g.dice = g.dice.map((d,i)=> g.hold[i] ? d : 1+Math.floor(Math.random()*6));
+  g.rolls++;
+  _yzRender();
+}
+function _yzScore(k) {
+  const g = _v64YZ;
+  const d = g.dice; const counts = {}; d.forEach(x=>counts[x]=(counts[x]||0)+1);
+  let s = 0;
+  if (['1','2','3','4','5','6'].includes(k)) s = d.filter(x=>x===parseInt(k)).reduce((a,b)=>a+b,0);
+  else if (k==='brelan') s = Object.values(counts).some(v=>v>=3) ? d.reduce((a,b)=>a+b,0) : 0;
+  else if (k==='carre') s = Object.values(counts).some(v=>v>=4) ? d.reduce((a,b)=>a+b,0) : 0;
+  else if (k==='full') s = Object.values(counts).includes(3) && Object.values(counts).includes(2) ? 25 : 0;
+  else if (k==='petite') { const u = [...new Set(d)].sort(); s = ['1234','2345','3456'].some(x=>x.split('').every(c=>u.includes(parseInt(c)))) ? 30 : 0; }
+  else if (k==='grande') { const u = [...new Set(d)].sort().join(''); s = ['12345','23456'].includes(u) ? 40 : 0; }
+  else if (k==='yz') s = Object.values(counts).includes(5) ? 50 : 0;
+  else if (k==='chance') s = d.reduce((a,b)=>a+b,0);
+  g.score[k] = s; g.totalScore += s;
+  // Reset for next round
+  g.dice = [1,1,1,1,1]; g.hold = [false,false,false,false,false]; g.rolls = 0;
+  _yzRender();
+}
+
+// === Roulette ===
+let _v64RL = null;
+function renderRoulette() {
+  if (!_v64RL) _v64RL = { balance: 100, last: null, history: [] };
+  _rlRender();
+}
+function _rlRender() {
+  const g = _v64RL;
+  _v64Set('roulette-content', _v64Card(
+    `<div style="text-align:center; font-size:13px;">💰 Solde : <strong style="color:var(--primary);">${g.balance}</strong> €</div>
+    ${g.last ? `<div style="text-align:center; font-size:64px; margin:14px 0;">${g.last.color==='red'?'🔴':g.last.color==='black'?'⚫':'🟢'} ${g.last.num}</div>` : '<div style="text-align:center; padding:18px; color:var(--textSec);">Pose ton pari</div>'}
+    <p style="font-size:12px; text-align:center; color:var(--textSec); margin-top:8px;">Mise 10€</p>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:14px;">
+      <button class="btn alt" onclick="_rlBet('red')">🔴 Rouge ×2</button>
+      <button class="btn alt" onclick="_rlBet('black')">⚫ Noir ×2</button>
+      <button class="btn alt" onclick="_rlBet('zero')">🟢 0 ×35</button>
+      <button class="btn alt" onclick="_rlBet('even')">Pair ×2</button>
+      <button class="btn alt" onclick="_rlBet('odd')">Impair ×2</button>
+      <button class="btn alt" onclick="_rlBet('high')">19-36 ×2</button>
+    </div>
+    <button class="btn ghost full" style="margin-top:10px;" onclick="_v64RL.balance=100; _rlRender();">↻ Reset à 100€</button>
+    <h4 style="margin:14px 0 6px;">📜 Historique</h4>
+    <div>${g.history.slice(-8).reverse().map(h=>`<div style="display:flex; justify-content:space-between; padding:6px 10px; background:var(--surfaceAlt); border-radius:6px; margin-bottom:3px; font-size:12px;"><span>${h.color==='red'?'🔴':h.color==='black'?'⚫':'🟢'} ${h.num}</span><span style="color:${h.delta>0?'var(--success)':'var(--danger)'};">${h.delta>0?'+':''}${h.delta}€</span></div>`).join('')||'<p style="font-size:12px; color:var(--textSec); text-align:center;">Aucun pari encore</p>'}</div>`
+  ));
+}
+function _rlBet(type) {
+  const g = _v64RL;
+  if (g.balance < 10) { toast('💸 Plus de fonds'); return; }
+  g.balance -= 10;
+  const num = Math.floor(Math.random()*37); // 0-36
+  const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+  const color = num === 0 ? 'zero' : reds.includes(num) ? 'red' : 'black';
+  let win = 0;
+  if (type === 'zero' && num === 0) win = 350;
+  else if (type === 'red' && color === 'red') win = 20;
+  else if (type === 'black' && color === 'black') win = 20;
+  else if (type === 'even' && num !== 0 && num % 2 === 0) win = 20;
+  else if (type === 'odd' && num !== 0 && num % 2 === 1) win = 20;
+  else if (type === 'high' && num >= 19) win = 20;
+  g.balance += win;
+  g.last = { num, color };
+  g.history.push({ num, color, delta: win - 10 });
+  _rlRender();
+}
 
 </script>
 </body>
