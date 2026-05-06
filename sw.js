@@ -1,4 +1,4 @@
-const CACHE = 'love2nono-v72-bigdict';
+const CACHE = 'love2nono-v74-autosave';
 const ASSETS = [
   './',
   './index.html',

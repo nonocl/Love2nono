@@ -4409,7 +4409,7 @@ mark.fuzzy-match {
 <div class="page" id="page-note-editor">
   <div class="page-header">
     <button class="back-btn" onclick="saveNoteAndBack()">‹</button>
-    <div class="page-title">Note</div>
+    <div class="page-title">Note <span id="note-save-status" style="font-size:11px; font-weight:500; color:var(--success); margin-left:8px; opacity:0; transition:opacity 0.25s;"></span></div>
     <button class="icon-btn" onclick="deleteCurrentNote()" style="color:var(--danger);">🗑️</button>
   </div>
   <div class="section" id="note-editor-section">
@@ -5207,20 +5207,79 @@ mark.fuzzy-match {
   </div>
 </div>
 
-<!-- ====== 2048 ====== -->
+<!-- ====== 2048 (V73 — réécriture complète) ====== -->
 <div class="page" id="page-game-2048">
+  <style>
+    .g2048-stats { display:flex; gap:10px; margin:0 auto 14px; max-width: min(360px, calc(100vw - 32px)); }
+    .g2048-stat { flex:1; background:var(--surfaceAlt); border:1px solid var(--border); border-radius:10px; padding:8px 10px; text-align:center; }
+    .g2048-stat-label { font-size:10px; font-weight:700; letter-spacing:0.08em; color:var(--textSec); }
+    .g2048-stat-val { font-size:24px; font-weight:900; margin-top:2px; }
+    .g2048-stat-best { color:var(--primary); }
+    .g2048-stage { position:relative; width:100%; max-width: min(360px, calc(100vw - 32px)); aspect-ratio:1; margin:0 auto; background:var(--surfaceAlt); border:1px solid var(--border); border-radius:12px; padding:8px; box-sizing:border-box; touch-action:none; user-select:none; -webkit-user-select:none; overflow:hidden; }
+    .g2048-bg, .g2048-tiles { position:absolute; inset:8px; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); gap:6px; }
+    .g2048-tiles { pointer-events:none; }
+    .g2048-bg > div { background:var(--bg); border-radius:8px; opacity:0.5; }
+    .g2048-cell { display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:900; font-size: clamp(15px, 6.2vw, 28px); min-width:0; min-height:0; overflow:hidden; }
+    .g2048-cell[data-v="2"]    { background:#eee4da; color:#776e65; }
+    .g2048-cell[data-v="4"]    { background:#ede0c8; color:#776e65; }
+    .g2048-cell[data-v="8"]    { background:#f2b179; color:#fff; }
+    .g2048-cell[data-v="16"]   { background:#f59563; color:#fff; }
+    .g2048-cell[data-v="32"]   { background:#f67c5f; color:#fff; }
+    .g2048-cell[data-v="64"]   { background:#f65e3b; color:#fff; }
+    .g2048-cell[data-v="128"]  { background:#edcf72; color:#fff; font-size: clamp(13px, 5.2vw, 24px); }
+    .g2048-cell[data-v="256"]  { background:#edcc61; color:#fff; font-size: clamp(13px, 5.2vw, 24px); }
+    .g2048-cell[data-v="512"]  { background:#edc850; color:#fff; font-size: clamp(13px, 5.2vw, 24px); }
+    .g2048-cell[data-v="1024"] { background:#edc53f; color:#fff; font-size: clamp(11px, 4.4vw, 20px); }
+    .g2048-cell[data-v="2048"] { background:#edc22e; color:#fff; font-size: clamp(11px, 4.4vw, 20px); box-shadow:0 0 18px rgba(237,194,46,0.6); }
+    .g2048-cell[data-v="4096"], .g2048-cell[data-v="8192"], .g2048-cell[data-v="16384"], .g2048-cell[data-v="32768"], .g2048-cell[data-v="65536"] { background:#3c3a32; color:#fff; font-size: clamp(10px, 4vw, 18px); }
+    .g2048-cell.is-new { animation: g2048Spawn 0.18s ease-out; }
+    .g2048-cell.is-merged { animation: g2048Pop 0.2s ease-out; }
+    @keyframes g2048Spawn { from { transform:scale(0); } to { transform:scale(1); } }
+    @keyframes g2048Pop { 0% { transform:scale(1); } 50% { transform:scale(1.18); } 100% { transform:scale(1); } }
+    .g2048-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:12px; z-index:5; animation: g2048Fade 0.25s ease-out; padding:14px; box-sizing:border-box; }
+    @keyframes g2048Fade { from { opacity:0; } to { opacity:1; } }
+    .g2048-overlay-msg { font-size:26px; font-weight:900; color:#fff; text-align:center; }
+    .g2048-overlay-score { font-size:14px; color:#fff; opacity:0.85; margin-top:6px; text-align:center; }
+    .g2048-overlay-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; justify-content:center; }
+    .g2048-pad { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; max-width: min(220px, 60vw); margin:14px auto 0; }
+    .g2048-btn { padding:14px 0; background:var(--surfaceAlt); color:var(--text); border:1px solid var(--border); border-radius:10px; font-size:18px; cursor:pointer; font-weight:700; }
+    .g2048-btn:active { transform:scale(0.95); }
+    .g2048-btn-mid { background:var(--primary); color:#fff; border-color:var(--primary); }
+  </style>
   <div class="page-header">
     <button class="back-btn" onclick="goBack()">‹</button>
     <div class="page-title">🔢 2048</div>
-    <button class="icon-btn" onclick="init2048()" title="Recommencer">↻</button>
+    <button class="icon-btn" onclick="g2048New()" title="Nouvelle partie">↻</button>
   </div>
-  <div class="section" style="text-align:center;">
-    <div style="display:flex; justify-content:space-around; margin-bottom:10px;">
-      <div><div style="font-size:11px; color:var(--textSec);">SCORE</div><div id="g2048-score" style="font-size:22px; font-weight:800;">0</div></div>
-      <div><div style="font-size:11px; color:var(--textSec);">RECORD</div><div id="g2048-best" style="font-size:22px; font-weight:800; color:var(--primary);">0</div></div>
+  <div class="section">
+    <div class="g2048-stats">
+      <div class="g2048-stat"><div class="g2048-stat-label">SCORE</div><div id="g2048-score" class="g2048-stat-val">0</div></div>
+      <div class="g2048-stat"><div class="g2048-stat-label">RECORD</div><div id="g2048-best" class="g2048-stat-val g2048-stat-best">0</div></div>
     </div>
-    <div id="g2048-board" style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; width:100%; max-width:min(340px, calc(100vw - 80px)); margin:0 auto; aspect-ratio:1; padding:6px; background:var(--surfaceAlt); border-radius:10px; touch-action:none; box-sizing:border-box; overflow:hidden;"></div>
-    <p style="margin-top:12px; font-size:11px; color:var(--textSec);">Glisse pour bouger les tuiles. Combine les mêmes pour atteindre 2048 !</p>
+    <div id="g2048-stage" class="g2048-stage">
+      <div id="g2048-bg" class="g2048-bg"></div>
+      <div id="g2048-tiles" class="g2048-tiles"></div>
+      <div id="g2048-overlay" class="g2048-overlay" style="display:none;">
+        <div class="g2048-overlay-msg" id="g2048-overlay-msg">Game Over</div>
+        <div class="g2048-overlay-score" id="g2048-overlay-score"></div>
+        <div class="g2048-overlay-actions">
+          <button class="btn primary" onclick="g2048New()">Rejouer</button>
+          <button class="btn alt" id="g2048-keep-btn" onclick="g2048KeepGoing()" style="display:none;">Continuer</button>
+        </div>
+      </div>
+    </div>
+    <div class="g2048-pad">
+      <div></div>
+      <button class="g2048-btn" onclick="g2048Move('up')" aria-label="Haut">▲</button>
+      <div></div>
+      <button class="g2048-btn" onclick="g2048Move('left')" aria-label="Gauche">◀</button>
+      <button class="g2048-btn g2048-btn-mid" id="g2048-undo-btn" onclick="g2048Undo()" title="Annuler (U)" aria-label="Annuler">↶</button>
+      <button class="g2048-btn" onclick="g2048Move('right')" aria-label="Droite">▶</button>
+      <div></div>
+      <button class="g2048-btn" onclick="g2048Move('down')" aria-label="Bas">▼</button>
+      <div></div>
+    </div>
+    <p style="margin-top:12px; font-size:11px; color:var(--textSec); text-align:center;">Glisse, utilise les flèches du clavier (ZQSD/WASD) ou les boutons. Combine les tuiles identiques pour atteindre 2048 !</p>
   </div>
 </div>
 
@@ -11829,8 +11888,8 @@ body.v56-active #fab-quick { bottom: 94px !important; z-index: 90 !important; }
 </div>
 <div class="page" id="page-invent-edit">
   <div class="page-header">
-    <button class="back-btn" onclick="goBack()">‹</button>
-    <div class="page-title">📦 Objet</div>
+    <button class="back-btn" onclick="invSaveAndBack()">‹</button>
+    <div class="page-title">📦 Objet <span id="inv-save-status" style="font-size:11px; font-weight:500; color:var(--success); margin-left:8px; opacity:0; transition:opacity 0.25s;"></span></div>
     <button class="icon-btn" onclick="invDel()" style="color:var(--danger);">🗑</button>
   </div>
   <div class="section">
@@ -11851,7 +11910,7 @@ body.v56-active #fab-quick { bottom: 94px !important; z-index: 90 !important; }
     <input type="date" class="input" id="inv-date">
     <span class="label">Notes</span>
     <textarea class="input" id="inv-notes" rows="3" placeholder="Garantie, n° de série, où c'est rangé..."></textarea>
-    <button class="btn primary full" onclick="invSave()" style="margin-top:10px;">💾 Enregistrer</button>
+    <button class="btn primary full" onclick="invSaveAndBack()" style="margin-top:10px;">✓ Terminer</button>
   </div>
 </div>
 
@@ -12355,8 +12414,8 @@ body.v56-active #fab-quick { bottom: 94px !important; z-index: 90 !important; }
 
 <div class="page" id="page-wardrobe-add">
   <div class="page-header">
-    <button class="back-btn" onclick="goBack()">‹</button>
-    <div class="page-title">+ Vêtement</div>
+    <button class="back-btn" onclick="wardSaveAndBack()">‹</button>
+    <div class="page-title">+ Vêtement <span id="ward-save-status" style="font-size:11px; font-weight:500; color:var(--success); margin-left:8px; opacity:0; transition:opacity 0.25s;"></span></div>
     <div style="width:40px;"></div>
   </div>
   <div class="section">
@@ -12387,7 +12446,7 @@ body.v56-active #fab-quick { bottom: 94px !important; z-index: 90 !important; }
     </select>
     <span class="label">Notes (style, marque...)</span>
     <textarea class="input" id="ward-notes" rows="2"></textarea>
-    <button class="btn primary full" onclick="wardSave()" style="margin-top:14px;">💾 Enregistrer</button>
+    <button class="btn primary full" onclick="wardSaveAndBack()" style="margin-top:14px;">✓ Terminer</button>
   </div>
 </div>
 
@@ -13883,7 +13942,6 @@ body.v56-active #fab-quick { bottom: 94px !important; z-index: 90 !important; }
 <div class="page" id="page-chess"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">Échecs</h2></div><div id="chess-content"></div></div>
 <div class="page" id="page-sudokumulti"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">Sudoku</h2></div><div id="sudokumulti-content"></div></div>
 <div class="page" id="page-crossword"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">Mots croisés</h2></div><div id="crossword-content"></div></div>
-<div class="page" id="page-g2048"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">2048</h2></div><div id="g2048-content"></div></div>
 <div class="page" id="page-ttt"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">Tic-Tac-Toe</h2></div><div id="ttt-content"></div></div>
 <div class="page" id="page-simon"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">Simon</h2></div><div id="simon-content"></div></div>
 <div class="page" id="page-mbti"><div class="page-header"><button class="back-btn" onclick="goBack()">←</button><h2 class="page-title">MBTI</h2></div><div id="mbti-content"></div></div>
@@ -14899,6 +14957,13 @@ function goBack() {
 }
 
 function goTo(page) {
+  // V73 : flush l'auto-save de la page qu'on quitte (s'il y en a un pending) — non
+  // bloquant pour ne pas figer la navigation, mais on annule le timer pour éviter
+  // qu'il fire après la transition.
+  if (typeof _autoSaveReg !== 'undefined' && state && state.page && state.page !== page && _autoSaveReg.has(state.page)) {
+    const r = _autoSaveReg.get(state.page);
+    if (r && r.timer) { clearTimeout(r.timer); r.timer = null; _fireAutoSave(state.page); }
+  }
   // === Nav history ===
   if (typeof window._navHistory === 'undefined') window._navHistory = [];
   // Don't push if going back, OR if same page, OR if previous push was identical
@@ -15099,7 +15164,7 @@ function goTo(page) {
   if (page === 'chess') renderChess();
   if (page === 'sudokumulti') renderSudokuMulti();
   if (page === 'crossword') renderCrossword();
-  if (page === 'g2048') render2048();
+  // V73 : route 'g2048' (placeholder V64) supprimée — la vraie page est 'game-2048'.
   if (page === 'ttt') renderTTT();
   if (page === 'simon') renderSimon();
   if (page === 'mbti') renderMBTI();
@@ -16795,10 +16860,15 @@ async function openNote(note) {
   // Apply BG
   applyNoteBgPreview();
   document.getElementById('note-suggest').innerHTML = '';
+  // V73 : auto-save bind + reset indicator
+  _setNoteSaveStatus('idle');
+  _setupNoteAutoSave();
   goTo('note-editor');
 }
 function setNoteColor(id) {
   state._editColor = id;
+  // V73 : auto-save sur changement de couleur
+  if (typeof _scheduleNoteAutoSave === 'function') _scheduleNoteAutoSave(400);
   // Re-render swatches
   const colorEl = document.getElementById('note-colors');
   colorEl.innerHTML = NOTE_COLORS.map(c => `<button onclick="setNoteColor('${c.id}')" style="width:28px; height:28px; border-radius:50%; border:2px solid ${id === c.id ? 'var(--text)' : 'transparent'}; background:${c.bg}; cursor:pointer; box-shadow:0 0 0 1px var(--border);" title="${c.label}"></button>`).join('');
@@ -16849,28 +16919,136 @@ function noteAutoClassify() {
 }
 function applyNoteCat(cat) {
   document.getElementById('note-cat').value = cat;
+  // V73 : auto-save sur application de catégorie suggérée
+  if (typeof _scheduleNoteAutoSave === 'function') _scheduleNoteAutoSave(400);
   toast(`✅ Catégorie : ${cat}`);
   document.getElementById('note-suggest').innerHTML = '';
 }
 
-async function saveNoteAndBack() {
-  const title = document.getElementById('note-title').value.trim();
-  const content = document.getElementById('note-content').value;
+// ============================================================
+// V73 : SYSTÈME D'AUTO-SAVE GÉNÉRIQUE
+// Chaque éditeur s'enregistre avec son saver async + un id de span d'indicateur.
+// Sauvegarde 600ms après la dernière frappe + flush au visibilitychange/pagehide.
+// ============================================================
+const _autoSaveReg = new Map(); // pageId -> { saver, statusElId, timer, busy }
+
+function _registerAutoSave(pageId, saver, statusElId) {
+  _autoSaveReg.set(pageId, { saver, statusElId, timer: null, busy: false });
+}
+function _bindAutoSaveFields(pageId, fields) {
+  const r = _autoSaveReg.get(pageId);
+  if (!r) return;
+  for (const f of fields) {
+    const item = (typeof f === 'string') ? { id: f } : f;
+    const el = document.getElementById(item.id);
+    if (!el || el.dataset.autoSaveBound) continue;
+    const evType = item.event || ((el.tagName === 'SELECT' || el.type === 'date' || el.type === 'checkbox' || el.type === 'radio') ? 'change' : 'input');
+    el.addEventListener(evType, () => _scheduleAutoSave(pageId));
+    if (evType === 'input') el.addEventListener('blur', () => _flushAutoSave(pageId));
+    el.dataset.autoSaveBound = '1';
+  }
+  _setAutoSaveStatus(pageId, 'idle');
+}
+function _scheduleAutoSave(pageId, delay) {
+  const r = _autoSaveReg.get(pageId);
+  if (!r) return;
+  clearTimeout(r.timer);
+  r.timer = setTimeout(() => _fireAutoSave(pageId), typeof delay === 'number' ? delay : 600);
+}
+async function _flushAutoSave(pageId) {
+  const r = _autoSaveReg.get(pageId);
+  if (!r) return;
+  clearTimeout(r.timer);
+  await _fireAutoSave(pageId);
+}
+async function _fireAutoSave(pageId) {
+  const r = _autoSaveReg.get(pageId);
+  if (!r || r.busy) return;
+  r.busy = true;
+  _setAutoSaveStatus(pageId, 'saving');
+  try {
+    const result = await r.saver();
+    // saver peut retourner false pour signifier "rien à sauver, n'affiche pas saved"
+    _setAutoSaveStatus(pageId, result === false ? 'idle' : 'saved');
+  } catch (e) {
+    console.error('autoSave', pageId, e);
+    _setAutoSaveStatus(pageId, 'idle');
+    try { toast('⚠️ Sauvegarde échouée'); } catch (_) {}
+  } finally {
+    r.busy = false;
+  }
+}
+function _setAutoSaveStatus(pageId, kind) {
+  const r = _autoSaveReg.get(pageId);
+  if (!r || !r.statusElId) return;
+  const el = document.getElementById(r.statusElId);
+  if (!el) return;
+  if (kind === 'saving') { el.textContent = '💾 …'; el.style.opacity = '0.7'; el.style.color = 'var(--textSec)'; }
+  else if (kind === 'saved') {
+    el.textContent = '✓ enregistré'; el.style.opacity = '1'; el.style.color = 'var(--success)';
+    clearTimeout(el._fadeTimer);
+    el._fadeTimer = setTimeout(() => { el.style.opacity = '0'; }, 1400);
+  } else { el.style.opacity = '0'; el.textContent = ''; }
+}
+// Flush la page courante quand l'app passe en arrière-plan ou se ferme.
+function _autoSaveFlushCurrentPage() {
+  const cur = window.state && window.state.page;
+  if (cur && _autoSaveReg.has(cur)) _flushAutoSave(cur);
+}
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') _autoSaveFlushCurrentPage();
+});
+window.addEventListener('pagehide', () => _autoSaveFlushCurrentPage());
+
+// ============================================================
+// AUTO-SAVE : NOTES
+// ============================================================
+async function _autoSaveNote() {
+  const titleEl = document.getElementById('note-title');
+  const contentEl = document.getElementById('note-content');
+  if (!titleEl || !contentEl) return false;
+  const title = titleEl.value.trim();
+  const content = contentEl.value;
   const color = state._editColor || 'default';
   const cat = document.getElementById('note-cat')?.value || null;
-  if (!title && !content) { goTo('notes'); return; }
-  if (state.editingNoteId) {
-    const n = await dbGet('notes', state.editingNoteId);
-    await dbPut('notes', { ...n, title, content, color, cat, updated_at: new Date().toISOString() });
-  } else {
-    await dbAdd('notes', { title, content, color, cat, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+  // Note vide : pas de save (et delete si entrée déjà créée)
+  if (!title && !content) {
+    if (state.editingNoteId) {
+      try { await dbDel('notes', state.editingNoteId); state.editingNoteId = null; }
+      catch (e) { console.error('autoSave delete-empty error', e); }
+    }
+    return false;
   }
+  const now = new Date().toISOString();
+  if (state.editingNoteId) {
+    const cur = await dbGet('notes', state.editingNoteId);
+    if (cur) await dbPut('notes', { ...cur, title, content, color, cat, updated_at: now });
+    else state.editingNoteId = await dbAdd('notes', { title, content, color, cat, created_at: now, updated_at: now });
+  } else {
+    state.editingNoteId = await dbAdd('notes', { title, content, color, cat, created_at: now, updated_at: now });
+  }
+  return true;
+}
+_registerAutoSave('note-editor', _autoSaveNote, 'note-save-status');
+
+// API legacy maintenue pour les onclick existants
+function _setNoteSaveStatus(kind) { _setAutoSaveStatus('note-editor', kind); }
+function _scheduleNoteAutoSave(delay) { _scheduleAutoSave('note-editor', delay); }
+function _setupNoteAutoSave() {
+  _bindAutoSaveFields('note-editor', ['note-title', 'note-content', { id: 'note-cat', event: 'change' }]);
+}
+
+async function saveNoteAndBack() {
+  await _flushAutoSave('note-editor');
   goTo('notes');
 }
+
 async function deleteCurrentNote() {
   if (!state.editingNoteId) { goTo('notes'); return; }
   if (!confirm('Supprimer cette note ?')) return;
+  const r = _autoSaveReg.get('note-editor'); if (r) clearTimeout(r.timer);
   await dbDel('notes', state.editingNoteId);
+  state.editingNoteId = null;
   goTo('notes');
 }
 
@@ -18842,7 +19020,6 @@ const PAGE_INDEX = [
   { page:'chess', name:'Échecs solo', cat:'Jeux', ico:'♟', kw:'echec chess strategie ia' },
   { page:'sudokumulti', name:'Sudoku multi', cat:'Jeux', ico:'🔢', kw:'sudoku puzzle nombre difficulte' },
   { page:'crossword', name:'Mots croisés', cat:'Jeux', ico:'📝', kw:'mots croises crossword puzzle' },
-  { page:'g2048', name:'2048', cat:'Jeux', ico:'🟧', kw:'2048 fusion tuile slide' },
   { page:'ttt', name:'Morpion', cat:'Jeux', ico:'⭕', kw:'tic tac toe morpion ia' },
   { page:'simon', name:'Simon', cat:'Jeux', ico:'🎯', kw:'simon memoire sequence couleur' },
   { page:'mbti', name:'Test MBTI', cat:'Lifestyle', ico:'🧠', kw:'mbti personnalite test 16types' },
@@ -27706,105 +27883,293 @@ async function setScore(game, value, suffix) {
 }
 
 // ============================================================
-// JEU 1: 2048
+// JEU 1: 2048 (V73 — réécriture from scratch)
 // ============================================================
-let _g2048 = { board:[], score:0, best:0 };
+// État global, reset à chaque init2048(). Persisté dans localStorage à chaque move
+// pour reprendre la partie en cours quand on revient sur la page.
+const _g2048 = {
+  grid: null,           // [[v,v,v,v], ...] (4×4)
+  prev: null,           // snapshot pour undo : { grid, score }
+  score: 0,
+  best: 0,
+  won: false,           // 2048 atteint au moins une fois
+  keepGoing: false,     // l'utilisateur a cliqué "Continuer" après 2048
+  over: false,
+};
+
+function _g2048Empty() { return Array.from({ length: 4 }, () => [0,0,0,0]); }
+
+function _g2048Save() {
+  try {
+    localStorage.setItem('g2048_state_v1', JSON.stringify({
+      grid: _g2048.grid, prev: _g2048.prev, score: _g2048.score,
+      won: _g2048.won, keepGoing: _g2048.keepGoing, over: _g2048.over,
+    }));
+  } catch (e) {}
+}
+function _g2048Load() {
+  try {
+    const raw = localStorage.getItem('g2048_state_v1');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function _g2048ClearSaved() { try { localStorage.removeItem('g2048_state_v1'); } catch (e) {} }
 
 async function init2048() {
   const best = await getScore('2048');
-  _g2048 = { board: [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]], score:0, best: best ? best.value : 0 };
-  add2048Tile(); add2048Tile();
-  document.getElementById('g2048-best').textContent = _g2048.best;
-  render2048();
+  _g2048.best = best ? best.value : 0;
+
+  const saved = _g2048Load();
+  if (saved && Array.isArray(saved.grid) && saved.grid.length === 4) {
+    _g2048.grid = saved.grid;
+    _g2048.prev = saved.prev || null;
+    _g2048.score = saved.score || 0;
+    _g2048.won = !!saved.won;
+    _g2048.keepGoing = !!saved.keepGoing;
+    _g2048.over = !!saved.over;
+  } else {
+    _g2048.grid = _g2048Empty();
+    _g2048.prev = null;
+    _g2048.score = 0;
+    _g2048.won = false;
+    _g2048.keepGoing = false;
+    _g2048.over = false;
+    _g2048SpawnTile(); _g2048SpawnTile();
+  }
+
+  // Setup background grid (16 cells) une seule fois
+  const bg = document.getElementById('g2048-bg');
+  if (bg && !bg.dataset.ready) {
+    bg.innerHTML = '<div></div>'.repeat(16);
+    bg.dataset.ready = '1';
+  }
+  // Hide overlay (peut rester affiché d'une partie précédente)
+  const ov = document.getElementById('g2048-overlay');
+  if (ov) ov.style.display = 'none';
+
   // Setup swipe
-  const board = document.getElementById('g2048-board');
-  board.removeEventListener('touchstart', _g2048Touch);
-  board.addEventListener('touchstart', _g2048Touch, { passive: false });
-  board.removeEventListener('touchend', _g2048TouchEnd);
-  board.addEventListener('touchend', _g2048TouchEnd);
-  document.removeEventListener('keydown', _g2048Key);
-  document.addEventListener('keydown', _g2048Key);
-}
-let _g2048Start = null;
-function _g2048Touch(e) { e.preventDefault(); const t = e.touches[0]; _g2048Start = { x:t.clientX, y:t.clientY }; }
-function _g2048TouchEnd(e) {
-  if (!_g2048Start) return;
-  const t = e.changedTouches[0];
-  const dx = t.clientX - _g2048Start.x, dy = t.clientY - _g2048Start.y;
-  if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
-  if (Math.abs(dx) > Math.abs(dy)) move2048(dx > 0 ? 'right' : 'left');
-  else move2048(dy > 0 ? 'down' : 'up');
-  _g2048Start = null;
-}
-function _g2048Key(e) {
-  if (state.page !== 'game-2048') return;
-  const k = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down' }[e.key];
-  if (k) { e.preventDefault(); move2048(k); }
+  const stage = document.getElementById('g2048-stage');
+  if (stage) {
+    stage.removeEventListener('touchstart', _g2048OnTouchStart);
+    stage.removeEventListener('touchend', _g2048OnTouchEnd);
+    stage.addEventListener('touchstart', _g2048OnTouchStart, { passive: false });
+    stage.addEventListener('touchend', _g2048OnTouchEnd);
+  }
+  document.removeEventListener('keydown', _g2048OnKey);
+  document.addEventListener('keydown', _g2048OnKey);
+
+  _g2048Render();
+  if (_g2048.over) _g2048ShowOver();
 }
 
-function add2048Tile() {
+function g2048New() {
+  _g2048ClearSaved();
+  _g2048.grid = _g2048Empty();
+  _g2048.prev = null;
+  _g2048.score = 0;
+  _g2048.won = false;
+  _g2048.keepGoing = false;
+  _g2048.over = false;
+  _g2048SpawnTile(); _g2048SpawnTile();
+  const ov = document.getElementById('g2048-overlay');
+  if (ov) ov.style.display = 'none';
+  _g2048Render();
+  _g2048Save();
+}
+
+function _g2048SpawnTile() {
   const empty = [];
-  for (let r=0; r<4; r++) for (let c=0; c<4; c++) if (_g2048.board[r][c]===0) empty.push([r,c]);
-  if (empty.length === 0) return;
-  const [r,c] = empty[Math.floor(Math.random()*empty.length)];
-  _g2048.board[r][c] = Math.random() < 0.9 ? 2 : 4;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++)
+    if (_g2048.grid[r][c] === 0) empty.push([r, c]);
+  if (!empty.length) return null;
+  const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+  _g2048.grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+  return [r, c];
 }
 
-function move2048(dir) {
-  const old = JSON.stringify(_g2048.board);
-  let board = _g2048.board.map(r=>[...r]);
-  const rotate = (b) => { const n = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]; for(let i=0;i<4;i++) for(let j=0;j<4;j++) n[j][3-i]=b[i][j]; return n; };
-  let rotations = { left:0, up:1, right:2, down:3 }[dir];
-  for (let i=0; i<rotations; i++) board = rotate(board);
-  // Slide left
-  for (let r=0; r<4; r++) {
-    let row = board[r].filter(v => v !== 0);
-    for (let i=0; i<row.length-1; i++) {
-      if (row[i] === row[i+1]) { row[i] *= 2; _g2048.score += row[i]; row.splice(i+1,1); }
+let _g2048SwipeStart = null;
+function _g2048OnTouchStart(e) {
+  if (e.cancelable) e.preventDefault();
+  const t = e.touches[0];
+  _g2048SwipeStart = { x: t.clientX, y: t.clientY };
+}
+function _g2048OnTouchEnd(e) {
+  if (!_g2048SwipeStart) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - _g2048SwipeStart.x;
+  const dy = t.clientY - _g2048SwipeStart.y;
+  _g2048SwipeStart = null;
+  if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
+  if (Math.abs(dx) > Math.abs(dy)) g2048Move(dx > 0 ? 'right' : 'left');
+  else g2048Move(dy > 0 ? 'down' : 'up');
+}
+function _g2048OnKey(e) {
+  if (state.page !== 'game-2048') return;
+  const map = {
+    ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+    a: 'left', A: 'left', d: 'right', D: 'right',
+    w: 'up', W: 'up', s: 'down', S: 'down',
+    q: 'left', Q: 'left', z: 'up', Z: 'up',
+  };
+  const dir = map[e.key];
+  if (dir) { e.preventDefault(); g2048Move(dir); return; }
+  if (e.key === 'u' || e.key === 'U') { e.preventDefault(); g2048Undo(); }
+}
+
+// Tourne une matrice 4×4 de 90° dans le sens horaire
+function _g2048Rotate(g) {
+  const n = [Array(4), Array(4), Array(4), Array(4)];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) n[c][3 - r] = g[r][c];
+  return n;
+}
+
+// Glisse + fusionne une ligne vers la gauche. Retourne {row, gained, mergedFlags}
+function _g2048SlideRow(row) {
+  const filtered = row.filter(v => v !== 0);
+  const out = [];
+  const flags = [];
+  let gained = 0;
+  let i = 0;
+  while (i < filtered.length) {
+    if (i + 1 < filtered.length && filtered[i] === filtered[i + 1]) {
+      const merged = filtered[i] * 2;
+      out.push(merged); flags.push(true);
+      gained += merged;
+      i += 2;
+    } else {
+      out.push(filtered[i]); flags.push(false);
+      i++;
     }
-    while (row.length < 4) row.push(0);
-    board[r] = row;
   }
-  for (let i=0; i<(4-rotations)%4; i++) board = rotate(board);
-  _g2048.board = board;
-  if (JSON.stringify(board) !== old) {
-    add2048Tile();
-    render2048();
-    if (_g2048.score > _g2048.best) {
-      _g2048.best = _g2048.score;
-      setScore('2048', _g2048.score);
-      document.getElementById('g2048-best').textContent = _g2048.best;
+  while (out.length < 4) { out.push(0); flags.push(false); }
+  return { row: out, gained, mergedFlags: flags };
+}
+
+function g2048Move(dir) {
+  if (_g2048.over) return;
+  const before = JSON.stringify(_g2048.grid);
+  const snapshot = { grid: _g2048.grid.map(r => r.slice()), score: _g2048.score };
+
+  // Tourner pour toujours slider à gauche
+  const rotations = { left: 0, up: 3, right: 2, down: 1 }[dir];
+  let g = _g2048.grid.map(r => r.slice());
+  let mm = [Array(4).fill(false), Array(4).fill(false), Array(4).fill(false), Array(4).fill(false)];
+  for (let i = 0; i < rotations; i++) g = _g2048Rotate(g);
+
+  let totalGained = 0;
+  for (let r = 0; r < 4; r++) {
+    const { row, gained, mergedFlags } = _g2048SlideRow(g[r]);
+    g[r] = row;
+    mm[r] = mergedFlags;
+    totalGained += gained;
+  }
+
+  // Tourner en arrière pour revenir au repère original
+  const back = (4 - rotations) % 4;
+  for (let i = 0; i < back; i++) { g = _g2048Rotate(g); mm = _g2048Rotate(mm); }
+
+  if (JSON.stringify(g) === before) return; // aucun changement → ignore
+
+  _g2048.prev = snapshot;
+  _g2048.grid = g;
+  _g2048.score += totalGained;
+
+  const spawn = _g2048SpawnTile();
+
+  if (_g2048.score > _g2048.best) {
+    _g2048.best = _g2048.score;
+    setScore('2048', _g2048.score);
+  }
+
+  _g2048Render({ mergedMask: mm, spawn });
+  _g2048Save();
+
+  // Victoire (premier 2048)
+  if (!_g2048.won && !_g2048.keepGoing) {
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+      if (_g2048.grid[r][c] >= 2048) {
+        _g2048.won = true; _g2048Save();
+        setTimeout(_g2048ShowWin, 240);
+        return;
+      }
     }
-    // Game over check
-    if (is2048Over()) setTimeout(() => alert(`Game Over ! Score: ${_g2048.score}`), 200);
+  }
+  // Game over
+  if (_g2048IsOver()) {
+    _g2048.over = true; _g2048Save();
+    setTimeout(_g2048ShowOver, 240);
   }
 }
 
-function is2048Over() {
-  for (let r=0; r<4; r++) for (let c=0; c<4; c++) if (_g2048.board[r][c]===0) return false;
-  for (let r=0; r<4; r++) for (let c=0; c<3; c++) if (_g2048.board[r][c]===_g2048.board[r][c+1]) return false;
-  for (let c=0; c<4; c++) for (let r=0; r<3; r++) if (_g2048.board[r][c]===_g2048.board[r+1][c]) return false;
+function _g2048IsOver() {
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++)
+    if (_g2048.grid[r][c] === 0) return false;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++)
+    if (_g2048.grid[r][c] === _g2048.grid[r][c + 1]) return false;
+  for (let c = 0; c < 4; c++) for (let r = 0; r < 3; r++)
+    if (_g2048.grid[r][c] === _g2048.grid[r + 1][c]) return false;
   return true;
 }
 
-const TILE_COLORS = { 0:'#cdc1b4',2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e' };
-function render2048() {
-  const board = document.getElementById('g2048-board');
-  if (!board) return;
-  board.innerHTML = '';
-  for (let r=0; r<4; r++) for (let c=0; c<4; c++) {
-    const v = _g2048.board[r][c];
-    const cell = document.createElement('div');
-    const color = TILE_COLORS[v] || '#3c3a32';
-    const textCol = v <= 4 ? '#776e65' : 'white';
-    // V71 : font-size adaptatif (clamp) pour pas déborder sur petits écrans
-    const fs = v >= 1000 ? 'clamp(11px, 4vw, 18px)' : v >= 100 ? 'clamp(13px, 5vw, 22px)' : 'clamp(15px, 6vw, 26px)';
-    cell.style.cssText = `background:${color}; color:${textCol}; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:${fs}; border-radius:6px; min-width:0; min-height:0; overflow:hidden;`;
-    cell.textContent = v || '';
-    board.appendChild(cell);
+function g2048Undo() {
+  if (!_g2048.prev) { try { toast('Rien à annuler'); } catch (e) {} return; }
+  _g2048.grid = _g2048.prev.grid;
+  _g2048.score = _g2048.prev.score;
+  _g2048.prev = null;
+  _g2048.over = false;
+  const ov = document.getElementById('g2048-overlay');
+  if (ov) ov.style.display = 'none';
+  _g2048Render();
+  _g2048Save();
+}
+
+function g2048KeepGoing() {
+  _g2048.keepGoing = true;
+  const ov = document.getElementById('g2048-overlay');
+  if (ov) ov.style.display = 'none';
+  _g2048Save();
+}
+
+function _g2048Render(opts) {
+  const tiles = document.getElementById('g2048-tiles');
+  if (!tiles) return;
+  const merged = (opts && opts.mergedMask) || null;
+  const spawn = (opts && opts.spawn) || null;
+  let html = '';
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+    const v = _g2048.grid[r][c];
+    if (v === 0) { html += '<div></div>'; continue; }
+    let cls = 'g2048-cell';
+    if (merged && merged[r] && merged[r][c]) cls += ' is-merged';
+    if (spawn && spawn[0] === r && spawn[1] === c) cls += ' is-new';
+    html += `<div class="${cls}" data-v="${v}">${v}</div>`;
   }
+  tiles.innerHTML = html;
   const sc = document.getElementById('g2048-score');
+  const bs = document.getElementById('g2048-best');
   if (sc) sc.textContent = _g2048.score;
+  if (bs) bs.textContent = _g2048.best;
+  const ub = document.getElementById('g2048-undo-btn');
+  if (ub) ub.style.opacity = _g2048.prev ? '1' : '0.4';
+}
+
+function _g2048ShowWin() {
+  const ov = document.getElementById('g2048-overlay');
+  if (!ov) return;
+  document.getElementById('g2048-overlay-msg').textContent = '🎉 Bravo, 2048 !';
+  document.getElementById('g2048-overlay-score').textContent = 'Score : ' + _g2048.score;
+  document.getElementById('g2048-keep-btn').style.display = '';
+  ov.style.display = 'flex';
+}
+
+function _g2048ShowOver() {
+  const ov = document.getElementById('g2048-overlay');
+  if (!ov) return;
+  document.getElementById('g2048-overlay-msg').textContent = '💥 Game Over';
+  document.getElementById('g2048-overlay-score').textContent =
+    'Score : ' + _g2048.score + ' · Record : ' + _g2048.best;
+  document.getElementById('g2048-keep-btn').style.display = 'none';
+  ov.style.display = 'flex';
 }
 
 // ============================================================
@@ -37861,6 +38226,8 @@ function invNew() {
   document.getElementById('inv-date').value = '';
   document.getElementById('inv-notes').value = '';
   document.getElementById('inv-photo-prev').innerHTML = '';
+  // V73 : bind auto-save sur les champs (idempotent)
+  _bindAutoSaveFields('invent-edit', ['inv-name', { id:'inv-cat', event:'change' }, 'inv-value', { id:'inv-date', event:'change' }, 'inv-notes']);
   goTo('invent-edit');
 }
 function invOpen(id) {
@@ -37873,6 +38240,8 @@ function invOpen(id) {
   document.getElementById('inv-date').value = it.date || '';
   document.getElementById('inv-notes').value = it.notes || '';
   document.getElementById('inv-photo-prev').innerHTML = it.photo ? `<img src="${it.photo}" style="width:100%; max-height:200px; object-fit:cover; border-radius:10px;">` : '';
+  // V73 : bind auto-save sur les champs
+  _bindAutoSaveFields('invent-edit', ['inv-name', { id:'inv-cat', event:'change' }, 'inv-value', { id:'inv-date', event:'change' }, 'inv-notes']);
   goTo('invent-edit');
 }
 function invLoadPhoto(input) {
@@ -37890,37 +38259,60 @@ function invLoadPhoto(input) {
       ctx.drawImage(img, 0, 0, w, h);
       _invPhoto = c.toDataURL('image/jpeg', 0.8);
       document.getElementById('inv-photo-prev').innerHTML = `<img src="${_invPhoto}" style="width:100%; max-height:200px; object-fit:cover; border-radius:10px;">`;
+      // V73 : photo changée → trigger auto-save
+      _scheduleAutoSave('invent-edit', 200);
     };
     img.src = e.target.result;
   };
   r.readAsDataURL(f);
 }
-function invSave() {
-  const name = document.getElementById('inv-name').value.trim();
-  if (!name) return toast('Donne un nom');
+// V73 : saver auto-save pour invent-edit (silencieux). Utilisé par le helper générique.
+async function _autoSaveInvent() {
+  const name = document.getElementById('inv-name')?.value.trim();
+  // Pas de nom = entrée vide. Si rien d'autre n'a été saisi, on supprime ce qu'on aurait créé.
+  const value = document.getElementById('inv-value')?.value;
+  const date = document.getElementById('inv-date')?.value;
+  const notes = document.getElementById('inv-notes')?.value;
+  if (!name && !value && !date && !notes && !_invPhoto) {
+    if (_invCurId) {
+      saveInv(getInv().filter(x => x.id !== _invCurId));
+      _invCurId = null;
+    }
+    return false;
+  }
+  // Si pas de nom mais d'autres champs : on garde "Sans nom" pour ne pas perdre
   const data = {
-    name,
+    name: name || 'Sans nom',
     cat: document.getElementById('inv-cat').value,
-    value: parseFloat(document.getElementById('inv-value').value) || 0,
-    date: document.getElementById('inv-date').value,
-    notes: document.getElementById('inv-notes').value,
+    value: parseFloat(value) || 0,
+    date: date || '',
+    notes: notes || '',
     photo: _invPhoto,
   };
   const inv = getInv();
   if (_invCurId) {
     const idx = inv.findIndex(x => x.id === _invCurId);
     if (idx >= 0) inv[idx] = { ...inv[idx], ...data };
+    else { _invCurId = 'i_' + Date.now(); inv.push({ id: _invCurId, ...data }); }
   } else {
-    inv.push({ id:'i_'+Date.now(), ...data });
+    _invCurId = 'i_' + Date.now();
+    inv.push({ id: _invCurId, ...data });
   }
   saveInv(inv);
-  toast('💾 Sauvé');
-  goTo('invent');
+  return true;
 }
+_registerAutoSave('invent-edit', _autoSaveInvent, 'inv-save-status');
+
+// V73 : conservé pour compatibilité avec d'éventuels appels externes — utilise désormais l'auto-save.
+async function invSave() { await _flushAutoSave('invent-edit'); goTo('invent'); }
+async function invSaveAndBack() { await _flushAutoSave('invent-edit'); goTo('invent'); }
+
 function invDel() {
   if (!_invCurId) return goTo('invent');
   if (!confirm('Supprimer cet objet ?')) return;
+  const r = _autoSaveReg.get('invent-edit'); if (r) clearTimeout(r.timer);
   saveInv(getInv().filter(x => x.id !== _invCurId));
+  _invCurId = null;
   goTo('invent');
 }
 function renderInv() {
@@ -40683,12 +41075,23 @@ async function renderWardrobe() {
     </div>
   </div>`).join('');
 }
+// V73 : id de l'item de garde-robe en cours de création (suivi pour l'auto-save).
+let _wardCurId = null;
 function wardAddNew() {
   _wardPhotoData = null;
+  _wardCurId = null;
   document.getElementById('ward-preview').innerHTML = '📷 Tap pour photo';
   document.getElementById('ward-name').value = '';
   document.getElementById('ward-color').value = '';
   document.getElementById('ward-notes').value = '';
+  // V73 : bind auto-save (idempotent)
+  _bindAutoSaveFields('wardrobe-add', [
+    { id: 'ward-cat', event: 'change' },
+    'ward-name',
+    'ward-color',
+    { id: 'ward-season', event: 'change' },
+    'ward-notes',
+  ]);
   goTo('wardrobe-add');
 }
 function wardLoadPhoto(input) {
@@ -40705,25 +41108,48 @@ function wardLoadPhoto(input) {
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
       _wardPhotoData = c.toDataURL('image/jpeg', 0.85);
       document.getElementById('ward-preview').innerHTML = `<img src="${_wardPhotoData}" style="width:100%; height:100%; object-fit:cover; border-radius:14px;">`;
+      // V73 : photo changée → trigger auto-save
+      _scheduleAutoSave('wardrobe-add', 200);
     };
     img.src = e.target.result;
   };
   r.readAsDataURL(f);
 }
-async function wardSave() {
-  const item = {
+// V73 : saver auto-save pour wardrobe-add. Tracking via _wardCurId pour éviter les doublons.
+async function _autoSaveWard() {
+  const name = document.getElementById('ward-name')?.value.trim();
+  const color = document.getElementById('ward-color')?.value.trim();
+  const notes = document.getElementById('ward-notes')?.value.trim();
+  // Aucune donnée saisie → ne rien faire (et supprimer si on avait créé)
+  if (!name && !color && !notes && !_wardPhotoData) {
+    if (_wardCurId) {
+      try { await dbDel('wardrobe', _wardCurId); _wardCurId = null; } catch (e) {}
+    }
+    return false;
+  }
+  const data = {
     cat: document.getElementById('ward-cat').value,
-    name: document.getElementById('ward-name').value.trim() || 'Sans nom',
-    color: document.getElementById('ward-color').value.trim(),
+    name: name || 'Sans nom',
+    color: color || '',
     season: document.getElementById('ward-season').value,
-    notes: document.getElementById('ward-notes').value.trim(),
+    notes: notes || '',
     photo: _wardPhotoData,
-    created: Date.now()
+    created: Date.now(),
   };
-  await dbAdd('wardrobe', item);
-  toast('👗 Ajouté à la garde-robe !');
-  goTo('wardrobe');
+  if (_wardCurId) {
+    const cur = await dbGet('wardrobe', _wardCurId);
+    if (cur) await dbPut('wardrobe', { ...cur, ...data });
+    else _wardCurId = await dbAdd('wardrobe', data);
+  } else {
+    _wardCurId = await dbAdd('wardrobe', data);
+  }
+  return true;
 }
+_registerAutoSave('wardrobe-add', _autoSaveWard, 'ward-save-status');
+
+// API legacy
+async function wardSave() { await _flushAutoSave('wardrobe-add'); goTo('wardrobe'); }
+async function wardSaveAndBack() { await _flushAutoSave('wardrobe-add'); goTo('wardrobe'); }
 async function wardOpen(id) {
   const it = (await dbAll('wardrobe')).find(x => x.id === id);
   if (!it) return;
@@ -58160,77 +58586,8 @@ function cwReveal() {
 }
 
 // === 6. 2048 ===
-// V70 BUGFIX : la fonction render2048 qui suit était une duplication V54 qui ÉCRASAIT
-// la vraie render2048() du jeu (ligne 26639) — celle-ci cherchait un #g2048-content
-// qui n'existe pas dans le HTML, du coup le board restait vide. Renommée en _v54_render2048_unused
-// pour que la vraie fonction (qui marche bien) ne soit plus écrasée.
-let V54__g2048 = null;
-function _v54_render2048_unused() {
-  let html = `<div style="background:linear-gradient(135deg,#FFD166,#FF8C42); color:white; padding:14px; border-radius:14px; text-align:center;">
-    <div style="font-size:36px;">🟧</div><div style="font-size:16px; font-weight:800;">2048</div>
-    <div style="font-size:11px; opacity:0.9;">Swipe pour fusionner les tuiles</div>
-  </div>
-  <div id="g2048-score" style="text-align:center; margin-top:14px; font-size:18px; font-weight:900;">Score : 0</div>
-  <div id="g2048-board" style="margin-top:10px; max-width:340px; margin:10px auto;"></div>
-  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:14px;">
-    <div></div>
-    <button class="btn alt" onclick="g2048Move('U')" style="padding:18px;">⬆️</button>
-    <div></div>
-    <button class="btn alt" onclick="g2048Move('L')" style="padding:18px;">⬅️</button>
-    <button class="btn primary" onclick="g2048Start()" style="padding:18px;">🔄</button>
-    <button class="btn alt" onclick="g2048Move('R')" style="padding:18px;">➡️</button>
-    <div></div>
-    <button class="btn alt" onclick="g2048Move('D')" style="padding:18px;">⬇️</button>
-    <div></div>
-  </div>`;
-  const target = document.getElementById('g2048-content');
-  if (target) { target.innerHTML = html; g2048Start(); }
-}
-function g2048Start() {
-  V54__g2048 = { grid: Array(4).fill(0).map(() => Array(4).fill(0)), score: 0 };
-  g2048Add(); g2048Add(); g2048Render();
-}
-function g2048Add() {
-  const empties = [];
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (V54__g2048.grid[r][c] === 0) empties.push([r,c]);
-  if (empties.length === 0) return;
-  const [r,c] = empties[Math.floor(Math.random()*empties.length)];
-  V54__g2048.grid[r][c] = Math.random() < 0.9 ? 2 : 4;
-}
-function g2048Render() {
-  const colors = {0:'#444',2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e'};
-  let html = `<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; background:#bbada0; padding:6px; border-radius:8px;">`;
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
-    const v = V54__g2048.grid[r][c];
-    const color = v >= 8 ? '#fff' : '#776e65';
-    html += `<div style="aspect-ratio:1; background:${colors[v]||'#3c3a32'}; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:${v>1000?18:24}px; font-weight:900; color:${color};">${v||''}</div>`;
-  }
-  html += `</div>`;
-  document.getElementById('g2048-board').innerHTML = html;
-  document.getElementById('g2048-score').textContent = 'Score : ' + V54__g2048.score;
-}
-function g2048Move(dir) {
-  if (!V54__g2048) return;
-  const g = V54__g2048.grid.map(r => r.slice());
-  let moved = false;
-  function slide(arr) {
-    arr = arr.filter(x => x !== 0);
-    for (let i = 0; i < arr.length - 1; i++) {
-      if (arr[i] === arr[i+1]) { arr[i] *= 2; V54__g2048.score += arr[i]; arr.splice(i+1, 1); }
-    }
-    while (arr.length < 4) arr.push(0);
-    return arr;
-  }
-  if (dir === 'L') { for (let r = 0; r < 4; r++) g[r] = slide(g[r]); }
-  if (dir === 'R') { for (let r = 0; r < 4; r++) g[r] = slide(g[r].reverse()).reverse(); }
-  if (dir === 'U') { for (let c = 0; c < 4; c++) { const col = slide([g[0][c],g[1][c],g[2][c],g[3][c]]); for (let r = 0; r < 4; r++) g[r][c] = col[r]; } }
-  if (dir === 'D') { for (let c = 0; c < 4; c++) { const col = slide([g[3][c],g[2][c],g[1][c],g[0][c]]); for (let r = 0; r < 4; r++) g[3-r][c] = col[r]; } }
-  // Detect change
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (g[r][c] !== V54__g2048.grid[r][c]) moved = true;
-  if (moved) { V54__g2048.grid = g; g2048Add(); g2048Render(); }
-  // Check 2048
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (g[r][c] === 2048) { toast('🎉 Tu as fait 2048 !'); break; }
-}
+// V73 : ancienne duplication V54 (V54__g2048, g2048Start/Add/Render/Move) supprimée.
+// Le 2048 a été entièrement réécrit — voir bloc "JEU 1: 2048 (V73)".
 
 // === 7. TIC-TAC-TOE vs IA ===
 let _tttState = null;
